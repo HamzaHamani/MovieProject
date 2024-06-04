@@ -6,4 +6,4 @@ export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };
 
-// NOTE: CONTINE SETUPING UP CLERK WITH WEEBHOKS
+// TODO: CONTINE SETUPING UP CLERK WITH WEEBHOKS
