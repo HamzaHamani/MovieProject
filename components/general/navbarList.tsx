@@ -15,13 +15,13 @@ const links = [
 export default function NavbarList({}: Props) {
   const pathname = usePathname();
   return (
-    <ul className="flex gap-7 items-center">
+    <ul className="flex gap-7 font-light  items-center">
       {links.map((elm) => (
         <Link
           href={elm.href}
           key={elm.href}
           className={`cursor-pointer ${
-            elm.href == pathname ? "text-gray-900" : "text-gray-500"
+            elm.href == pathname ? "text-gray-100" : "text-gray-200"
           }`}
         >
           {elm.label}
