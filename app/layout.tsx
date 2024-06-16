@@ -2,10 +2,27 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { dark } from "@clerk/themes";
-
-import { ClerkProvider } from "@clerk/nextjs";
+import localFont from "next/font/local";
 
 const inter = Inter({ subsets: ["latin"] });
+const chillaxRegular = localFont({
+  src: [
+    {
+      path: "../public/fonts/Chillax-Regular.otf",
+      weight: "normal",
+    },
+  ],
+  variable: "--font-chillax-regular",
+});
+const chillaxBold = localFont({
+  src: [
+    {
+      path: "../public/fonts/Chillax-Bold.otf",
+      weight: "bold",
+    },
+  ],
+  variable: "--font-chillax-bold",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,10 +35,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider appearance={{ baseTheme: dark }}>
-      <html lang="en">
-        <body className={`bg-background ${inter.className}`}>{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body
+        className={`bg-background font-chillaxRegular ${chillaxBold.className} ${chillaxRegular.className}  ${inter.className}`}
+      >
+        {children}
+      </body>
+    </html>
   );
 }

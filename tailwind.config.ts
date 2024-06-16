@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+// TODO IF U DIDNT LIKE THE NEW BG-COLOR CHECK FIGMA FOR ORIGINAL DESIGN COLORS
 const config = {
   darkMode: ["class"],
   content: [
@@ -18,12 +19,17 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        chillaxRegular: ["var(--font-chillax-regular)"],
+        chillaxBold: ["var(--font-chillax-bold)"],
+      },
       colors: {
         textMain: "#cdd2d5",
-        border: "hsl(var(--border))",
+        primaryM: "#1111",
+        border: "hsl(var(--b0order))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "#030506",
+        background: "#10100E",
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",

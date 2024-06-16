@@ -2,23 +2,16 @@ import React from "react";
 import { Button } from "../ui/button";
 import NavbarList from "./navbarList";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import Logo from "./logo";
 
 type Props = {};
 //  TODO FIX LAYOUT SHIFT WITH SIGNED IN BUTTON WHILE USING CLERK
 export default function Navbar({}: Props) {
   return (
-    <nav className="flex bg-background text-text  justify-around p-4">
-      <div>Logo</div>
+    <nav className="flex w-[100rem] mx-auto rounded-full bg-[#111111] text-text   justify-around p-4">
+      <Logo />
       <NavbarList />
-
-      <SignedOut>
-        <SignInButton mode="modal">
-          <Button>Get Started</Button>
-        </SignInButton>
-      </SignedOut>
-      <SignedIn>
-        <UserButton />
-      </SignedIn>
+      <Button>Get Started</Button>
     </nav>
   );
 }
