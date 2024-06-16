@@ -6,11 +6,9 @@ export default function BaseLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={""}>
-        <Navbar />
-        {children}
-      </body>
-    </html>
+    <section className={""}>
+      <Navbar />
+      {children}
+    </section>
   );
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { dark } from "@clerk/themes";
 import localFont from "next/font/local";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -12,7 +11,7 @@ const chillaxRegular = localFont({
       weight: "normal",
     },
   ],
-  variable: "--font-chillax-regular",
+  variable: "--font-chillaxRegular",
 });
 const chillaxBold = localFont({
   src: [
@@ -21,7 +20,7 @@ const chillaxBold = localFont({
       weight: "bold",
     },
   ],
-  variable: "--font-chillax-bold",
+  variable: "--font-chillaxBold",
 });
 
 export const metadata: Metadata = {
@@ -37,7 +36,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`bg-background font-chillaxRegular ${chillaxBold.className} ${chillaxRegular.className}  ${inter.className}`}
+        //  TODO COMEBACK AND FIX THE ISSUE FOR THE FONT WEIGHT, OR JUST USE ANOTHER FONT, NOT LOCALLY ONES
+        className={`bg-background   ${chillaxRegular.className}  ${inter.className}`}
       >
         {children}
       </body>

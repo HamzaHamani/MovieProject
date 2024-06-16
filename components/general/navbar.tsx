@@ -1,7 +1,6 @@
 import React from "react";
 import { Button } from "../ui/button";
 import NavbarList from "./navbarList";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import Logo from "./logo";
 
 type Props = {};

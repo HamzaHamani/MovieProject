@@ -20,12 +20,24 @@ const config = {
     },
     extend: {
       fontFamily: {
-        chillaxRegular: ["var(--font-chillax-regular)"],
-        chillaxBold: ["var(--font-chillax-bold)"],
+        chillaxRegular: ["var(--font-chillaxRegular)"],
+        chillaxBold: ["var(--font-chillaxBold)"],
       },
       colors: {
-        textMain: "#cdd2d5",
-        primaryM: "#1111",
+        backgroundM: "#111111",
+        textMain: "#F8FCFF",
+        primaryM: {
+          50: "#fefaed",
+          100: "#fcf0c8",
+          200: "#fae9ad",
+          300: "#f8df88",
+          400: "#f7d971",
+          500: "#f5cf4d",
+          600: "#dfbc46",
+          700: "#ae9337",
+          800: "#87722a",
+          900: "#675720",
+        },
         border: "hsl(var(--b0order))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
