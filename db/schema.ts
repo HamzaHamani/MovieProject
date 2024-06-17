@@ -5,3 +5,8 @@ export const users = pgTable("users", {
   age: integer("age").notNull(),
   email: text("email").notNull().unique(),
 });
+export const table = pgTable("table", {
+  id: serial("id").primaryKey(),
+  postMessage: text("postMessage").notNull(),
+  likes: integer("likes").notNull(),
+});
