@@ -9,6 +9,8 @@ import {
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import type { AdapterAccountType } from "next-auth/adapters";
+import { create } from "domain";
+import { relations } from "drizzle-orm";
 
 // const connectionString = "postgres://postgres:postgres@localhost:5432/drizzle";
 // const pool = postgres(connectionString, { max: 1 });
@@ -23,6 +25,30 @@ export const users = pgTable("user", {
   email: text("email").notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
+  premium: boolean("premium").default(false),
+});
+
+export const bookmarks = pgTable("bookmarks", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  bookmarkName: text("bookmarkName").notNull(),
+  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull(),
+});
+
+export const bookmarksMovies = pgTable("bookmarksMovies", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  bookmarkId: text("bookmarkId")
+    .notNull()
+    .references(() => bookmarks.id, { onDelete: "cascade" }),
+  movieId: text("movieId").notNull(),
+  addedAt: timestamp("addedAt", { mode: "date" }).notNull(),
 });
 
 export const accounts = pgTable(
@@ -88,6 +114,33 @@ export const authenticators = pgTable(
   (authenticator) => ({
     compositePK: primaryKey({
       columns: [authenticator.userId, authenticator.credentialID],
+    }),
+  })
+);
+
+// Define relationships for users
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  bookmarks: many(bookmarks),
+}));
+
+// Define relationships for bookmarks
+
+export const bookmarksRelations = relations(bookmarks, ({ one, many }) => ({
+  user: one(users, {
+    fields: [bookmarks.userId],
+    references: [users.id],
+  }),
+  bookmarkMovies: many(bookmarksMovies),
+}));
+// Define relationships for bookmarkMovies
+
+export const bookmarkMoviesRelations = relations(
+  bookmarksMovies,
+  ({ one }) => ({
+    bookmark: one(bookmarks, {
+      fields: [bookmarksMovies.bookmarkId],
+      references: [bookmarks.id],
     }),
   })
 );

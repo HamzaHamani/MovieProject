@@ -5,11 +5,16 @@ import { GoogleSignIn } from "@/components/GoogleSignIn";
 
 export default async function Home() {
   const session = await auth();
-  console.log(session);
 
   return (
     <main>
-      {!session ? "please sign in" : `hello ${session.user?.name}`}
+      {!session ? (
+        "please sign in"
+      ) : (
+        <div>
+          hello {session.user?.name} <img src={session.user?.image as string} />
+        </div>
+      )}
 
       {!session ? (
         <div>

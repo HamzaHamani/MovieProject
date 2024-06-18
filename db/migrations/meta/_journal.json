@@ -8,6 +8,20 @@
       "when": 1718727196931,
       "tag": "0000_demonic_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1718734081568,
+      "tag": "0001_nebulous_starjammers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1718735527227,
+      "tag": "0002_chief_scarecrow",
+      "breakpoints": true
     }
   ]
 }
