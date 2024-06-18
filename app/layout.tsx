@@ -37,7 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         //  TODO COMEBACK AND FIX THE ISSUE FOR THE FONT WEIGHT, OR JUST USE ANOTHER FONT, NOT LOCALLY ONES
-        className={`bg-background   ${chillaxRegular.className}  ${inter.className}`}
+        className={`bg-background text-textMain   ${chillaxRegular.className}  ${inter.className}`}
       >
         {children}
       </body>

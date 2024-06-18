@@ -10,8 +10,3 @@ export const table = pgTable("table", {
   postMessage: text("postMessage").notNull(),
   likes: integer("likes").notNull(),
 });
-export const tablee = pgTable("table", {
-  id: serial("id").primaryKey(),
-  postMessage: text("postMessage").notNull(),
-  likes: integer("likes").notNull(),
-});
