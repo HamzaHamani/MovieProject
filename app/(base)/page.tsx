@@ -1,4 +1,4 @@
-import { SignInButton } from "@/components/SignIn";
+import { SignIn } from "@/components/SignIn";
 import { auth } from "@/auth";
 
 export default async function Home() {
@@ -7,7 +7,7 @@ export default async function Home() {
 
   return (
     <main>
-      Hello <SignInButton />
+      Hello <SignIn />
     </main>
   );
 }
