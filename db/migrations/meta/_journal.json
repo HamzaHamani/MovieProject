@@ -22,6 +22,41 @@
       "when": 1718735527227,
       "tag": "0002_chief_scarecrow",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1718736112130,
+      "tag": "0003_fair_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1718738205847,
+      "tag": "0004_faulty_nemesis",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1718738945608,
+      "tag": "0005_modern_luke_cage",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1718739019676,
+      "tag": "0006_unusual_karnak",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1718739602192,
+      "tag": "0007_broken_mockingbird",
+      "breakpoints": true
     }
   ]
 }

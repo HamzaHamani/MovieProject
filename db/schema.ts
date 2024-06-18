@@ -36,8 +36,10 @@ export const bookmarks = pgTable("bookmarks", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   bookmarkName: text("bookmarkName").notNull(),
-  createdAt: timestamp("createdAt", { mode: "date" }).notNull(),
-  updatedAt: timestamp("updatedAt", { mode: "date" }).notNull(),
+  description: text("description").notNull(),
+  image: text("image"),
+  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
 });
 
 export const bookmarksMovies = pgTable("bookmarksMovies", {
@@ -48,7 +50,8 @@ export const bookmarksMovies = pgTable("bookmarksMovies", {
     .notNull()
     .references(() => bookmarks.id, { onDelete: "cascade" }),
   movieId: text("movieId").notNull(),
-  addedAt: timestamp("addedAt", { mode: "date" }).notNull(),
+  review: text("review").notNull(),
+  addedAt: timestamp("addedAt", { mode: "date" }).defaultNow(),
 });
 
 export const accounts = pgTable(

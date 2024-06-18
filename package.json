@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "hamza": "npx drizzle-kit generate && npx drizzle-kit migrate"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.2.0",
