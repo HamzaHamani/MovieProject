@@ -17,7 +17,7 @@ export default function NavbarList({ links }: Props) {
           key={elm.href}
           className={`cursor-pointer ${
             elm.href == pathname ? "text-gray-100" : "text-gray-200"
-          }`}
+          } font-medium`}
         >
           {elm.label}
         </Link>

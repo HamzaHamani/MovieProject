@@ -36,8 +36,7 @@ const config = {
     },
     extend: {
       fontFamily: {
-        chillaxRegular: ["var(--font-chillaxRegular)"],
-        chillaxBold: ["var(--font-chillaxBold)"],
+        chillax: ["var(--font-chillax)"],
       },
       colors: {
         backgroundM: "#111111",

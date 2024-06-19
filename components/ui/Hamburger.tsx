@@ -22,7 +22,10 @@ export default async function Hamburger() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="default" className="bg-transparent hidden md:flex ">
+        <Button
+          variant="default"
+          className="bg-transparent hover:bg-transparent active:bg-transparent hidden md:flex "
+        >
           <div className="space-y-1">
             <div className="h-0.5 w-8 bg-current s:scale-y-75" />
             <div className="h-0.5 w-8 bg-current s:scale-y-75" />
