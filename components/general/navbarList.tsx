@@ -15,7 +15,7 @@ const links = [
 export default function NavbarList({}: Props) {
   const pathname = usePathname();
   return (
-    <ul className="flex gap-7 font-light  items-center">
+    <ul className="flex gap-7 font-light  items-center md:hidden">
       {links.map((elm) => (
         <Link
           href={elm.href}
