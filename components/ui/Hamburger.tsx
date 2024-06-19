@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import NavbarList from "../general/navbarList";
 import { getUser } from "@/lib/utils";
 import { CircleDot } from "lucide-react";
-import { handleLogout } from "@/app/actions";
+import { handleLogout } from "@/lib/actions";
 
 export default async function Hamburger() {
   const user = await getUser();
