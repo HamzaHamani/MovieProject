@@ -14,31 +14,41 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import NavbarList from "../general/navbarList";
-import { getSession } from "@/lib/utils";
+import { getUser } from "@/lib/utils";
 import { CircleDot } from "lucide-react";
 
 export default async function Hamburger() {
-  const session = await getSession();
-  console.log(session);
+  const user = await getUser();
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="default" className="bg-transparent hidden md:flex ">
           <div className="space-y-1">
-            <div className="h-0.5 w-6 bg-current" />
-            <div className="h-0.5 w-6 bg-current" />
-            <div className="h-0.5 w-6 bg-current" />
+            <div className="h-0.5 w-8 bg-current s:scale-y-75" />
+            <div className="h-0.5 w-8 bg-current s:scale-y-75" />
+            <div className="h-0.5 w-8 bg-current s:scale-y-75" />
           </div>
         </Button>
       </SheetTrigger>
       <SheetContent className="border-none">
         <SheetHeader>
-          <SheetTitle className="text-primaryM-400">Please Log-in</SheetTitle>
+          {user ? (
+            <div>
+              <SheetTitle className="text-primaryM-400">
+                Welcome {user?.name}
+              </SheetTitle>
+            </div>
+          ) : (
+            <SheetTitle className="text-primaryM-400">Please Log-in</SheetTitle>
+          )}
+
           <SheetDescription>
-            So you can bookmark movies and access your profile
+            {user
+              ? "You can now access your profile and bookmarks"
+              : "You can log-in to access your profile and bookmarks"}
           </SheetDescription>
         </SheetHeader>
-        <div className="py-10">
+        <div className="py-24">
           <ul className="flex flex-col gap-5 text-2xl">
             <SheetClose asChild>
               <Link href="/">
@@ -81,13 +91,32 @@ export default async function Hamburger() {
                 </li>
               </Link>
             </SheetClose>
+            <SheetClose asChild>
+              <Link href={"/profile"}>
+                <li className="flex items-center gap-2">
+                  <span className="">
+                    <CircleDot className="text-sm w-3" />
+                  </span>
+                  Profile
+                </li>
+              </Link>
+            </SheetClose>
           </ul>
         </div>{" "}
         <SheetFooter>
-          <SheetClose asChild>
-            <Button type="submit" className="bg-primaryM-500 text-backgroundM">
-              {session != null ? "Log Out" : "Log In"}
-            </Button>
+          <SheetClose asChild className="w-full">
+            {user ? (
+              ""
+            ) : (
+              <Link href="/sign-in">
+                <Button
+                  type="submit"
+                  className="bg-primaryM-500 text-backgroundM active:bg-primaryM-800 w-full"
+                >
+                  Get Started
+                </Button>
+              </Link>
+            )}
           </SheetClose>
         </SheetFooter>
       </SheetContent>

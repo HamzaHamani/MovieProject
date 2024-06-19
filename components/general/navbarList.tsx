@@ -3,16 +3,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-type Props = {};
+type Props = {
+  links: { href: string; label: string }[];
+};
 
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/explore", label: "Explore" },
-  { href: "/saved", label: "Saved" },
-  { href: "/search", label: "Search" },
-];
-
-export default function NavbarList({}: Props) {
+export default function NavbarList({ links }: Props) {
   const pathname = usePathname();
   return (
     <ul className="flex gap-7 font-light  items-center md:hidden">

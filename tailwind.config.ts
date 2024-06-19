@@ -30,6 +30,8 @@ const config = {
       // => @media (max-width: 767px) { ... }
 
       sm: { max: "639px" },
+      s: { max: "425px" },
+      xs: { max: "320px" },
       // => @media (max-width: 639px) { ... }
     },
     extend: {
