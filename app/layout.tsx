@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import localFont from "next/font/local";
+import Navbar from "@/components/general/navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 const chillaxRegular = localFont({
@@ -37,8 +38,9 @@ export default function RootLayout({
     <html lang="en">
       <body
         //  TODO COMEBACK AND FIX THE ISSUE FOR THE FONT WEIGHT, OR JUST USE ANOTHER FONT, NOT LOCALLY ONES
-        className={`bg-background text-textMain   ${chillaxRegular.className}  ${inter.className}`}
+        className={`bg-background text-textMain ${chillaxBold.className}  ${chillaxRegular.className}  ${inter.className}`}
       >
+        <Navbar />
         {children}
       </body>
     </html>

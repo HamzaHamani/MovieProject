@@ -22,9 +22,9 @@ export default async function Navbar({}: Props) {
       <Logo />
       <NavbarList links={links} />
       {user ? (
-        <div>user</div>
+        <div className="md:hidden">user</div>
       ) : (
-        <Button className="bg-transparent hover:bg-transparent font-extrabold md:hidden">
+        <Button className="bg-transparent hover:bg-transparent font-extrabold md:hidden active:bg-transparent">
           <Link href="/sign-in">Get Started</Link>
         </Button>
       )}
