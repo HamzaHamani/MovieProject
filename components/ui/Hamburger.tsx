@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import NavbarList from "../general/navbarList";
 import { getUser } from "@/lib/utils";
 import { CircleDot } from "lucide-react";
+import { handleLogout } from "@/app/actions";
 
 export default async function Hamburger() {
   const user = await getUser();
@@ -109,12 +110,19 @@ export default async function Hamburger() {
         <SheetFooter>
           <SheetClose asChild className="w-full">
             {user ? (
-              ""
+              <form action={handleLogout}>
+                <Button
+                  type="submit"
+                  className="bg-primaryM-500 text-backgroundM active:bg-primaryM-800 w-full hover:bg-primaryM-400"
+                >
+                  Log Out
+                </Button>
+              </form>
             ) : (
               <Link href="/sign-in">
                 <Button
                   type="submit"
-                  className="bg-primaryM-500 text-backgroundM active:bg-primaryM-800 w-full"
+                  className="bg-primaryM-500 text-backgroundM active:bg-primaryM-800 w-full hover:bg-primaryM-400  "
                 >
                   Get Started
                 </Button>

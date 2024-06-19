@@ -15,6 +15,7 @@ export default function Explore({}: Props) {
           alt="image of a movie"
         />
       </div>
+
       <div>carousel</div>
     </div>
   );
