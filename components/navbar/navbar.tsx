@@ -15,9 +15,10 @@ const links = [
 
 type Props = {};
 export default async function Navbar({}: Props) {
+  //TODO FIX ISSUE WITH NAVBAR MARGIN TOP
   const user = await getUser();
   return (
-    <nav className="flex w-[90%] mx-auto rounded-full bg-backgroundM text-text items-center  xmd:text-sm   justify-between px-16 p-4 mt-3 xmd:p-3 xmd:px-10">
+    <nav className="flex w-[100%] mx-auto round bg-backgroundM text-text items-center  xmd:text-sm    justify-between px-16 p-4  xmd:p-3 xmd:px-10">
       <Logo />
       <NavbarList links={links} />
       {user ? (

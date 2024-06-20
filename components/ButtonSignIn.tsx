@@ -1,6 +1,6 @@
 "use client";
 
-import { SiGithub } from "react-icons/si";
+import { SiGithub, SiGoogle } from "react-icons/si";
 import { Button } from "./ui/button";
 import { handleSignin } from "@/lib/actions";
 
@@ -11,15 +11,13 @@ type Props = {
 export default function ButtonSignIn({ provider }: Props) {
   return (
     <Button
-      className="p-6 flex gap-2 items-center justify-center"
+      className="p-7 bg-textMain text-backgroundM flex gap-2 items-center text-lg justify-center hover:bg-gray-300 transition-all active:bg-gray-400"
       onClick={async () => {
         handleSignin(provider);
       }}
     >
-      <span>
-        <SiGithub />
-      </span>
-      Sign in with {provider === "github" ? "Github" : "Google"}
+      <span>{provider === "github" ? <SiGithub /> : <SiGoogle />}</span>
+      Continue with {provider === "github" ? "Github" : "Google"}
     </Button>
   );
 }
