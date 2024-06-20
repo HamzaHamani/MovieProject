@@ -12,5 +12,3 @@ export default defineConfig({
   strict: true,
   verbose: true,
 });
-
-// TODO CHECK ENV URL DOESNT WORK, BUT WHEN USING URL DIRECTLY IT WORKS, SO PROB WITH ENVLOCAL

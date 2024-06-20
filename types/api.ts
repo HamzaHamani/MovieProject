@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// EXPLORE SECTION API SCHEMA
 export const exploreApiSchema = z.object({
   adult: z.boolean(),
   backdrop_path: z.string(),
@@ -17,6 +18,8 @@ export const exploreApiSchema = z.object({
   vote_count: z.number(),
 });
 export type TexploreApiSchema = z.infer<typeof exploreApiSchema>;
+
+//  SPECIFIED MOVIE SCHEMA
 
 export const GenreSchema = z.object({
   id: z.number(),
