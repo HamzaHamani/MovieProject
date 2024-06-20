@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 type Props = {};
 
 export default async function page({}: Props) {
+  //TODO get back to designing this page
   const user = await getUser();
   if (user) redirect("/explore");
   return (

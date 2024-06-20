@@ -1,6 +1,5 @@
 import type { Config } from "tailwindcss";
 
-// TODO IF U DIDNT LIKE THE NEW BG-COLOR CHECK FIGMA FOR ORIGINAL DESIGN COLORS
 const config = {
   darkMode: ["class"],
   content: [
