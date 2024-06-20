@@ -1,13 +1,13 @@
 import ButtonSignIn from "@/components/ButtonSignIn";
 import Logo from "@/components/general/logo";
-import { getSession } from "@/lib/actions";
+import { getSession, getUser } from "@/lib/actions";
 import { redirect } from "next/navigation";
 
 type Props = {};
 
 export default async function page({}: Props) {
-  const session = await getSession();
-  if (session) redirect("/explore");
+  const user = await getUser();
+  if (user) redirect("/explore");
   return (
     <div className="flex  gap-36 h-[92.7vh] ">
       <div className="flex flex-col mt-20">
