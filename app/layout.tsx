@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`bg-background text-textMain font-chillax font-normal   ${chillax.className}  `}
+        className={`bg-backgroundM text-textMain font-chillax font-normal   ${chillax.className} relative  `}
       >
         <Navbar />
         {children}
