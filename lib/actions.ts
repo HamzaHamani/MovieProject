@@ -11,6 +11,7 @@ import {
   usersSchema,
 } from "@/types/index";
 import { z } from "zod";
+import { TspecifiedMovie } from "@/types/api";
 
 export async function getUser() {
   const session = await auth();
@@ -80,4 +81,13 @@ export async function handleLogout() {
 type provider = "github" | "google";
 export async function handleSignin(provider: provider) {
   await signIn(provider);
+}
+
+export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/${id}?language=en-US&api_key=${process.env.TMDB_API_KEY}`
+  );
+  const data = await res.json();
+
+  return data;
 }
