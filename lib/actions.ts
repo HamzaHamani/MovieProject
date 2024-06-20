@@ -5,6 +5,12 @@ import { bookmarks, bookmarksMovies } from "@/db/schema";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
 import { signOut } from "@/auth";
+import {
+  bookmarksMoviesSchema,
+  bookmarksSchema,
+  usersSchema,
+} from "@/types/index";
+import { z } from "zod";
 
 export async function getUser() {
   const session = await auth();
@@ -19,23 +25,37 @@ export async function getSession() {
 }
 
 //   fetching only the bookmarks of the user
-export async function getBookmarks(userId: string) {
+
+type bookSchemaType = z.infer<typeof bookmarksSchema>;
+export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
   const boks = await db
     .select()
     .from(bookmarks)
     .where(eq(bookmarks.userId, userId));
-  return console.log(boks);
+  const validatedBoks = boks.map((bookmark) => bookmarksSchema.parse(bookmark));
+
+  return validatedBoks;
 }
 
 //   fetch only movies of specied bookmark of that specified user
-export async function getMoviesBook(bookmarkId: string) {
+
+type moviesBookSchemaType = z.infer<typeof bookmarksMoviesSchema>;
+
+export async function getMoviesBook(
+  bookmarkId: string
+): Promise<moviesBookSchemaType[]> {
   const bookmarkMovie = await db
     .select()
     .from(bookmarksMovies)
     .where(eq(bookmarksMovies.bookmarkId, bookmarkId));
-  return console.log(bookmarkMovie);
+
+  const validateMovieBooks = bookmarkMovie.map((movie) =>
+    bookmarksMoviesSchema.parse(movie)
+  );
+  return validateMovieBooks;
 }
 
+//TODO VALIDATE THE DATA COMING FROM THE FORM
 export async function AddMovie(formData: FormData) {
   await db.insert(bookmarksMovies).values({
     bookmarkId: formData.get("bookmarkId") as string,
