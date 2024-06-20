@@ -1,10 +1,10 @@
-import React from "react";
 import { Button } from "../ui/button";
 import NavbarList from "./navbarList";
-import Logo from "./logo";
+import Logo from "../general/logo";
 import Hamburger from "../ui/Hamburger";
 import Link from "next/link";
-import { getUser } from "@/lib/utils";
+import { getUser } from "@/lib/actions";
+import { UserDropDown } from "./userDropDown";
 
 const links = [
   { href: "/", label: "Home" },
@@ -16,13 +16,12 @@ const links = [
 type Props = {};
 export default async function Navbar({}: Props) {
   const user = await getUser();
-
   return (
     <nav className="flex w-[90%] mx-auto rounded-full bg-backgroundM text-text items-center  xmd:text-sm   justify-between px-16 p-4 mt-3 xmd:p-3 xmd:px-10">
       <Logo />
       <NavbarList links={links} />
       {user ? (
-        <div className="md:hidden">user</div>
+        <UserDropDown user={user} />
       ) : (
         <Button className="bg-transparent hover:bg-transparent font-extrabold md:hidden active:bg-transparent">
           <Link href="/sign-in">Get Started</Link>

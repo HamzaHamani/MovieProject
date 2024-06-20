@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import localFont from "next/font/local";
-import Navbar from "@/components/general/navbar";
+import Navbar from "@/components/navbar/navbar";
 
 const chillax = localFont({
   src: [
@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`bg-background text-textMain font-chillax   ${chillax.className}  `}
+        className={`bg-background text-textMain font-chillax font-normal   ${chillax.className}  `}
       >
         <Navbar />
         {children}

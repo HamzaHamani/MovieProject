@@ -4,11 +4,11 @@ export type Bookmark = {};
 
 export const usersSchema = z.object({
   id: z.string(),
-  name: z.string().optional(),
+  name: z.string(),
   email: z.string().email(),
   emailVerified: z.date().optional(),
   image: z.string().optional(),
-  premium: z.boolean().default(false),
+  premium: z.boolean().default(false).optional(),
 });
 export const bookmarksSchema = z.object({
   id: z.string(),

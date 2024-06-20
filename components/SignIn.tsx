@@ -1,10 +1,10 @@
 import { signIn } from "@/auth";
+import { handleSignin } from "@/lib/actions";
 
 export function SignIn() {
   return (
     <form
       action={async () => {
-        "use server";
         await signIn("github");
       }}
     >

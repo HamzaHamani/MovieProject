@@ -1,9 +1,40 @@
 "use server";
 
-import { signOut } from "@/auth";
-import { db } from "@/db";
+import { auth, signIn } from "@/auth";
 import { bookmarks, bookmarksMovies } from "@/db/schema";
-import { signIn } from "next-auth/react";
+import { db } from "@/db";
+import { eq } from "drizzle-orm";
+import { signOut } from "@/auth";
+
+export async function getUser() {
+  const session = await auth();
+  const user = session?.user;
+
+  return user;
+}
+
+export async function getSession() {
+  const session = await auth();
+  return session;
+}
+
+//   fetching only the bookmarks of the user
+export async function getBookmarks(userId: string) {
+  const boks = await db
+    .select()
+    .from(bookmarks)
+    .where(eq(bookmarks.userId, userId));
+  return console.log(boks);
+}
+
+//   fetch only movies of specied bookmark of that specified user
+export async function getMoviesBook(bookmarkId: string) {
+  const bookmarkMovie = await db
+    .select()
+    .from(bookmarksMovies)
+    .where(eq(bookmarksMovies.bookmarkId, bookmarkId));
+  return console.log(bookmarkMovie);
+}
 
 export async function AddMovie(formData: FormData) {
   await db.insert(bookmarksMovies).values({
@@ -12,6 +43,7 @@ export async function AddMovie(formData: FormData) {
     movieId: formData.get("movieId") as string,
   });
 }
+
 export async function CreateBookmark(formData: FormData) {
   const insert = await db.insert(bookmarks).values({
     bookmarkName: formData.get("bookmarkName") as string,
@@ -21,7 +53,6 @@ export async function CreateBookmark(formData: FormData) {
   console.log(insert);
   return insert;
 }
-
 export async function handleLogout() {
   await signOut();
 }

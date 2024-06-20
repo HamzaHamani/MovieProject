@@ -11,10 +11,7 @@ import {
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import NavbarList from "../general/navbarList";
-import { getUser } from "@/lib/utils";
+import { getUser } from "@/lib/actions";
 import { CircleDot } from "lucide-react";
 import { handleLogout } from "@/lib/actions";
 

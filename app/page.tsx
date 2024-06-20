@@ -4,19 +4,19 @@ import SignOut from "@/components/SignOut";
 import { GoogleSignIn } from "@/components/GoogleSignIn";
 
 export default async function Home() {
-  const api_key = process.env.TMDB_API_KEY!;
-  console.log(api_key);
+  // const api_key = process.env.TMDB_API_KEY!;
+  // console.log(api_key);
 
-  const res = await fetch(
-    `https://api.themoviedb.org/3/movie/157336?language=en-US&api_key=${api_key}`
-  );
+  // const res = await fetch(
+  //   `https://api.themoviedb.org/3/movie/157336?language=en-US&api_key=${api_key}`
+  // );
 
-  const data = await res.json();
-  const session = await auth();
+  // const data = await res.json();
+  // const session = await auth();
 
   return (
     <main>
-      {!session ? (
+      {/* {!session ? (
         "please sign in"
       ) : (
         <div>
@@ -32,7 +32,7 @@ export default async function Home() {
         </div>
       ) : (
         <SignOut />
-      )}
+      )} */}
     </main>
   );
 }
