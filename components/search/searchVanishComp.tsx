@@ -39,12 +39,10 @@ export function SearchVanishComp() {
     }
   };
   return (
-    <div className="h-[40rem] flex flex-col justify-center  items-center px-4">
-      <PlaceholdersAndVanishInput
-        placeholders={placeholders}
-        onChange={handleChange}
-        onSubmit={onSubmit}
-      />
-    </div>
+    <PlaceholdersAndVanishInput
+      placeholders={placeholders}
+      onChange={handleChange}
+      onSubmit={onSubmit}
+    />
   );
 }

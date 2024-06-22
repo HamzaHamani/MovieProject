@@ -45,15 +45,25 @@ type moviesBookSchemaType = z.infer<typeof bookmarksMoviesSchema>;
 export async function getMoviesBook(
   bookmarkId: string
 ): Promise<moviesBookSchemaType[]> {
-  const bookmarkMovie = await db
-    .select()
-    .from(bookmarksMovies)
-    .where(eq(bookmarksMovies.bookmarkId, bookmarkId));
+  try {
+    // Fetch the movies with the given bookmarkId from the database
+    const bookmarkMovies = await db
+      .select()
+      .from(bookmarksMovies)
+      .where(eq(bookmarksMovies.bookmarkId, bookmarkId));
 
-  const validateMovieBooks = bookmarkMovie.map((movie) =>
-    bookmarksMoviesSchema.parse(movie)
-  );
-  return validateMovieBooks;
+    // Validate the fetched data against the schema
+    const validatedMovies = bookmarkMovies.map((movie) =>
+      bookmarksMoviesSchema.parse(movie)
+    );
+
+    return validatedMovies;
+  } catch (error: any) {
+    console.error("Error fetching or validating bookmarks:", error.message);
+
+    // Handle the error (could be logging, rethrowing, or custom handling)
+    throw new Error("Failed to fetch or validate bookmark movies.");
+  }
 }
 
 //TODO VALIDATE THE DATA COMING FROM THE FORM
