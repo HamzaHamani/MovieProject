@@ -22,6 +22,7 @@ export default function CarouselExploreContent({ data }: Props) {
     current.set("movie", data[0].id.toString());
     const search = current.toString();
     const query = search ? `?${search}` : "";
+    console.log(query);
     router.push(`${pathname}${query}`);
   }
   function activeCarouse(movie: TexploreApiSchema) {
