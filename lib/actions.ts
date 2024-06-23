@@ -11,7 +11,8 @@ import {
   usersSchema,
 } from "@/types/index";
 import { z } from "zod";
-import { TspecifiedMovie } from "@/types/api";
+import { TsearchMovie, TspecifiedMovie } from "@/types/api";
+import axios from "axios";
 
 export async function getUser() {
   const session = await auth();
@@ -43,7 +44,7 @@ export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
 type moviesBookSchemaType = z.infer<typeof bookmarksMoviesSchema>;
 
 export async function getMoviesBook(
-  bookmarkId: string
+  bookmarkId: string,
 ): Promise<moviesBookSchemaType[]> {
   try {
     // Fetch the movies with the given bookmarkId from the database
@@ -54,7 +55,7 @@ export async function getMoviesBook(
 
     // Validate the fetched data against the schema
     const validatedMovies = bookmarkMovies.map((movie) =>
-      bookmarksMoviesSchema.parse(movie)
+      bookmarksMoviesSchema.parse(movie),
     );
 
     return validatedMovies;
@@ -95,9 +96,18 @@ export async function handleSignin(provider: provider) {
 
 export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
   const res = await fetch(
-    `https://api.themoviedb.org/3/movie/${id}?language=en-US&api_key=${process.env.TMDB_API_KEY}`
+    `https://api.themoviedb.org/3/movie/${id}?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
   );
   const data = await res.json();
 
+  return data;
+}
+
+// utilite for search page
+export async function getSearchMovie(query: string): Promise<TsearchMovie> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=true&language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data: TsearchMovie = await res.data;
   return data;
 }

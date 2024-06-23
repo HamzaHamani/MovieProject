@@ -45,6 +45,8 @@ const config = {
       ss: { max: "620px" },
       sss: { max: "560px" },
       s: { max: "480px" }, //use to be 425
+      h1text9: { max: "385px" },
+      xss: { max: "375px" },
       xs: { max: "320px" },
 
       // => @media (max-width: 639px) { ... }

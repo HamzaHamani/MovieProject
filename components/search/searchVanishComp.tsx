@@ -33,7 +33,7 @@ export function SearchVanishComp() {
     const searchValue = formData.get("search");
 
     if (searchValue) {
-      router.push(`${originUrl}/movie/${searchValue}`);
+      router.push(`${originUrl}/search/${searchValue}`);
     }
   };
   return (

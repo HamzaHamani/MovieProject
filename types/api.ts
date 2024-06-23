@@ -19,7 +19,7 @@ export const exploreApiSchema = z.object({
 });
 export type TexploreApiSchema = z.infer<typeof exploreApiSchema>;
 
-//  SPECIFIED MOVIE SCHEMA
+//  SPECIFIED MOVIE SCHEMA FOR EXPLORE PAGE
 
 export const GenreSchema = z.object({
   id: z.number(),
@@ -48,7 +48,7 @@ export const SpokenLanguageSchema = z.object({
 });
 export type SpokenLanguage = z.infer<typeof SpokenLanguageSchema>;
 
-export const WelcomeSchema = z.object({
+export const exploreApiSchema = z.object({
   adult: z.boolean(),
   backdrop_path: z.string(),
   belongs_to_collection: z.null(),
@@ -76,4 +76,35 @@ export const WelcomeSchema = z.object({
   vote_average: z.number(),
   vote_count: z.number(),
 });
-export type TspecifiedMovie = z.infer<typeof WelcomeSchema>;
+export type TspecifiedMovie = z.infer<typeof exploreApiSchema>;
+
+// SEARCH PAGE API SCHEMA
+
+export const OriginalLanguageSchema = z.enum(["en", "ja"]);
+export type OriginalLanguage = z.infer<typeof OriginalLanguageSchema>;
+
+export const ResultSchema = z.object({
+  adult: z.boolean(),
+  backdrop_path: z.union([z.null(), z.string()]),
+  genre_ids: z.array(z.number()),
+  id: z.number(),
+  original_language: OriginalLanguageSchema,
+  original_title: z.string(),
+  overview: z.string(),
+  popularity: z.number(),
+  poster_path: z.string(),
+  release_date: z.string(),
+  title: z.string(),
+  video: z.boolean(),
+  vote_average: z.number(),
+  vote_count: z.number(),
+});
+export type Result = z.infer<typeof ResultSchema>;
+
+export const searchApiSchema = z.object({
+  page: z.number(),
+  results: z.array(ResultSchema),
+  total_pages: z.number(),
+  total_results: z.number(),
+});
+export type TsearchMovie = z.infer<typeof searchApiSchema>;
