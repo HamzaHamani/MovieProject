@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import localFont from "next/font/local";
 import Navbar from "@/components/navbar/navbar";
+import { GlobalContextProvider } from "@/context/globalContext";
 
 const chillax = localFont({
   src: [
@@ -43,10 +44,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`bg-backgroundM text-textMain font-chillax font-normal   ${chillax.className} relative  `}
+        className={`bg-backgroundM font-chillax font-normal text-textMain ${chillax.className} relative`}
       >
         <Navbar />
-        {children}
+        <GlobalContextProvider>{children}</GlobalContextProvider>
       </body>
     </html>
   );
