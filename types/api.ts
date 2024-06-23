@@ -48,7 +48,7 @@ export const SpokenLanguageSchema = z.object({
 });
 export type SpokenLanguage = z.infer<typeof SpokenLanguageSchema>;
 
-export const exploreApiSchema = z.object({
+export const specifiedMovie = z.object({
   adult: z.boolean(),
   backdrop_path: z.string(),
   belongs_to_collection: z.null(),
@@ -76,7 +76,7 @@ export const exploreApiSchema = z.object({
   vote_average: z.number(),
   vote_count: z.number(),
 });
-export type TspecifiedMovie = z.infer<typeof exploreApiSchema>;
+export type TspecifiedMovie = z.infer<typeof specifiedMovie>;
 
 // SEARCH PAGE API SCHEMA
 
