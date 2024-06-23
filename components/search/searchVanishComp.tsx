@@ -25,9 +25,7 @@ export function SearchVanishComp() {
     "What's popular this week?",
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {};
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     //TODO add search functionality with the TMDB api, push user to movie with its own id
     e.preventDefault();
