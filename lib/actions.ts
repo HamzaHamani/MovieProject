@@ -104,9 +104,14 @@ export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
 }
 
 // utilite for search page
-export async function getSearchMovie(query: string): Promise<TsearchMovie> {
+
+type values = {
+  query: string;
+  page: number;
+};
+export async function getSearchMovie(values: values): Promise<TsearchMovie> {
   const res = await axios.get(
-    `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=true&language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
+    `https://api.themoviedb.org/3/search/movie?query=${values.query}&include_adult=true&language=en-US&page=${values.page}&api_key=${process.env.TMDB_API_KEY}`,
   );
   const data: TsearchMovie = await res.data;
   return data;

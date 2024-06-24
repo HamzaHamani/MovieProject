@@ -2,20 +2,13 @@
 import usePage from "@/hooks/usePage";
 import { TsearchMovie } from "@/types/api";
 import { ArrowLeftToLine, ArrowRightToLine } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 type Props = {
   data: TsearchMovie;
 };
 
 export default function ArrowButtons({ data }: Props) {
-  const searchParams = useSearchParams();
-  const pageNumber = searchParams.get("page");
-  console.log(pageNumber);
   const { page, nextPage, prevPage } = usePage();
-  console.log(page);
-  console.log(pageNumber?.toString() === data.total_pages.toString());
 
   //TODO THE NAVIGATION IS WORKING, NOW U JUST GOTTA FORWARD THE DATA TO THE ACTION IDK HOW TBH HHHHHHH
   return (

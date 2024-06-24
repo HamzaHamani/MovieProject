@@ -39,13 +39,23 @@ const config = {
       xsmd: { max: "774px" },
       md: { max: "770px" },
       // => @media (max-width: 767px) { ... }
+      //ignore just for search page
       smd: { max: "655px" },
+      //-----
 
       sm: { max: "639px" },
+
+      //ignore just for search page
       ss: { max: "620px" },
       sss: { max: "560px" },
+      //--------
+
       s: { max: "480px" }, //use to be 425
+
+      //ignore just for search page
       h1text9: { max: "385px" },
+      //---------
+
       xss: { max: "375px" },
       xs: { max: "320px" },
 
@@ -134,7 +144,7 @@ export default config;
 function addVariablesForColors({ addBase, theme }: any) {
   let allColors = flattenColorPalette(theme("colors"));
   let newVars = Object.fromEntries(
-    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val]),
   );
 
   addBase({

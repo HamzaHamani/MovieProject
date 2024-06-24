@@ -4,6 +4,7 @@ import "./globals.css";
 import localFont from "next/font/local";
 import Navbar from "@/components/navbar/navbar";
 import { GlobalContextProvider } from "@/context/globalContext";
+import ReactQueryProvider from "@/provider/reaxtQueryProvider";
 
 const chillax = localFont({
   src: [
@@ -46,8 +47,10 @@ export default function RootLayout({
       <body
         className={`bg-backgroundM font-chillax font-normal text-textMain ${chillax.className} relative`}
       >
-        <Navbar />
-        <GlobalContextProvider>{children}</GlobalContextProvider>
+        <ReactQueryProvider>
+          <Navbar />
+          <GlobalContextProvider>{children}</GlobalContextProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );
