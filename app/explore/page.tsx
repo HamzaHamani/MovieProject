@@ -1,7 +1,6 @@
 import { CarouselExplore } from "@/components/explore/carouselExplore";
 import { getSpecifiedMovie } from "@/lib/actions";
 import { TexploreApiSchema, TspecifiedMovie } from "@/types/api";
-import Image from "next/image";
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -13,7 +12,7 @@ export default async function Explore({ searchParams }: Props) {
   //TODO TRY CHANGINGE TYPE OFSEARCH PARAMS TO ONLY MOIE AND TRY USING IT AND SOME OTHER VALUE
   const res = await fetch(
     `https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1%&api_key=${process.env.TMDB_API_KEY}`,
-    { next: { revalidate: 3600 } }
+    { next: { revalidate: 3600 } },
   );
   const result = await res.json();
   const data: TexploreApiSchema[] = result.results;
@@ -22,8 +21,8 @@ export default async function Explore({ searchParams }: Props) {
     specifiedMovie = await getSpecifiedMovie(searchParams.movie as string);
   }
   return (
-    <div className="h-[100vh] ">
-      <div className="w-full h-screen absolute top-0 -z-10 opacity-70 object-cover">
+    <div className="h-[100vh]">
+      <div className="absolute top-0 -z-10 h-screen w-full object-cover opacity-70">
         <img
           src={`https://image.tmdb.org/t/p/original/${specifiedMovie?.backdrop_path}`}
           // width={1920}
@@ -33,7 +32,7 @@ export default async function Explore({ searchParams }: Props) {
         />
       </div>
 
-      <div className=" h-[90vh] flex flex-col justify-between">
+      <div className="flex h-[90vh] flex-col justify-between">
         <div></div>
         <CarouselExplore data={data} />
       </div>

@@ -6,21 +6,20 @@ import { redirect } from "next/navigation";
 type Props = {};
 
 export default async function page({}: Props) {
-  //TODO get back to designing this page
   const user = await getUser();
   if (user) redirect("/explore");
   return (
-    <div className="flex  gap-36 h-[92.7vh] ">
-      <div className="flex flex-col mt-20">
+    <div className="flex h-[92.7vh] gap-36">
+      <div className="mt-20 flex flex-col">
         <h2 className="text-[190px] font-extrabold tracking-tight">Welcome!</h2>
-        <span className="text-2xl -mt-10 ml-6 text-gray-300">
+        <span className="-mt-10 ml-6 text-2xl text-gray-300">
           Embark on an adventure into movies and TV shows with us!{" "}
         </span>
-        <div className="w-[110px] h-[1px] mt-6  bg-gray-300 ml-6"></div>
+        <div className="ml-6 mt-6 h-[1px] w-[110px] bg-gray-300"></div>
       </div>
-      <div className="w-[500px] h-[500px] flex flex-col rounded-3xl  justify-end  mt-20   p-4">
+      <div className="mt-20 flex h-[500px] w-[500px] flex-col justify-end rounded-3xl p-4">
         <h2>Log-in to your account</h2>
-        <div className="bg-red-70 flex gap-2 items-center justify-center ">
+        <div className="bg-red-70 flex items-center justify-center gap-2">
           <ButtonSignIn provider="google" />
           <ButtonSignIn provider="github" />
         </div>

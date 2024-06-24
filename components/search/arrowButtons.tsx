@@ -10,7 +10,6 @@ type Props = {
 export default function ArrowButtons({ data }: Props) {
   const { page, nextPage, prevPage } = usePage();
 
-  //TODO THE NAVIGATION IS WORKING, NOW U JUST GOTTA FORWARD THE DATA TO THE ACTION IDK HOW TBH HHHHHHH
   return (
     <>
       {" "}

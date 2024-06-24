@@ -10,10 +10,10 @@ export default function MovieLoadingIndicator({}) {
         <div className="flex justify-between">
           <h2 className="text-lg">
             Found: <span className="font-bold text-primaryM-500">100</span>{" "}
-            movies
+            results
           </h2>
           <div className="flex items-center justify-center gap-3">
-            <span>1-10</span>
+            <span>1-1</span>
             <span className="flex items-center justify-center gap-1">
               <button
                 disabled={true}
@@ -21,7 +21,7 @@ export default function MovieLoadingIndicator({}) {
               >
                 <ArrowLeftToLine />
               </button>
-              <button className="cursor-pointer bg-yellow-500 p-2">
+              <button className="cursor-pointer bg-yellow-500 p-2" disabled>
                 <ArrowRightToLine />
               </button>
             </span>

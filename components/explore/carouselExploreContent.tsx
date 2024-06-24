@@ -10,7 +10,7 @@ type Props = {
 
 export default function CarouselExploreContent({ data }: Props) {
   const [slectedMovie, setSelectedMovie] = useState<TexploreApiSchema | any>(
-    null
+    null,
   );
   const router = useRouter();
   const pathname = usePathname();
@@ -22,7 +22,7 @@ export default function CarouselExploreContent({ data }: Props) {
     current.set("movie", data[0].id.toString());
     const search = current.toString();
     const query = search ? `?${search}` : "";
-    console.log(query);
+
     router.push(`${pathname}${query}`);
   }
   function activeCarouse(movie: TexploreApiSchema) {
@@ -43,11 +43,11 @@ export default function CarouselExploreContent({ data }: Props) {
   }
 
   return (
-    <CarouselContent className="flex items-end  justify-center">
+    <CarouselContent className="flex items-end justify-center">
       {data.map((movie, index) => (
-        <CarouselItem key={index} className="basis-1/7 pl-[25px]  ">
+        <CarouselItem key={index} className="basis-1/7 pl-[25px]">
           <div
-            className={`p-1 w-[200px] cursor-pointer rounded-lg duration-300 transition-all ${
+            className={`w-[200px] cursor-pointer rounded-lg p-1 transition-all duration-300 ${
               slectedMovie == movie.id ? "w-[270px]" : ""
             }`}
             onClick={() => activeCarouse(movie)}
@@ -55,9 +55,9 @@ export default function CarouselExploreContent({ data }: Props) {
             <img
               src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
               alt="movie poster "
-              className={`w-full h-full  transition-all object-cover rounded-lg ${
+              className={`h-full w-full rounded-lg object-cover transition-all ${
                 slectedMovie == movie.id ? "" : ""
-              }  `}
+              } `}
             />
           </div>
         </CarouselItem>

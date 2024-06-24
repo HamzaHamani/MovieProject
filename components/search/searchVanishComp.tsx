@@ -27,7 +27,6 @@ export function SearchVanishComp() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {};
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    //TODO add search functionality with the TMDB api, push user to movie with its own id
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const searchValue = formData.get("search");

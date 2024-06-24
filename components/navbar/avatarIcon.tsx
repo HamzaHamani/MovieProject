@@ -5,7 +5,7 @@ type Props = {};
 
 export default async function AvatarIcon({}: Props) {
   const user = await getUser();
-  console.log(user);
+
   return (
     <Avatar>
       {" "}

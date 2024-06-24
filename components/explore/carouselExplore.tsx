@@ -1,10 +1,4 @@
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { Carousel, CarouselPrevious } from "@/components/ui/carousel";
 import { TexploreApiSchema } from "@/types/api";
 import CarouselExploreContent from "./carouselExploreContent";
 type Props = {
@@ -17,7 +11,7 @@ export async function CarouselExplore({ data }: Props) {
       opts={{
         align: "center",
       }}
-      className="w-[100%] mx-auto overf"
+      className="overf mx-auto w-[100%]"
     >
       <CarouselExploreContent data={data} />
       <CarouselPrevious />
