@@ -9,9 +9,9 @@ type Props = {
 let specifiedMovie: TspecifiedMovie;
 
 export default async function Explore({ searchParams }: Props) {
-  //TODO TRY CHANGINGE TYPE OFSEARCH PARAMS TO ONLY MOIE AND TRY USING IT AND SOME OTHER VALUE
   const res = await fetch(
-    `https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1%&api_key=${process.env.TMDB_API_KEY}`,
+    `https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
+
     { next: { revalidate: 3600 } },
   );
   const result = await res.json();

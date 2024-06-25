@@ -8,7 +8,7 @@ type Props = {
   data: TsearchMovie;
 };
 
-//TODO ADD ANIMATION WITH FRAMER MOTION
+//TODO ADD ANIMATION WITH FRAMER MOTION, change skelete color
 
 export default function SearchMoviesDisplay({ data }: Props) {
   return (
