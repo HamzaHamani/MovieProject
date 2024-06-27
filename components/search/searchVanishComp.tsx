@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { PlaceholdersAndVanishInput } from "../ui/PlaceholdersAndVanishInput";
 import { useEffect, useState } from "react";
+import usePage from "@/hooks/usePage";
 
-export function SearchVanishComp() {
+export function SearchVanishComp({ className }: { className?: string }) {
   const router = useRouter();
-
+  const { setPage } = usePage();
   const [originUrl, setOriginUrl] = useState("");
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export function SearchVanishComp() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const searchValue = formData.get("search");
+    setPage(1);
 
     if (searchValue) {
       router.push(`${originUrl}/search/${searchValue}?page=1`);

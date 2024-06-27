@@ -32,7 +32,7 @@ export default async function Explore({ searchParams }: Props) {
         }}
       />
 
-      <div className="flex h-screen flex-col justify-between">
+      <div className="flex h-[91.5vh] flex-col justify-between">
         <div></div>
         <CarouselExplore data={data} />
       </div>

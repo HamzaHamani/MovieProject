@@ -6,7 +6,7 @@ import usePage from "@/hooks/usePage";
 import { getSearchMovie } from "@/lib/actions";
 import { TsearchMovie } from "@/types/api";
 import MovieLoadingIndicator from "../../../components/search/movieLoadingIndicator";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NoResults from "@/components/search/noResults";
 
 export const dynamic = "force-dynamic";
@@ -19,9 +19,16 @@ type Props = {
 type SearchMovieQueryKey = [string, string, number];
 
 const Page = ({ params }: Props) => {
+  const queryClient = useQueryClient();
   const { query } = params;
   const { page, nextPage, prevPage } = usePage();
 
+  const prefetchNextPage = async () => {
+    await queryClient.prefetchQuery({
+      queryFn: fetchSearchMovie,
+      queryKey: ["searchMovie", query, page + 1],
+    });
+  };
   const fetchSearchMovie = async ({
     queryKey,
   }: {
@@ -33,14 +40,15 @@ const Page = ({ params }: Props) => {
       page: page,
     };
     const data: TsearchMovie = (await getSearchMovie(values)) as TsearchMovie;
+
     return data;
   };
 
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading, isSuccess } = useQuery({
     queryFn: fetchSearchMovie,
     queryKey: ["searchMovie", query, page],
   });
-
+  if (isSuccess) prefetchNextPage();
   if (isLoading) return <MovieLoadingIndicator />;
   if (error) return <div>Error: {error.message}</div>;
   if (data?.results.length == 0) return <NoResults />;
@@ -51,8 +59,10 @@ const Page = ({ params }: Props) => {
 
 function RenderUi({ data }: { data: TsearchMovie }) {
   return (
-    <div className="mx-auto mt-20 w-[90%]">
-      <SearchVanishComp />
+    <div className="mx-auto w-[90%]">
+      <div className="mt-20">
+        <SearchVanishComp />
+      </div>
       <SearcMovieNavigation data={data} />
       <SearchMoviesDisplay data={data} />
     </div>

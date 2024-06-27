@@ -4,12 +4,12 @@ type Props = {};
 
 export default function NotFound({}: Props) {
   return (
-    <div className="grid h-screen place-content-center bg-backgroundM px-4">
+    <div className="grid h-[91.5vh] place-content-center bg-backgroundM px-4">
       <div className="text-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 1024 768"
-          className="mx-auto h-56 w-auto text-textMain sm:h-64"
+          className="mx-auto h-64 w-auto text-textMain sm:h-64"
         >
           <g fill="none" fillRule="evenodd">
             <g fill="#dfbc46">
