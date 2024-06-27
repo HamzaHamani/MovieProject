@@ -7,8 +7,8 @@ export default function MovieLoadingIndicator({}) {
     <div className="mx-auto mt-20 w-[90%]">
       <SearchVanishComp />
       <div className="mx-auto mt-12 w-[97%]">
-        <div className="flex justify-between">
-          <h2 className="text-lg">
+        <div className="flex items-center justify-between lg:text-sm">
+          <h2 className="text-lg lg:text-base">
             Found: <span className="font-bold text-primaryM-500">100</span>{" "}
             results
           </h2>
@@ -17,18 +17,21 @@ export default function MovieLoadingIndicator({}) {
             <span className="flex items-center justify-center gap-1">
               <button
                 disabled={true}
-                className="cursor-pointer bg-[#675720] p-2"
+                className="cursor-pointer bg-[#675720] p-2 lg:p-1.5 lg:px-2"
               >
-                <ArrowLeftToLine />
+                <ArrowLeftToLine className="lg:w-5" />
               </button>
-              <button className="cursor-pointer bg-yellow-500 p-2" disabled>
-                <ArrowRightToLine />
+              <button
+                className="cursor-pointer bg-yellow-500 p-2 lg:p-1.5 lg:px-2"
+                disabled
+              >
+                <ArrowRightToLine className="lg:w-5" />
               </button>
             </span>
           </div>
         </div>
       </div>
-      <div className="mt-6 grid grid-cols-5 gap-5">
+      <div className="xxl:grid-cols-4 relative mt-10 grid w-full grid-cols-5 items-center gap-5 lg:grid-cols-3 smd:grid-cols-2 s:grid-cols-1">
         {Array.from({ length: 10 }, (_, index) => (
           <MovieSkeleton key={index} />
         ))}

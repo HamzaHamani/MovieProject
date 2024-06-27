@@ -15,17 +15,17 @@ export default function ArrowButtons({ data }: Props) {
       {" "}
       <button
         disabled={page == 1}
-        className={`${page === 1 ? "bg-[#675720]" : "bg-yellow-500"} cursor-pointe p-2`}
+        className={`${page === 1 ? "bg-[#675720]" : "bg-yellow-500"} cursor-pointe p-2 lg:p-1.5 lg:px-2`}
         onClick={prevPage}
       >
-        <ArrowLeftToLine />
+        <ArrowLeftToLine className="lg:w-5" />
       </button>
       <button
-        className={`cursor-pointer p-2 ${page?.toString() === data.total_pages.toString() ? "bg-[#675720]" : "bg-yellow-500"}`}
+        className={`cursor-pointer p-2 ${page?.toString() === data.total_pages.toString() ? "bg-[#675720]" : "bg-yellow-500"} lg:p-1.5 lg:px-2`}
         onClick={nextPage}
         disabled={page?.toString() === data.total_pages.toString()}
       >
-        <ArrowRightToLine />
+        <ArrowRightToLine className="lg:w-5" />
       </button>
     </>
   );

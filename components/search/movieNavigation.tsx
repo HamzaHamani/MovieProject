@@ -12,8 +12,8 @@ export default function SearcMovieNavigation({ data }: Props) {
   return (
     <>
       <div className="mx-auto mt-12 w-[97%]">
-        <div className="flex justify-between">
-          <h2 className="text-lg">
+        <div className="flex items-center justify-between lg:text-sm">
+          <h2 className="text-lg lg:text-base">
             Found:{" "}
             <span className="font-bold text-primaryM-500">
               {data.total_results}

@@ -57,3 +57,6 @@
     color: transparent;
   }
 }
+.grid {
+  justify-items: center;
+}

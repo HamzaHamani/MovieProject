@@ -20,6 +20,7 @@ const config = {
       },
     },
     screens: {
+      xxl: { max: "1957px" },
       xl: { max: "1440px" },
 
       //ignore just for search page
