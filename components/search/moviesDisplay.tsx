@@ -1,10 +1,9 @@
 "use client";
-import usePage from "@/hooks/usePage";
 import { TsearchMovie } from "@/types/api";
-import { useSearchParams } from "next/navigation";
 import { Button } from "../ui/button";
 import { RiStarSFill } from "react-icons/ri";
 import { GrDocumentMissing } from "react-icons/gr";
+import Link from "next/link";
 
 type Props = {
   data: TsearchMovie;
@@ -12,7 +11,6 @@ type Props = {
 
 //TODO ADD ANIMATION WITH FRAMER MOTION, change skelete color
 //TODO ADD INDICATOR WHEN U LOG OUT OR LOG IN WITH TOAST
-//TODO ADD PREFETCH FUNCTIONALITY
 
 export default function SearchMoviesDisplay({ data }: Props) {
   return (
@@ -36,9 +34,11 @@ export default function SearchMoviesDisplay({ data }: Props) {
             )}
 
             <div className="absolute top-0 flex h-full w-full items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/50 group-hover:opacity-100">
-              <Button className="bg-primaryM-500 text-lg text-black hover:bg-primaryM-300">
-                More Details
-              </Button>
+              <Link href={`/movie/${movie.id}`}>
+                <Button className="bg-primaryM-500 text-lg text-black hover:bg-primaryM-300">
+                  More Details
+                </Button>
+              </Link>
             </div>
           </div>
           <div className="flex h-[100px] flex-col justify-between gap-2 py-2">

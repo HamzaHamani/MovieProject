@@ -95,10 +95,10 @@ export async function handleSignin(provider: provider) {
 }
 
 export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
-  const res = await fetch(
+  const res = await axios.get(
     `https://api.themoviedb.org/3/movie/${id}?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
   );
-  const data = await res.json();
+  const data = await res.data;
 
   return data;
 }

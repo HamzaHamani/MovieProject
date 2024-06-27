@@ -33,8 +33,9 @@ export function SearchVanishComp({ className }: { className?: string }) {
     const searchValue = formData.get("search");
     setPage(1);
 
+    //TODO add loading indicator between routes, if loading appear while searching movies tryn adding back ?page=1
     if (searchValue) {
-      router.push(`${originUrl}/search/${searchValue}?page=1`);
+      router.push(`${originUrl}/search/${searchValue}`);
     }
   };
   return (

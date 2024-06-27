@@ -2,6 +2,11 @@ import { CarouselExplore } from "@/components/explore/carouselExplore";
 import { getSpecifiedMovie } from "@/lib/actions";
 import { TexploreApiSchema, TspecifiedMovie } from "@/types/api";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Explore",
+};
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
 };

@@ -1,5 +1,8 @@
-type Props = {};
+import { Metadata } from "next";
 
-export default function Saved({}: Props) {
+export const metadata: Metadata = {
+  title: "Bookmarks",
+};
+export default function Saved({}) {
   return <div>Saved</div>;
 }

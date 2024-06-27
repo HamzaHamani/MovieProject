@@ -1,5 +1,10 @@
 import { SearchVanishComp } from "@/components/search/searchVanishComp";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Search",
+};
 type Props = {};
 
 export default function Search({}: Props) {

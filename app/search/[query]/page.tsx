@@ -16,6 +16,7 @@ type Props = {
     query: string;
   };
 };
+
 type SearchMovieQueryKey = [string, string, number];
 
 const Page = ({ params }: Props) => {
@@ -54,18 +55,23 @@ const Page = ({ params }: Props) => {
   if (data?.results.length == 0) return <NoResults />;
 
   // return <MovieLoadingIndicator />;
-  return data ? <RenderUi data={data} /> : null;
+  return data ? <RenderUi data={data} query={query} /> : null;
 };
 
-function RenderUi({ data }: { data: TsearchMovie }) {
+function RenderUi({ data, query }: { data: TsearchMovie; query: string }) {
   return (
-    <div className="mx-auto w-[90%]">
-      <div className="mt-20">
-        <SearchVanishComp />
+    <>
+      <head>
+        <title>{`${query} | Cine-Sphere `}</title>
+      </head>
+      <div className="mx-auto w-[90%]">
+        <div className="mt-20">
+          <SearchVanishComp />
+        </div>
+        <SearcMovieNavigation data={data} />
+        <SearchMoviesDisplay data={data} />
       </div>
-      <SearcMovieNavigation data={data} />
-      <SearchMoviesDisplay data={data} />
-    </div>
+    </>
   );
 }
 
