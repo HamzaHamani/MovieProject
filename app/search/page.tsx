@@ -4,7 +4,7 @@ type Props = {};
 
 export default function Search({}: Props) {
   return (
-    <div className="bg-gray-0 flex h-[91.5vh] flex-col items-center">
+    <div className="bg-gray-0 flex h-screen flex-col items-center">
       <div className="bg-red-0 mx-auto mt-20 flex w-[100wh] flex-col text-center text-[160px] tracking-tighter xl:text-[130px] lg:text-[90px] md:text-[70px] sm:text-[50px] s:text-[40px] xs:text-[30px]">
         <h1 className="textGradient text-center font-extrabold uppercase xl:text-[30px] h1text:text-[125px] h1text2:text-[150px] h1text3:text-[140px] h1text4:text-[133px] h1text5:text-[125px] h1text6:text-[110px] h1text7:text-[100px] lg:text-[90px] h1text8:text-[80px] xmd:text-[75px] xsmd:text-[69px] md:text-[63px] smd:text-[58px] ss:text-[53px] sss:text-[46px] s:text-[40px] h1text9:text-[33px] xss:text-[30px] xs:text-[28px]">
           Discover Your Next

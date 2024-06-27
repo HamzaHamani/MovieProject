@@ -7,6 +7,7 @@ import { getSearchMovie } from "@/lib/actions";
 import { TsearchMovie } from "@/types/api";
 import MovieLoadingIndicator from "../../../components/search/movieLoadingIndicator";
 import { useQuery } from "@tanstack/react-query";
+import NoResults from "@/components/search/noResults";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +43,9 @@ const Page = ({ params }: Props) => {
 
   if (isLoading) return <MovieLoadingIndicator />;
   if (error) return <div>Error: {error.message}</div>;
+  if (data?.results.length == 0) return <NoResults />;
 
+  // return <MovieLoadingIndicator />;
   return data ? <RenderUi data={data} /> : null;
 };
 

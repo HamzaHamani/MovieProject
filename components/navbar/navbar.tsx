@@ -15,16 +15,15 @@ const links = [
 
 type Props = {};
 export default async function Navbar({}: Props) {
-  //TODO FIX ISSUE WITH NAVBAR MARGIN TOP. eithere use background image insted of image or check for a solution. BUT PROBABLY THE BACKGROUND IMAGE IS THE SOLUTION 100
   const user = await getUser();
   return (
-    <nav className="flex w-[90%] rounded-full mt-2 mx-auto round bg-backgroundM text-text items-center  xmd:text-sm    justify-between px-16 p-4  xmd:p-3 xmd:px-10">
+    <nav className="round text-text absolute mx-auto flex w-full items-center justify-between bg-backgroundM p-4 px-16 xmd:p-3 xmd:px-10 xmd:text-sm">
       <Logo />
       <NavbarList links={links} />
       {user ? (
         <UserDropDown user={user} />
       ) : (
-        <Button className="bg-transparent hover:bg-transparent font-extrabold md:hidden active:bg-transparent">
+        <Button className="bg-transparent font-extrabold hover:bg-transparent active:bg-transparent md:hidden">
           <Link href="/sign-in">Get Started</Link>
         </Button>
       )}

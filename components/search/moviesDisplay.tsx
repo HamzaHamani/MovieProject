@@ -13,6 +13,7 @@ type Props = {
 
 //TODO ADD ANIMATION WITH FRAMER MOTION, change skelete color
 //TODO ADD INDICATOR WHEN U LOG OUT OR LOG IN WITH TOAST
+//TODO ADD PREFETCH FUNCTIONALITY
 
 export default function SearchMoviesDisplay({ data }: Props) {
   return (
@@ -26,17 +27,17 @@ export default function SearchMoviesDisplay({ data }: Props) {
               alt="movie poster"
               className="h-full w-full object-cover transition-all duration-200 ease-linear hover:scale-110"
             />
-            <div className="absolute top-0 flex h-[500px] w-full items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/50 group-hover:opacity-100">
+            <div className="absolute top-0 flex h-full w-full items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/50 group-hover:opacity-100">
               <Button className="bg-primaryM-500 text-lg text-black hover:bg-primaryM-300">
                 More Details
               </Button>
             </div>
           </div>
-          <div className="flex h-[100px] flex-col gap-2 p-2">
+          <div className="flex h-[100px] flex-col justify-between gap-2 py-2">
             <h2>{movie.title} </h2>
             <div className="flex items-center justify-between">
               <p>{movie.release_date}</p>
-              <p className="flex p-1">
+              <p className="flex gap-2 p-1">
                 <span>
                   <RiStarSFill className="text-2xl text-primaryM-500" />
                 </span>{" "}
