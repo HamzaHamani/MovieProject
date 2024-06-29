@@ -27,6 +27,16 @@ export async function getSession() {
   return session;
 }
 
+// auth utilites
+export async function handleLogout() {
+  await signOut();
+}
+
+type provider = "github" | "google";
+export async function handleSignin(provider: provider) {
+  await signIn(provider);
+}
+
 //   fetching only the bookmarks of the user
 
 type bookSchemaType = z.infer<typeof bookmarksSchema>;
@@ -85,14 +95,6 @@ export async function CreateBookmark(formData: FormData) {
   });
   console.log(insert);
   return insert;
-}
-export async function handleLogout() {
-  await signOut();
-}
-
-type provider = "github" | "google";
-export async function handleSignin(provider: provider) {
-  await signIn(provider);
 }
 
 export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {

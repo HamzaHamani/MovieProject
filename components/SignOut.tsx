@@ -1,26 +1,30 @@
 "use client";
 import { handleLogout } from "@/lib/actions";
 import { LogOut } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 //TODO SHOW LOADING INDICATOR ON SIGN OUT
 export default function SignOutButton() {
+  const handleLogoutPromise = () =>
+    new Promise(async (resolve, reject) => {
+      try {
+        await handleLogout();
+        resolve({ name: "Sonner" });
+      } catch (error) {
+        reject(error);
+      }
+    });
+
   async function handle(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    try {
-      toast.loading("Signing  out...");
-      // handleLogout();
-      console.log("signing out");
-      setTimeout(async () => {
-        await handleLogout();
-        toast.dismiss();
-        toast.success("Signed out successfully");
-      }, 5000);
-    } catch (e) {
-      toast.error("Failed to sign out");
-    } finally {
-    }
+
+    toast.promise(handleLogoutPromise(), {
+      loading: "Logging out..",
+      success: () => `Logged out successfully!`,
+      error: "Failed to sign out",
+    });
   }
+
   return (
     <form onSubmit={handle}>
       <button type="submit" className="flex w-[12vw]">

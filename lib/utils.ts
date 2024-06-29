@@ -10,3 +10,5 @@ export function cn(...inputs: ClassValue[]) {
 // const res = fetch(
 //   `https://api.themoviedb.org/3/movie/157336?language=en-US&api_key=${api_key}`
 // );
+export const delay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));

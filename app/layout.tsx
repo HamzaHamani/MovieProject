@@ -4,7 +4,7 @@ import localFont from "next/font/local";
 import Navbar from "@/components/navbar/navbar";
 import { GlobalContextProvider } from "@/context/globalContext";
 import ReactQueryProvider from "@/provider/reaxtQueryProvider";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
@@ -58,7 +58,7 @@ export default function RootLayout({
           <ReactQueryProvider>
             <Navbar />
             {children}
-            <Toaster />
+            <Toaster richColors position="bottom-center" />
           </ReactQueryProvider>
         </GlobalContextProvider>
       </body>

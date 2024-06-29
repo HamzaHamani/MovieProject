@@ -1,14 +1,13 @@
-"use client";
 import { TsearchMovie } from "@/types/api";
 import ArrowButtons from "./arrowButtons";
 import usePage from "@/hooks/usePage";
+import NavigationPage from "./navigationPage";
 
 type Props = {
   data: TsearchMovie;
 };
 
 export default function SearcMovieNavigation({ data }: Props) {
-  const { page } = usePage();
   return (
     <>
       <div className="mx-auto mt-12 w-[97%]">
@@ -21,9 +20,7 @@ export default function SearcMovieNavigation({ data }: Props) {
             results
           </h2>
           <div className="flex items-center justify-center gap-3">
-            <span>
-              {page}-{data?.total_pages}
-            </span>
+            <NavigationPage data={data} />
             <span className="flex items-center justify-center gap-1">
               <ArrowButtons data={data} />
             </span>

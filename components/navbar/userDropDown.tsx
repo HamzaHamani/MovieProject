@@ -1,4 +1,4 @@
-import { CreditCard, LogOut, User } from "lucide-react";
+import { CreditCard, User } from "lucide-react";
 
 import {
   DropdownMenu,
