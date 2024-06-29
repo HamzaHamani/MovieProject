@@ -34,7 +34,9 @@ export default function SearchMoviesDisplay({ data }: Props) {
             )}
 
             <div className="absolute top-0 flex h-full w-full items-center justify-center bg-black/0 opacity-0 transition-all group-hover:bg-black/50 group-hover:opacity-100">
-              <Link href={`/movie/${movie.id}`}>
+              <Link
+                href={`/${movie.media_type == "movie" ? "movie" : "tv"}/${movie.id}`}
+              >
                 <Button className="bg-primaryM-500 text-lg text-black hover:bg-primaryM-300">
                   More Details
                 </Button>
@@ -42,9 +44,13 @@ export default function SearchMoviesDisplay({ data }: Props) {
             </div>
           </div>
           <div className="flex h-[100px] flex-col justify-between gap-2 py-2">
-            <h2>{movie.title} </h2>
+            <h2>{movie.media_type == "movie" ? movie?.title : movie.name} </h2>
             <div className="flex items-center justify-between">
-              <p>{movie.release_date}</p>
+              <p>
+                {movie.media_type == "movie"
+                  ? movie?.release_date
+                  : movie.first_air_date}
+              </p>
               <p className="flex gap-2 p-1">
                 <span>
                   <RiStarSFill className="text-2xl text-primaryM-500" />

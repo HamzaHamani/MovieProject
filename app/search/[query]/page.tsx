@@ -5,9 +5,10 @@ import { SearchVanishComp } from "@/components/search/searchVanishComp";
 import usePage from "@/hooks/usePage";
 import { getSearchMovie } from "@/lib/actions";
 import { TsearchMovie } from "@/types/api";
-import MovieLoadingIndicator from "../../../components/search/movieLoadingIndicator";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NoResults from "@/components/search/noResults";
+import MovieLoadingIndicator from "@/components/search/movieLoadingIndicator";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +43,11 @@ const Page = ({ params }: Props) => {
     };
     const data: TsearchMovie = (await getSearchMovie(values)) as TsearchMovie;
 
-    return data;
+    const filtered = data.results.filter(
+      (result) => result.media_type !== "person",
+    );
+    const filteredData = { ...data, results: filtered };
+    return filteredData;
   };
 
   const { data, error, isLoading, isSuccess } = useQuery({
@@ -61,9 +66,8 @@ const Page = ({ params }: Props) => {
 function RenderUi({ data, query }: { data: TsearchMovie; query: string }) {
   return (
     <>
-      <head>
-        <title>{`${query} | Cine-Sphere `}</title>
-      </head>
+      <title>{`${query} | Cine-Sphere `}</title>
+
       <div className="mx-auto w-[90%]">
         <div className="mt-20">
           <SearchVanishComp />

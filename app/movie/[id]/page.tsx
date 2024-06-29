@@ -1,3 +1,4 @@
+import WholeDisplay from "@/components/movie/wholeDisplay";
 import { getSpecifiedMovie } from "@/lib/actions";
 import { TspecifiedMovie } from "@/types/api";
 import axios from "axios";
@@ -13,7 +14,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   async function fetchMovie(): Promise<TspecifiedMovie> {
     try {
       const data = await getSpecifiedMovie(id);
-
       return data as TspecifiedMovie;
     } catch (e) {
       throw new Error("Failed to fetch the movie");
@@ -25,12 +25,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: res.overview,
   };
 }
-export default async function page({ params, searchParams }: Props) {
+
+export default async function Page({ params }: Props) {
   const { id } = params;
   async function fetchMovie(): Promise<TspecifiedMovie> {
     try {
       const data = await getSpecifiedMovie(id);
-
       return data as TspecifiedMovie;
     } catch (e) {
       throw new Error("Failed to fetch movie");
@@ -38,5 +38,5 @@ export default async function page({ params, searchParams }: Props) {
   }
   const response = await fetchMovie();
 
-  return <div>specified {response.origin_country}</div>;
+  return <WholeDisplay response={response} />;
 }

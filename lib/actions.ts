@@ -13,6 +13,7 @@ import {
 import { z } from "zod";
 import { TsearchMovie, TspecifiedMovie } from "@/types/api";
 import axios from "axios";
+import { TspecifiedTv } from "@/types/apiTv";
 
 export async function getUser() {
   const session = await auth();
@@ -96,7 +97,16 @@ export async function handleSignin(provider: provider) {
 
 export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
   const res = await axios.get(
-    `https://api.themoviedb.org/3/movie/${id}?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
+    `https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
+
+  return data;
+}
+// utilite for specified tv show
+export async function getSpecifiedTV(id: string): Promise<TspecifiedTv> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.TMDB_API_KEY}`,
   );
   const data = await res.data;
 
@@ -111,7 +121,7 @@ type values = {
 };
 export async function getSearchMovie(values: values): Promise<TsearchMovie> {
   const res = await axios.get(
-    `https://api.themoviedb.org/3/search/movie?query=${values.query}&include_adult=true&language=en-US&page=${values.page}&api_key=${process.env.TMDB_API_KEY}`,
+    `https://api.themoviedb.org/3/search/multi?query=${values.query}&include_adult=true&language=en-US&page=${values.page}&api_key=${process.env.TMDB_API_KEY}&include_adult=true`,
   );
   const data: TsearchMovie = await res.data;
   return data;

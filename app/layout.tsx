@@ -53,11 +53,14 @@ export default function RootLayout({
       <body
         className={`bg-backgroundM font-chillax font-normal text-textMain ${chillax.className} relative`}
       >
-        <ReactQueryProvider>
-          <Toaster />
-          <Navbar />
-          <GlobalContextProvider>{children}</GlobalContextProvider>
-        </ReactQueryProvider>
+        {" "}
+        <GlobalContextProvider>
+          <ReactQueryProvider>
+            <Toaster />
+            <Navbar />
+            {children}
+          </ReactQueryProvider>
+        </GlobalContextProvider>
       </body>
     </html>
   );

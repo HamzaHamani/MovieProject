@@ -2,6 +2,7 @@ import { SignIn } from "@/components/SignIn";
 import { auth } from "@/auth";
 import SignOut from "@/components/SignOut";
 import { GoogleSignIn } from "@/components/GoogleSignIn";
+import { getBookmarks } from "@/lib/actions";
 
 export default async function Home() {
   // const api_key = process.env.TMDB_API_KEY!;

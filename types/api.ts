@@ -80,31 +80,74 @@ export type TspecifiedMovie = z.infer<typeof specifiedMovie>;
 
 // SEARCH PAGE API SCHEMA
 
-export const OriginalLanguageSchema = z.enum(["en", "ja"]);
+export const KnownForMediaTypeSchema = z.enum(["movie", "tv", "person"]);
+export type KnownForMediaType = z.infer<typeof KnownForMediaTypeSchema>;
+
+export const OriginalLanguageSchema = z.enum(["en", "id", "nl"]);
 export type OriginalLanguage = z.infer<typeof OriginalLanguageSchema>;
 
-export const ResultSchema = z.object({
-  adult: z.boolean(),
+export const KnownForDepartmentSchema = z.enum([
+  "Acting",
+  "Directing",
+  "Editing",
+  "Writing",
+]);
+export type KnownForDepartment = z.infer<typeof KnownForDepartmentSchema>;
+
+export const ResultMediaTypeSchema = z.enum(["movie", "tv", "person"]);
+export type ResultMediaType = z.infer<typeof ResultMediaTypeSchema>;
+
+export const KnownForSchema = z.object({
   backdrop_path: z.union([z.null(), z.string()]),
-  genre_ids: z.array(z.number()),
   id: z.number(),
-  original_language: OriginalLanguageSchema,
-  original_title: z.string(),
+  title: z.string().optional(),
+  original_title: z.string().optional(),
   overview: z.string(),
-  popularity: z.number(),
   poster_path: z.string(),
-  release_date: z.string(),
-  title: z.string(),
-  video: z.boolean(),
+  media_type: KnownForMediaTypeSchema,
+  adult: z.boolean(),
+  original_language: OriginalLanguageSchema,
+  genre_ids: z.array(z.number()),
+  popularity: z.number(),
+  release_date: z.string().optional(),
+  video: z.boolean().optional(),
   vote_average: z.number(),
   vote_count: z.number(),
+  name: z.string().optional(),
+  original_name: z.string().optional(),
+  first_air_date: z.string().optional(),
+  origin_country: z.array(z.string()).optional(),
+});
+export type KnownFor = z.infer<typeof KnownForSchema>;
+
+export const ResultSchema = z.object({
+  backdrop_path: z.union([z.null(), z.string()]),
+  id: z.number(),
+  name: z.string().optional(),
+  original_name: z.string().optional(),
+  overview: z.string(),
+  poster_path: z.union([z.null(), z.string()]),
+  media_type: ResultMediaTypeSchema,
+  adult: z.boolean(),
+  original_language: OriginalLanguageSchema,
+  genre_ids: z.array(z.number()),
+  popularity: z.number(),
+  first_air_date: z.string().optional(),
+  vote_average: z.number(),
+  vote_count: z.number(),
+  origin_country: z.array(z.string()).optional(),
+  title: z.string().optional(),
+  original_title: z.string().optional(),
+  release_date: z.string().optional(),
+  video: z.boolean().optional(),
 });
 export type Result = z.infer<typeof ResultSchema>;
 
-export const searchApiSchema = z.object({
+export const searchMultiSchema = z.object({
   page: z.number(),
   results: z.array(ResultSchema),
   total_pages: z.number(),
   total_results: z.number(),
 });
-export type TsearchMovie = z.infer<typeof searchApiSchema>;
+
+export type TsearchMovie = z.infer<typeof searchMultiSchema>;
