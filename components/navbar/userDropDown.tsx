@@ -44,7 +44,6 @@ export function UserDropDown({ user }: any) {
 
         <DropdownMenuSeparator className="bg-gray-500" />
         <DropdownMenuItem>
-          <LogOut className="mr-2 h-4 w-4" />
           <SignOutButton />
         </DropdownMenuItem>
       </DropdownMenuContent>
