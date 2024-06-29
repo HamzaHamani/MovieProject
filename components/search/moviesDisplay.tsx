@@ -26,6 +26,7 @@ export default function SearchMoviesDisplay({ data }: Props) {
                 src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
                 alt="movie poster"
                 className="h-full w-full object-cover transition-all duration-200 ease-linear hover:scale-110"
+                onLoad={(e) => {}}
               />
             ) : (
               <h3 className="text-center">

@@ -35,7 +35,7 @@ export default async function page({ params }: Props) {
       return data;
     } catch (e) {
       console.error(e);
-      throw new Error("Failed to fetch movie");
+      throw new Error("Failed to fetch tv show");
     }
   }
   const response = await fetch();

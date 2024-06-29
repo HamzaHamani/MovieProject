@@ -46,6 +46,7 @@ const Page = ({ params }: Props) => {
     const filtered = data.results.filter(
       (result) => result.media_type !== "person",
     );
+    //TODO TAKE ONLY LENGTH OF FILTURED DATA AND ALSO THE NAVIGATION OF THEM,WHY? BECAUSE THE API RETURNS PERSONS ALSO AND FILTERED DATA IS ONLY MOVIES AND TV SHOWS
     const filteredData = { ...data, results: filtered };
     return filteredData;
   };

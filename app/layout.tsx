@@ -56,9 +56,9 @@ export default function RootLayout({
         {" "}
         <GlobalContextProvider>
           <ReactQueryProvider>
-            <Toaster />
             <Navbar />
             {children}
+            <Toaster />
           </ReactQueryProvider>
         </GlobalContextProvider>
       </body>

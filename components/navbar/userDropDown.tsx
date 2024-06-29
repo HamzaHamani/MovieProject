@@ -1,13 +1,4 @@
-import {
-  Cloud,
-  CreditCard,
-  Github,
-  Keyboard,
-  LifeBuoy,
-  LogOut,
-  Settings,
-  User,
-} from "lucide-react";
+import { CreditCard, LogOut, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -16,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AvatarIcon from "./avatarIcon";
@@ -35,9 +25,9 @@ export function UserDropDown({ user }: any) {
       <DropdownMenuTrigger>
         <AvatarIcon />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-backgroundM text-textMain border-gray-500">
+      <DropdownMenuContent className="w-56 border-gray-500 bg-backgroundM text-textMain">
         <DropdownMenuLabel>{userT.name}</DropdownMenuLabel>
-        <DropdownMenuLabel className="text-gray-400 font-normal text-xs">
+        <DropdownMenuLabel className="text-xs font-normal text-gray-400">
           {userT.email}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-gray-500" />
