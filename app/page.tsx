@@ -1,8 +1,8 @@
-import { SignIn } from "@/components/SignIn";
 import { auth } from "@/auth";
 import SignOut from "@/components/SignOut";
-import { GoogleSignIn } from "@/components/GoogleSignIn";
+
 import { getBookmarks } from "@/lib/actions";
+import Create from "./_create/Create";
 
 export default async function Home() {
   // const api_key = process.env.TMDB_API_KEY!;
@@ -17,6 +17,7 @@ export default async function Home() {
 
   return (
     <main>
+      <Create />
       {/* {!session ? (
         "please sign in"
       ) : (

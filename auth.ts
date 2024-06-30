@@ -8,7 +8,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [GitHub, google],
   adapter: DrizzleAdapter(db),
   pages: {
-    signIn: "/signIn",
-    signOut: "/logout",
+    signIn: "/sign-in",
   },
 });

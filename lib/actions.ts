@@ -80,6 +80,9 @@ export async function getMoviesBook(
 
 //TODO VALIDATE THE DATA COMING FROM THE FORM
 export async function AddMovie(formData: FormData) {
+  console.log(formData.get("bookmarkId") as string);
+  console.log(formData.get("review") as string);
+  console.log(formData.get("movieId") as string);
   await db.insert(bookmarksMovies).values({
     bookmarkId: formData.get("bookmarkId") as string,
     review: formData.get("review") as string,
@@ -88,6 +91,9 @@ export async function AddMovie(formData: FormData) {
 }
 
 export async function CreateBookmark(formData: FormData) {
+  console.log(formData.get("bookmarkName") as string);
+  console.log(formData.get("description") as string);
+  console.log(formData.get("id") as string);
   const insert = await db.insert(bookmarks).values({
     bookmarkName: formData.get("bookmarkName") as string,
     userId: formData.get("id") as string,
