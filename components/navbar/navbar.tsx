@@ -16,6 +16,7 @@ const links = [
 type Props = {};
 export default async function Navbar({}: Props) {
   const user = await getUser();
+  //TODO TRY USING POSITION ABSOLUTE, AND GET BACK TO THE OLD DESIGN OF NAVBAR AND ASK GPT IF U FIN ANY ISSUES, MAYBE CUZ WE NEED TO SPCIFY THE FULL WITH OF THE NAVBAR
   return (
     <nav className="round text-text mx-auto flex w-full items-center justify-between bg-backgroundM p-4 px-16 xmd:p-3 xmd:px-10 xmd:text-sm">
       <Logo />

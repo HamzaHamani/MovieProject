@@ -9,9 +9,6 @@ type Props = {
   data: TsearchMovie;
 };
 
-//TODO ADD ANIMATION WITH FRAMER MOTION, change skelete color
-//TODO ADD INDICATOR WHEN U LOG OUT OR LOG IN WITH TOAST
-
 export default function SearchMoviesDisplay({ data }: Props) {
   return (
     <div className="relative mt-10 grid w-full grid-cols-5 items-center gap-5 xxl:grid-cols-4 lg:grid-cols-3 smd:grid-cols-2 s:grid-cols-1">

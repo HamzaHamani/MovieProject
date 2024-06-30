@@ -1,6 +1,5 @@
 import { TsearchMovie } from "@/types/api";
 import ArrowButtons from "./arrowButtons";
-import usePage from "@/hooks/usePage";
 import NavigationPage from "./navigationPage";
 
 type Props = {

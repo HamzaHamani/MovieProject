@@ -3,7 +3,6 @@ import { handleLogout } from "@/lib/actions";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 
-//TODO SHOW LOADING INDICATOR ON SIGN OUT
 export default function SignOutButton() {
   const handleLogoutPromise = () =>
     new Promise(async (resolve, reject) => {

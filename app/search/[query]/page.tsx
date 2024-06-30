@@ -23,7 +23,7 @@ type SearchMovieQueryKey = [string, string, number];
 const Page = ({ params }: Props) => {
   const queryClient = useQueryClient();
   const { query } = params;
-  const { page, nextPage, prevPage } = usePage();
+  const { page } = usePage();
 
   const prefetchNextPage = async () => {
     await queryClient.prefetchQuery({
@@ -43,10 +43,10 @@ const Page = ({ params }: Props) => {
     };
     const data: TsearchMovie = (await getSearchMovie(values)) as TsearchMovie;
 
+    //TODO WHEN FILTERING DATA TRY TO TAKE LENGTH EVERY TIME, ACCUMULATE IT IN A VARIABLE, AND THEN REMOVE IT FROM THE TOTAL RESULT AND DISPLAY IT, THEN ASK GPT WITH THE NEW DATA TO GIVE U MAX PAGE FOR EACH PAGE HAVING 20MOVIES
     const filtered = data.results.filter(
       (result) => result.media_type !== "person",
     );
-    //TODO TAKE ONLY LENGTH OF FILTURED DATA AND ALSO THE NAVIGATION OF THEM,WHY? BECAUSE THE API RETURNS PERSONS ALSO AND FILTERED DATA IS ONLY MOVIES AND TV SHOWS
 
     const filteredData = { ...data, results: filtered };
 
@@ -67,6 +67,7 @@ const Page = ({ params }: Props) => {
 };
 
 function RenderUi({ data, query }: { data: TsearchMovie; query: string }) {
+  //TODO MAKE THIS MOVIENAVIGATION SERVER COMPONENT, CUZ THE PARENT IS   CHILD COMPONENT, SO U GOTTA USE THE METHOD
   return (
     <>
       <title>{`${query} | Cine-Sphere `}</title>
@@ -75,6 +76,7 @@ function RenderUi({ data, query }: { data: TsearchMovie; query: string }) {
         <div className="mt-20">
           <SearchVanishComp />
         </div>
+
         <SearcMovieNavigation data={data} />
         <SearchMoviesDisplay data={data} />
       </div>
