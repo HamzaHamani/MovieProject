@@ -13,14 +13,24 @@ const links = [
   { href: "/search", label: "Search" },
 ];
 
-type Props = {};
-export default async function Navbar({}: Props) {
+type Props = {
+  type: string;
+};
+
+const baseNavStyles =
+  "round text-text mx-auto flex items-center justify-between p-4 px-16 xmd:p-3 xmd:px-10 xmd:text-sm";
+
+const normalNav = `${baseNavStyles} w-full bg-backgroundM`;
+const transparentNav = `${baseNavStyles} absolute bg-transparent left-0 right-0`;
+export default async function Navbar({ type }: Props) {
   const user = await getUser();
   //TODO TRY USING POSITION ABSOLUTE, AND GET BACK TO THE OLD DESIGN OF NAVBAR AND ASK GPT IF U FIN ANY ISSUES, MAYBE CUZ WE NEED TO SPCIFY THE FULL WITH OF THE NAVBAR
   return (
-    <nav className="round text-text mx-auto flex w-full items-center justify-between bg-backgroundM p-4 px-16 xmd:p-3 xmd:px-10 xmd:text-sm">
-      <Logo />
-      <NavbarList links={links} />
+    <nav className={`${type == "normal" ? normalNav : transparentNav} z-50`}>
+      <div className="flex items-center gap-8">
+        <Logo />
+        <NavbarList links={links} />
+      </div>
       {user ? (
         <UserDropDown user={user} />
       ) : (

@@ -9,8 +9,6 @@ export default async function Page({
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  console.log(searchParams?.error);
-
   const user = await getUser();
   if (user) redirect("/explore");
   return (

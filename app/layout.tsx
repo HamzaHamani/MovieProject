@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
-import Navbar from "@/components/navbar/navbar";
 import { GlobalContextProvider } from "@/context/globalContext";
 import ReactQueryProvider from "@/provider/reaxtQueryProvider";
 import { Toaster } from "sonner";
@@ -51,12 +50,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`bg-backgroundM font-chillax font-normal text-textMain ${chillax.className} relative`}
+        className={`relative bg-backgroundM font-chillax font-normal text-textMain ${chillax.className} relative`}
       >
         {" "}
         <GlobalContextProvider>
           <ReactQueryProvider>
-            <Navbar />
             {children}
             <Toaster richColors position="bottom-center" />
           </ReactQueryProvider>

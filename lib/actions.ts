@@ -14,6 +14,9 @@ import { z } from "zod";
 import { TsearchMovie, TspecifiedMovie } from "@/types/api";
 import axios from "axios";
 import { TspecifiedTv } from "@/types/apiTv";
+import { TvideoApiSchema } from "@/types/video";
+
+//------------------------------------------------------------------------#uilities for handlingath
 
 export async function getUser() {
   const session = await auth();
@@ -36,6 +39,7 @@ type provider = "github" | "google";
 export async function handleSignin(provider: provider) {
   await signIn(provider);
 }
+//------------------------------------------------------------------------#uilities for fetching data from the database
 
 //   fetching only the bookmarks of the user
 
@@ -103,12 +107,23 @@ export async function CreateBookmark(formData: FormData) {
   return insert;
 }
 
+//------------------------------------------------------------------------#uilities for fetching data from the api##
+
 export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
   const res = await axios.get(
     `https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}`,
   );
   const data = await res.data;
 
+  return data;
+}
+export async function getSpecifiedMovieVideos(
+  id: string,
+): Promise<TvideoApiSchema> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/movie/${id}/videos?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data: TvideoApiSchema = await res.data;
   return data;
 }
 // utilite for specified tv show

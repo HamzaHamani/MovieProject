@@ -20,7 +20,11 @@ const config = {
       },
     },
     screens: {
+      xxxl: { max: "2263px" },
+      xlx: { max: "2097px" },
       xxl: { max: "1957px" },
+      xxds: { max: "1771px" },
+      xds: { max: "1583px" },
       xl: { max: "1440px" },
 
       //ignore just for search page
@@ -29,6 +33,7 @@ const config = {
       h1text3: { max: "1567px" },
       h1text4: { max: "1452px" },
       h1text5: { max: "1400px" },
+      ds: { max: "1380px" },
       h1text6: { max: "1309px" },
       h1text7: { max: "1139px" },
       // => @media (max-width: 1279px) { ... }
@@ -37,6 +42,7 @@ const config = {
       h1text8: { max: "946px" },
 
       xmd: { max: "890px" },
+      xssmd: { max: "863px" },
       xsmd: { max: "774px" },
       md: { max: "770px" },
       // => @media (max-width: 767px) { ... }
