@@ -3,11 +3,12 @@ import { Suspense } from "react";
 import VideoLoadingIndicator from "../MovieTv/videoLoadingIndicator";
 import TrailerVideo from "../MovieTv/trailerVideo";
 
-import FirstContainerMovie from "./firstContainer";
+import FirstContainer from "../MovieTv/firstContainer";
 import StoryCast from "../MovieTv/storyCast";
 
 type Props = {
   response: TspecifiedMovie;
+  typeM?: "movie" | "tv";
 };
 
 export default function WholeDisplay({ response }: Props) {
@@ -33,15 +34,15 @@ export default function WholeDisplay({ response }: Props) {
           }}
         ></div>
         <div className="relative z-20 col-span-2 mx-auto flex h-[110%] w-[90%] flex-col justify-end gap-5">
-          <FirstContainerMovie response={response} />
+          <FirstContainer response={response} typeM="movie" />
         </div>
         <div className="mx-auto mt-10 w-[90%]">
-          <StoryCast response={response} />
+          <StoryCast response={response} typeM="movie" />
           <div className="mt-10"></div>
         </div>
 
         {/* <Suspense fallback={<VideoLoadingIndicator />}>
-          <TrailerVideo id={movieId} />
+          <TrailerVideo id={movieId} typeM="movie" />
         </Suspense> */}
       </div>
     </div>

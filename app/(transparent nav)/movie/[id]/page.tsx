@@ -38,5 +38,5 @@ export default async function Page({ params }: Props) {
   }
   const response = await fetchMovie();
 
-  return <WholeDisplay response={response} />;
+  return <WholeDisplay response={response} typeM={"movie"} />;
 }

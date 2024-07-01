@@ -1,4 +1,6 @@
 import { TspecifiedTv } from "@/types/apiTv";
+import FirstContainer from "../MovieTv/firstContainer";
+import StoryCast from "../MovieTv/storyCast";
 
 type Props = {
   response: TspecifiedTv;
@@ -8,52 +10,35 @@ export default function WholeDisplay({ response }: Props) {
   const posterUrl = `https://image.tmdb.org/t/p/original${response.poster_path}`;
   const imageUrl = `https://image.tmdb.org/t/p/original${response.backdrop_path}`;
   return (
-    <div className="relative h-[91.5vh]">
-      <div className="relative h-[55.5vh] w-full">
+    <div className="relative h-screen">
+      <div className="relative h-[53.5vh] w-full">
         {response.backdrop_path && (
-          <img
-            src={imageUrl}
-            alt="Background"
-            className="absolute h-full w-full object-cover opacity-65"
-          />
+          <div
+            className="absolute inset-0 h-full w-full bg-cover bg-center opacity-65"
+            style={{
+              backgroundImage: `url(${imageUrl})`, // Replace imageUrl with your actual image URL
+              backgroundPosition: "top", // Ensure image starts from the top
+            }}
+          ></div>
         )}
         <div
-          className="absolute -bottom-10 z-10 h-44 w-full"
+          className="absolute -bottom-10 z-10 h-56 w-full"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(17, 17, 17, 0.01),rgba(17, 17, 17, .5), #111111, #111111)",
+              "linear-gradient(to bottom, rgba(13, 12, 15, 0.01),rgba(13, 12, 15, 0.5), #0d0c0f, #0d0c0f)",
           }}
         ></div>
-        <div className="container relative z-20 col-span-2 grid h-[93vh] grid-cols-3 items-center justify-center gap-5">
-          <div className="col-span-1 h-[550px] w-[400px] bg-gray-50">
-            <img src={posterUrl} alt="Movie Poster" />
-          </div>
-          <div className="col-span-2 flex h-[550px] flex-col justify-start gap-10">
-            <h3 className="text-6xl font-bold text-primaryM-500">
-              {response.name}
-            </h3>
-            <div className="flex gap-2">
-              {response.genres.map((genre) => (
-                <span
-                  className="rounded-full bg-white p-1 px-4 text-black"
-                  key={genre.name}
-                >
-                  {genre.name}
-                </span>
-              ))}
-              {response.adult && (
-                <span className="rounded-full bg-red-600 p-1 px-4 text-black">
-                  +18
-                </span>
-              )}
-            </div>
-            <p>{response.overview}</p>
-            <div>
-              <h3>Casts</h3>
-              <div className="h-[100px] w-[200px] bg-gray-50"></div>
-            </div>
-          </div>
+        <div className="relative z-20 col-span-2 mx-auto flex h-[110%] w-[90%] flex-col justify-end gap-5">
+          <FirstContainer response={response} typeM="tv" />
         </div>
+        <div className="mx-auto mt-10 w-[90%]">
+          <StoryCast response={response} typeM="tv" />
+          <div className="mt-10"></div>
+        </div>
+
+        {/* <Suspense fallback={<VideoLoadingIndicator />}>
+          <TrailerVideo id={movieId} typeM="movie" />
+        </Suspense> */}
       </div>
     </div>
   );

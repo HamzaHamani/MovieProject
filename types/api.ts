@@ -75,6 +75,7 @@ export const specifiedMovie = z.object({
   video: z.boolean(),
   vote_average: z.number(),
   vote_count: z.number(),
+  first_air_date: z.string().optional(),
 });
 export type TspecifiedMovie = z.infer<typeof specifiedMovie>;
 

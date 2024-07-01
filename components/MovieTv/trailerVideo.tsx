@@ -1,16 +1,17 @@
-import { getSpecifiedMovieVideos } from "@/lib/actions";
+import { getSpecifiedTVMovieVideos } from "@/lib/actions";
 import { delay } from "@/lib/utils";
 import React from "react";
 
 type Props = {
   id: any;
+  typeM: "movie" | "tv";
 };
 
-export default async function TrailerVideo({ id }: Props) {
+export default async function TrailerVideo({ id, typeM }: Props) {
   async function fetchVideos() {
     try {
       await delay(10000);
-      const data = await getSpecifiedMovieVideos(id);
+      const data = await getSpecifiedTVMovieVideos(id, "movie");
       return data;
     } catch (e) {
       throw new Error("Failed to fetch the videos");

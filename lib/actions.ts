@@ -15,6 +15,7 @@ import { TsearchMovie, TspecifiedMovie } from "@/types/api";
 import axios from "axios";
 import { TspecifiedTv } from "@/types/apiTv";
 import { TvideoApiSchema } from "@/types/video";
+import { TCreditsSchema } from "@/types/cast";
 
 //------------------------------------------------------------------------#uilities for handlingath
 
@@ -109,6 +110,7 @@ export async function CreateBookmark(formData: FormData) {
 
 //------------------------------------------------------------------------#uilities for fetching data from the api##
 
+//---- utilites for specified movie
 export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
   const res = await axios.get(
     `https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}`,
@@ -117,15 +119,7 @@ export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
 
   return data;
 }
-export async function getSpecifiedMovieVideos(
-  id: string,
-): Promise<TvideoApiSchema> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/movie/${id}/videos?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data: TvideoApiSchema = await res.data;
-  return data;
-}
+
 // utilite for specified tv show
 export async function getSpecifiedTV(id: string): Promise<TspecifiedTv> {
   const res = await axios.get(
@@ -133,6 +127,30 @@ export async function getSpecifiedTV(id: string): Promise<TspecifiedTv> {
   );
   const data = await res.data;
 
+  return data;
+}
+
+//---general utilites for fetching data from the api
+
+export async function getSpecifiedTVMovieVideos(
+  id: string,
+  typeM: "movie" | "tv",
+): Promise<TvideoApiSchema> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/${typeM}/${id}/videos?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data: TvideoApiSchema = await res.data;
+  return data;
+}
+
+export async function getCreditsTVMovie(
+  id: string,
+  typeM: "movie" | "tv",
+): Promise<TCreditsSchema> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/${typeM}/${id}/credits?api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
   return data;
 }
 
