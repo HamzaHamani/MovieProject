@@ -50,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`relative bg-backgroundM font-chillax font-normal text-textMain ${chillax.className} relative`}
+        className={` relative bg-backgroundM font-normal text-textMain ${chillax.className} relative`}
       >
         {" "}
         <GlobalContextProvider>

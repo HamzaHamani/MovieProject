@@ -97,3 +97,44 @@
     stroke-dashoffset: -125px;
   }
 }
+
+.list-with-circles li {
+  position: relative;
+  padding-right: 0.5rem;
+}
+.list-with-circles li::after {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  right: -10px;
+  margin-left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.list-with-circles li:last-child::after {
+  content: none;
+}
+.content-center {
+  position: absolute;
+  top: 38%;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+.bg-cover {
+  background-size: cover; /* Ensure the image covers the entire container */
+}
+
+.bg-center {
+  background-position: center; /* Center the background image */
+}
+
+.opacity-65 {
+  opacity: 0.65; /* Adjust the opacity as needed */
+}

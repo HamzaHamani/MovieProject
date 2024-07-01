@@ -73,7 +73,7 @@ const config = {
         chillax: ["var(--font-chillax)"],
       },
       colors: {
-        backgroundM: "#111111",
+        backgroundM: "#0d0c0f",
         textMain: "#F8FCFF",
         primaryM: {
           50: "#fefaed",

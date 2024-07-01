@@ -6,7 +6,7 @@ type Props = {
 
 export default function layout({ children }: Props) {
   return (
-    <div>
+    <div className="font-chillax">
       <Navbar type={"transparent"} />
       {children}
     </div>
