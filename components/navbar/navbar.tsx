@@ -24,7 +24,7 @@ const normalNav = `${baseNavStyles} w-full bg-backgroundM`;
 const transparentNav = `${baseNavStyles} absolute bg-transparent left-0 right-0`;
 export default async function Navbar({ type }: Props) {
   const user = await getUser();
-  //TODO TRY USING POSITION ABSOLUTE, AND GET BACK TO THE OLD DESIGN OF NAVBAR AND ASK GPT IF U FIN ANY ISSUES, MAYBE CUZ WE NEED TO SPCIFY THE FULL WITH OF THE NAVBAR
+
   return (
     <nav className={`${type == "normal" ? normalNav : transparentNav} z-50`}>
       <div className="flex items-center gap-8">

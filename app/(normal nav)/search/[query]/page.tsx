@@ -43,7 +43,6 @@ const Page = ({ params }: Props) => {
     };
     const data: TsearchMovie = (await getSearchMovie(values)) as TsearchMovie;
 
-    //TODO WHEN FILTERING DATA TRY TO TAKE LENGTH EVERY TIME, ACCUMULATE IT IN A VARIABLE, AND THEN REMOVE IT FROM THE TOTAL RESULT AND DISPLAY IT, THEN ASK GPT WITH THE NEW DATA TO GIVE U MAX PAGE FOR EACH PAGE HAVING 20MOVIES
     const filtered = data.results.filter(
       (result) => result.media_type !== "person",
     );
@@ -63,10 +62,22 @@ const Page = ({ params }: Props) => {
   if (data?.results.length == 0) return <NoResults />;
 
   // return <MovieLoadingIndicator />;
-  return data ? <RenderUi data={data} query={query} /> : null;
+  return data ? (
+    <RenderUi query={query}>
+      {" "}
+      <SearcMovieNavigation data={data} />
+      <SearchMoviesDisplay data={data} />
+    </RenderUi>
+  ) : null;
 };
 
-function RenderUi({ data, query }: { data: TsearchMovie; query: string }) {
+function RenderUi({
+  query,
+  children,
+}: {
+  query: string;
+  children?: React.ReactNode;
+}) {
   //TODO MAKE THIS MOVIENAVIGATION SERVER COMPONENT, CUZ THE PARENT IS   CHILD COMPONENT, SO U GOTTA USE THE METHOD
   return (
     <>
@@ -77,8 +88,7 @@ function RenderUi({ data, query }: { data: TsearchMovie; query: string }) {
           <SearchVanishComp />
         </div>
 
-        <SearcMovieNavigation data={data} />
-        <SearchMoviesDisplay data={data} />
+        {children}
       </div>
     </>
   );

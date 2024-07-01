@@ -7,6 +7,7 @@ type Props = {
 };
 
 export default function SearcMovieNavigation({ data }: Props) {
+  console.log("test");
   return (
     <>
       <div className="mx-auto mt-12 w-[97%]">

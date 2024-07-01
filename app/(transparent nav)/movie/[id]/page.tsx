@@ -8,7 +8,7 @@ type Props = {
   params: { id: string };
   searchParams?: { [key: string]: string | string[] | undefined };
 };
-
+//TODO ERROR ON PRODUCTION IN YOUTUBE VIDEOS 404 CONNECTION CLOSED
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = params;
   async function fetchMovie(): Promise<TspecifiedMovie> {
