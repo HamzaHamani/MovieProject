@@ -1,11 +1,12 @@
 import { convertRuntime } from "@/lib/utils";
 import { TspecifiedMovie } from "@/types/api";
-import { Bookmark, PlusCircle, Share2 } from "lucide-react";
+import { Bookmark, PlusCircle, Share2, Watch } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ButtonAnimation } from "../ui/ButtonAnimation";
 import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "../ui/shareButton";
+import WatchListButton from "./watchListButton";
 
 type TspecifiedMedia = TspecifiedMovie | TspecifiedTv;
 
@@ -47,13 +48,7 @@ export default function FirstContainer({ response, typeM }: Props) {
             ))}
           </div>
           <div className="button-left mt-3 flex gap-2">
-            <Button className="flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs">
-              {" "}
-              <span className="xsmd:text-xs">
-                <Bookmark />
-              </span>
-              Add Watchlist
-            </Button>
+            <WatchListButton />
             <Button
               variant={"outline"}
               className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"
@@ -107,13 +102,7 @@ export default function FirstContainer({ response, typeM }: Props) {
             ))}
           </div>
           <div className="button-left mt-3 flex gap-2">
-            <Button className="flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs">
-              {" "}
-              <span className="xsmd:text-xs">
-                <Bookmark />
-              </span>
-              Add Watchlist
-            </Button>
+            <WatchListButton />
             <Button
               variant={"outline"}
               className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"

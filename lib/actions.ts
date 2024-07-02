@@ -49,10 +49,11 @@ export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
   const boks = await db
     .select()
     .from(bookmarks)
-    .where(eq(bookmarks.userId, userId));
-  const validatedBoks = boks.map((bookmark) => bookmarksSchema.parse(bookmark));
-
-  return validatedBoks;
+    .where(eq(bookmarks.userId, "ccbe1345-98f3-4060-b42c-63affded0400"));
+  // const validatedBoks = boks.map((bookmark) => bookmarksSchema.parse(bookmark));
+  //TODO CHECK WHY VALIDATING IS NOT WORKING
+  console.log(boks);
+  return boks as bookSchemaType[];
 }
 
 //   fetch only movies of specied bookmark of that specified user
