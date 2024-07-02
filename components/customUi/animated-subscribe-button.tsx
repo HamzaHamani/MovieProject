@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { cp } from "fs";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -24,15 +25,29 @@ export const AnimatedSubscribeButton: React.FC<
   typeSearch,
 }) => {
   const [isSubscribed, setIsSubscribed] = useState<boolean>(subscribeStatus);
-  isSubscribed
-    ? toast.success(`${typeSearch} Link Copied in your Clipboard`)
-    : null;
+
+  const copyUrlToClipboard = () => {
+
+
+    const currentUrl = window.location.href;
+    navigator.clipboard
+      .writeText(currentUrl)
+      .then(() => {
+        toast.success(`${typeSearch} Link Copied in your Clipboard`);
+      })
+      .catch((err) => {
+        console.error("Failed to copy URL: ", err);
+      });
+    setIsSubscribed(true);
+  };
+
   isSubscribed ? setTimeout(() => setIsSubscribed(false), 2000) : null;
+
   return (
     <AnimatePresence mode="wait">
       {isSubscribed ? (
         <motion.button
-          className="relative flex w-[150px] items-center justify-center overflow-hidden rounded-md bg-white p-[10px] outline outline-1 outline-black"
+          className="relative flex w-[130px] items-center justify-center overflow-hidden rounded-md bg-white p-[8px] outline outline-1 outline-black"
           onClick={() => setIsSubscribed(false)}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -51,9 +66,9 @@ export const AnimatedSubscribeButton: React.FC<
         </motion.button>
       ) : (
         <motion.button
-          className="relative flex w-[150px] cursor-pointer items-center justify-center rounded-md border border-gray-800 p-[10px]"
+          className="relative flex w-[130px] cursor-pointer items-center justify-center rounded-md border border-gray-800 p-[8px] sss:hidden"
           style={{ backgroundColor: buttonColor, color: buttonTextColor }}
-          onClick={() => setIsSubscribed(true)}
+          onClick={copyUrlToClipboard}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

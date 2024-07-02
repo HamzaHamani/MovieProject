@@ -39,7 +39,7 @@ export default async function page({ params }: Props) {
     }
   }
   const response = await fetch();
-  console.log(response.adult);
+  // console.log(response.adult);
 
   return <WholeDisplay response={response} />;
 }

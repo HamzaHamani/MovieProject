@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ButtonAnimation } from "../ui/ButtonAnimation";
 import { TspecifiedTv } from "@/types/apiTv";
+import ShareButton from "../ui/shareButton";
 
 type TspecifiedMedia = TspecifiedMovie | TspecifiedTv;
 
@@ -18,44 +19,50 @@ export default function FirstContainer({ response, typeM }: Props) {
     const movieRes = response as TspecifiedMovie;
     const runtime = convertRuntime(movieRes.runtime);
     return (
-      <div className="flex w-[90vw] justify-between p-2">
+      <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
         <div className="flex flex-col gap-3">
-          <Badge className="mb-3 w-fit bg-backgroundM px-4 text-base">
+          <Badge className="mb-3 w-fit bg-backgroundM px-4 text-base font-normal sm:px-2 sm:text-xs">
             Movie
           </Badge>
           <h2 className="text-5xl font-extrabold tracking-tighter text-textMain">
             {movieRes.title}
           </h2>
-          <ul className="flex w-fit gap-2 text-sm text-gray-200">
-            <li>{runtime}</li>
+          {/* TODO, IN CASE OF USING UL LIST, JUST NORMAL P TAG, WITH SPANS INSIDE IT THEN SPERATE WITH GAP FLEX AND ADD DOTS UR SLEF WITHOUT ANY STYLING */}
+          <div className="flex w-fit gap-2 text-sm text-gray-300 smd:gap-1 smd:text-xs">
+            <span>{runtime}</span>
+            <span>•</span>
             {/* <li className="circle">{}</li> */}
             {typeM === "movie" ? (
-              <li>{movieRes.release_date}</li>
+              <span>{movieRes.release_date}</span>
             ) : (
-              <li>{movieRes.first_air_date}</li>
+              <span>{movieRes.first_air_date}</span>
             )}
-            <li>{movieRes.release_date}</li>
-            {movieRes.genres.map((genre) => (
-              <li key={genre.id}>{genre.name}</li>
+            <span>•</span>
+            {movieRes.genres.map((genre, index) => (
+              <div key={index} className="flex gap-2 smd:gap-1">
+                <span key={genre.id}>{genre.name}</span>
+                {index < movieRes.genres.length - 1 && <span>•</span>}
+              </div>
             ))}
-          </ul>
+          </div>
           <div className="button-left mt-3 flex gap-2">
-            <Button className="flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600">
+            <Button className="flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs">
               {" "}
-              <span>
+              <span className="xsmd:text-xs">
                 <Bookmark />
               </span>
               Add Watchlist
             </Button>
             <Button
               variant={"outline"}
-              className="flex items-center gap-2 bg-transparent"
+              className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"
             >
               <span>
                 <PlusCircle />
               </span>{" "}
-              Add List
+              <span className="sss:hidden">Add List</span>
             </Button>
+            <ShareButton typeSearch="Movie" />
           </div>
         </div>
         <div className="shareR self-end">
@@ -74,21 +81,26 @@ export default function FirstContainer({ response, typeM }: Props) {
   if (typeM === "tv") {
     const tvRes = response as TspecifiedTv;
     return (
-      <div className="flex w-[90vw] justify-between p-2">
+      <div className="mb-7 flex w-[90vw] justify-between p-2">
         <div className="flex flex-col gap-3">
           <Badge className="mb-3 w-fit bg-backgroundM px-4 text-base">TV</Badge>
           <h2 className="text-5xl font-extrabold tracking-tighter text-textMain">
             {tvRes.name}
           </h2>
-          <ul className="flex w-fit gap-2 text-sm text-gray-200">
-            <li>{tvRes.number_of_episodes} ep</li>
-            {/* <li className="circle">{}</li> */}
-            <li>{tvRes.first_air_date}</li>
+          <div className="flex w-fit gap-2 text-sm text-gray-200 smd:gap-1 smd:text-xs">
+            <span>{tvRes.number_of_episodes} ep</span>
+            <span>•</span>
 
-            {tvRes.genres.map((genre) => (
-              <li key={genre.id}>{genre.name}</li>
+            <span>{tvRes.first_air_date}</span>
+            <span>•</span>
+
+            {tvRes.genres.map((genre, index) => (
+              <div className="flex gap-2 smd:gap-1" key={index}>
+                <span key={genre.id}>{genre.name}</span>
+                {index < tvRes.genres.length - 1 && <span>•</span>}
+              </div>
             ))}
-          </ul>
+          </div>
           <div className="button-left mt-3 flex gap-2">
             <Button className="flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600">
               {" "}

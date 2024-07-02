@@ -20,7 +20,7 @@ export default function Error({
       <div className="text-center">
         <h1 className="text-9xl font-black text-gray-200">404</h1>
 
-        <p className="text-2xl font-bold tracking-tight text-gray-300 sm:text-4xl">
+        <p className="text-center text-4xl font-bold tracking-tight text-gray-300 lg:text-2xl sm:text-lg">
           {error.message || "An error occurred"}
         </p>
         <div className="flex items-center justify-center gap-2">

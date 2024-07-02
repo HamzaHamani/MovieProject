@@ -35,6 +35,7 @@ const config = {
       h1text5: { max: "1400px" },
       ds: { max: "1380px" },
       h1text6: { max: "1309px" },
+      Ctex6: { max: "1290px" },
       h1text7: { max: "1139px" },
       // => @media (max-width: 1279px) { ... }
       lg: { max: "1024px" },
@@ -47,7 +48,7 @@ const config = {
       md: { max: "770px" },
       // => @media (max-width: 767px) { ... }
       //ignore just for search page
-      smd: { max: "655px" },
+      smd: { max: "656px" },
       //-----
 
       sm: { max: "639px" },

@@ -1,5 +1,5 @@
 import { AnimatedSubscribeButton } from "@/components/customUi/animated-subscribe-button";
-import { CheckIcon, ChevronRightIcon, Share2 } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 
 export function ButtonAnimation({
   text,
