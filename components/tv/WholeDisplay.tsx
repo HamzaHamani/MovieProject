@@ -3,6 +3,7 @@ import FirstContainer from "../MovieTv/firstContainer";
 import Story from "../MovieTv/storyComponent";
 
 import CastComponent from "../MovieTv/castComponent";
+import CarouselLoadingIndicator from "../MovieTv/CarouselLoadingIndicator";
 
 type Props = {
   response: TspecifiedTv;
