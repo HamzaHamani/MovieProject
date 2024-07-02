@@ -85,7 +85,7 @@ export default function FirstContainer({ response, typeM }: Props) {
       <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
         <div className="flex flex-col gap-3">
           <Badge className="mb-3 w-fit bg-backgroundM px-4 text-base font-normal sm:px-2 sm:text-xs">
-            Movie
+            TV show
           </Badge>
           <h2 className="text-5xl font-extrabold tracking-tighter text-textMain">
             {tvRes.name}

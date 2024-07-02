@@ -25,9 +25,9 @@ export function CarouselComponent({ res }: Props) {
         {popularCast.map((cast, index) => (
           <CarouselItem
             key={index}
-            className="Ctex6:basis-1/4 flex basis-1/6 items-center justify-center xds:basis-1/5 h1text8:basis-1/3 ss:basis-1/2 s:basis-52"
+            className="Ctex6:basis-1/4 -ml-0 flex basis-1/6 items-center justify-between xds:basis-1/5 h1text8:basis-1/3 ss:basis-1/2 s:basis-52"
           >
-            <div className="bg-re-500 p1 flex w-[300px] gap-2">
+            <div className="bg-re-500 p1 flex w-[300px] justify-center gap-2">
               <div className="h-[80px] w-[80px] overflow-hidden rounded-full bg-white xds:h-[70px] xds:w-[70px] lg:h-[65px] lg:w-[65px] s:h-[50px] s:w-[50px]">
                 <img
                   src={`https://image.tmdb.org/t/p/w500/${cast.profile_path}`}
@@ -47,8 +47,8 @@ export function CarouselComponent({ res }: Props) {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="lg:hidden" />
-      <CarouselNext className="lg:hidden" />
+      <CarouselPrevious className="h1text8:hidden" />
+      <CarouselNext className="h1text8:hidden" />
     </Carousel>
   );
 }

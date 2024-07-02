@@ -1,6 +1,8 @@
 import { TspecifiedTv } from "@/types/apiTv";
 import FirstContainer from "../MovieTv/firstContainer";
-import StoryCast from "../MovieTv/storyCast";
+import Story from "../MovieTv/storyComponent";
+
+import CastComponent from "../MovieTv/castComponent";
 
 type Props = {
   response: TspecifiedTv;
@@ -31,11 +33,14 @@ export default function WholeDisplay({ response }: Props) {
         <div className="relative z-20 col-span-2 mx-auto flex h-[110%] w-[90%] flex-col justify-end gap-5">
           <FirstContainer response={response} typeM="tv" />
         </div>
+
         <div className="mx-auto mt-10 w-[90%]">
-          <StoryCast response={response} typeM="tv" />
-          <div className="mt-10"></div>
+          <Story response={response} typeM="tv" />
+
+          <CastComponent typeM="tv" id={response.id} />
         </div>
 
+        <div className="h-screen"></div>
         {/* <Suspense fallback={<VideoLoadingIndicator />}>
           <TrailerVideo id={movieId} typeM="movie" />
         </Suspense> */}

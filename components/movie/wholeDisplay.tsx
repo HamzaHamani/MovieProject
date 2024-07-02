@@ -4,7 +4,9 @@ import VideoLoadingIndicator from "../MovieTv/videoLoadingIndicator";
 import TrailerVideo from "../MovieTv/trailerVideo";
 
 import FirstContainer from "../MovieTv/firstContainer";
-import StoryCast from "../MovieTv/storyCast";
+import Story from "../MovieTv/storyComponent";
+import CarouselLoadingIndicator from "../MovieTv/CarouselLoadingIndicator";
+import CastComponent from "../MovieTv/castComponent";
 
 type Props = {
   response: TspecifiedMovie;
@@ -37,9 +39,12 @@ export default function WholeDisplay({ response }: Props) {
           <FirstContainer response={response} typeM="movie" />
         </div>
         <div className="mx-auto mt-10 w-[90%]">
-          <StoryCast response={response} typeM="movie" />
-          <div className="mt-10"></div>
+          <Story response={response} typeM="tv" />
+
+          <CastComponent typeM="movie" id={response.id} />
         </div>
+
+        <div className="h-screen"></div>
 
         {/* <Suspense fallback={<VideoLoadingIndicator />}>
           <TrailerVideo id={movieId} typeM="movie" />

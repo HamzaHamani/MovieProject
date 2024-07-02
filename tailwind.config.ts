@@ -25,6 +25,7 @@ const config = {
       xxl: { max: "1957px" },
       xxds: { max: "1771px" },
       xds: { max: "1583px" },
+      xdss: { max: "1566px" },
       xl: { max: "1440px" },
 
       //ignore just for search page
