@@ -36,7 +36,8 @@ export default async function Page({ params }: Props) {
       throw new Error("Failed to fetch movie");
     }
   }
-  const response = await fetchMovie();
+
+  const response :TspecifiedMovie  = await fetchMovie();
 
   return <WholeDisplay response={response} typeM={"movie"} />;
 }

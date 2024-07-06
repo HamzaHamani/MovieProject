@@ -1,11 +1,7 @@
 import { TspecifiedMovie } from "@/types/api";
-import { Suspense } from "react";
-import VideoLoadingIndicator from "../MovieTv/videoLoadingIndicator";
-import TrailerVideo from "../MovieTv/trailerVideo";
 
 import FirstContainer from "../MovieTv/firstContainer";
 import Story from "../MovieTv/storyComponent";
-import CarouselLoadingIndicator from "../MovieTv/CarouselLoadingIndicator";
 import CastComponent from "../MovieTv/castComponent";
 
 type Props = {
@@ -14,7 +10,6 @@ type Props = {
 };
 
 export default function WholeDisplay({ response }: Props) {
-  const posterUrl = `https://image.tmdb.org/t/p/original${response.poster_path}`;
   const imageUrl = `https://image.tmdb.org/t/p/original${response.backdrop_path}`;
   return (
     <div className="relative h-screen">

@@ -49,7 +49,7 @@ export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
   const boks = await db
     .select()
     .from(bookmarks)
-    .where(eq(bookmarks.userId, "ccbe1345-98f3-4060-b42c-63affded0400"));
+    .where(eq(bookmarks.userId, userId));
   // const validatedBoks = boks.map((bookmark) => bookmarksSchema.parse(bookmark));
   //TODO CHECK WHY VALIDATING IS NOT WORKING
   console.log(boks);
@@ -85,28 +85,37 @@ export async function getMoviesBook(
 }
 
 //TODO VALIDATE THE DATA COMING FROM THE FORM
-export async function AddMovie(formData: FormData) {
+export async function AddMovie(data: {
+  bookmarkId: string;
+  review: string | null;
+  movieId: string | number;
+}) {
   // console.log(formData.get("bookmarkId") as string);
   // console.log(formData.get("review") as string);
   // console.log(formData.get("movieId") as string);
+  if (!data.review) data.review = "";
   await db.insert(bookmarksMovies).values({
-    bookmarkId: formData.get("bookmarkId") as string,
-    review: formData.get("review") as string,
-    movieId: formData.get("movieId") as string,
+    bookmarkId: data.bookmarkId,
+    review: data.review,
+    movieId: data.movieId,
   });
 }
 
-export async function CreateBookmark(formData: FormData) {
-  // console.log(formData.get("bookmarkName") as string);
-  // console.log(formData.get("description") as string);
-  // console.log(formData.get("id") as string);
-  const insert = await db.insert(bookmarks).values({
-    bookmarkName: formData.get("bookmarkName") as string,
-    userId: formData.get("id") as string,
-    description: formData.get("description") as string,
-  });
+export async function CreateBookmark(data: {
+  bookmarkName: string;
+  userId: string;
+  description: string;
+}) {
+  const insert = await db
+    .insert(bookmarks)
+    .values({
+      bookmarkName: data.bookmarkName,
+      userId: data.userId,
+      description: data.description,
+    })
+    .returning({ id: bookmarks.id });
   // console.log(insert);
-  return insert;
+  return insert[0];
 }
 
 //------------------------------------------------------------------------#uilities for fetching data from the api##

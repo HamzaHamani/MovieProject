@@ -48,7 +48,7 @@ export default function FirstContainer({ response, typeM }: Props) {
             ))}
           </div>
           <div className="button-left mt-3 flex gap-2">
-            <WatchListButton />
+            <WatchListButton shwoId={movieRes.id} />
             <Button
               variant={"outline"}
               className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"
@@ -102,7 +102,7 @@ export default function FirstContainer({ response, typeM }: Props) {
             ))}
           </div>
           <div className="button-left mt-3 flex gap-2">
-            <WatchListButton />
+            <WatchListButton shwoId={tvRes.id} />
             <Button
               variant={"outline"}
               className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"

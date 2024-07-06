@@ -1,24 +1,14 @@
 "use client";
 import { Bookmark } from "lucide-react";
 import { Button } from "../ui/button";
-import { getBookmarks, getUser } from "@/lib/actions";
+import { AddMovie, CreateBookmark, getBookmarks, getUser } from "@/lib/actions";
 import { toast } from "sonner";
 
-type Props = {};
+type Props = {
+  shwoId: string | number;
+};
 
-export default function WatchListButton({}: Props) {
-  //   async function useUser() {
-  //     const user = await getUser();
-  //   }
-  //   const handleClick = async (e: React.FormEvent<HTMLFormElement>) => {
-  //     e.preventDefault();
-  //     console.log("sent");
-  //     if (!user) {
-  //       console.log("not logged in");
-  //       return;
-  //     }
-  //   };
-
+export default function WatchListButton({ shwoId }: Props) {
   async function handleClick(e: any) {
     const user = await getUser();
     const id: string = user?.id as string;
@@ -29,8 +19,29 @@ export default function WatchListButton({}: Props) {
     }
     try {
       const bookmark = await getBookmarks(id);
-      //TODO CHECK IF THERE IS NO BOOKMAKR, IF NOT CREATE ONE AND ADDED IT
-      //TODO CHANGES TABLE NAMES FOR BOOKMARKS TO SOMETHING LIKE LIST AND OTHER TABLES
+
+      console.log(bookmark, "here", id);
+      if (!bookmark.map((item) => item.bookmarkName).includes("watchlist")) {
+        // creating watchlist if not existed
+        const data = {
+          userId: id,
+          bookmarkName: "watchlist",
+          description: "Movies and Tv shows you want to watch",
+        };
+
+        const bookmardId = await CreateBookmark(data);
+
+        // adding movie to watchlist aftrer creating it
+        const movieData = {
+          bookmarkId: bookmardId.id,
+          movieId: shwoId,
+          review: "",
+        };
+
+        await AddMovie(movieData);
+        toast.success("Added to watchlist");
+        return;
+      }
     } catch (e) {
       console.log(e);
     }
