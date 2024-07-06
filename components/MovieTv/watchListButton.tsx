@@ -20,7 +20,7 @@ export default function WatchListButton({ shwoId }: Props) {
     try {
       const bookmark = await getBookmarks(id);
 
-      console.log(bookmark, "here", id);
+      // check if watchlist exists, if not create it and add the movie
       if (!bookmark.map((item) => item.bookmarkName).includes("watchlist")) {
         // creating watchlist if not existed
         const data = {
@@ -42,6 +42,21 @@ export default function WatchListButton({ shwoId }: Props) {
         toast.success("Added to watchlist");
         return;
       }
+
+      //TODO handling if movie exsit first dont add it , add the function where u get bookmarks in line 22
+      // if watchlist exists, add the movie to it
+      const watchlist = bookmark.filter(
+        (item) => item.bookmarkName === "watchlist",
+      );
+      const watchlistBookmark = watchlist[0]; // Assuming there's only one watchlist
+      const movieData = {
+        bookmarkId: watchlistBookmark.id,
+        movieId: shwoId,
+        review: "",
+      };
+      await AddMovie(movieData);
+      toast.success("Added to watchlist");
+      console.log("watchlist", watchlist);
     } catch (e) {
       console.log(e);
     }

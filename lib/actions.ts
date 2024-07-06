@@ -52,7 +52,7 @@ export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
     .where(eq(bookmarks.userId, userId));
   // const validatedBoks = boks.map((bookmark) => bookmarksSchema.parse(bookmark));
   //TODO CHECK WHY VALIDATING IS NOT WORKING
-  console.log(boks);
+
   return boks as bookSchemaType[];
 }
 
