@@ -19,7 +19,6 @@ export default function WatchListButton({ shwoId }: Props) {
     }
     try {
       const bookmark = await getBookmarks(id);
-
       // check if watchlist exists, if not create it and add the movie
       if (!bookmark.map((item) => item.bookmarkName).includes("watchlist")) {
         // creating watchlist if not existed
@@ -28,16 +27,13 @@ export default function WatchListButton({ shwoId }: Props) {
           bookmarkName: "watchlist",
           description: "Movies and Tv shows you want to watch",
         };
-
         const bookmardId = await CreateBookmark(data);
-
         // adding movie to watchlist aftrer creating it
         const movieData = {
           bookmarkId: bookmardId.id,
           movieId: shwoId,
           review: "",
         };
-
         await AddMovie(movieData);
         toast.success("Added to watchlist");
         return;
