@@ -1,13 +1,12 @@
 import { convertRuntime } from "@/lib/utils";
 import { TspecifiedMovie } from "@/types/api";
-import { Bookmark, PlusCircle, Share2, Watch } from "lucide-react";
-import { Button } from "../ui/button";
+import { Share2 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { ButtonAnimation } from "../ui/ButtonAnimation";
 import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
 import WatchListButton from "./buttons/watchListButton";
-import AddListButton from "./buttons/addListButton";
+import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
 
 type TspecifiedMedia = TspecifiedMovie | TspecifiedTv;
 
@@ -50,15 +49,8 @@ export default function FirstContainer({ response, typeM }: Props) {
           </div>
           <div className="button-left mt-3 flex gap-2">
             <WatchListButton shwoId={movieRes.id} />
-            <Button
-              variant={"outline"}
-              className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"
-            >
-              <span>
-                <PlusCircle />
-              </span>{" "}
-              <span className="sss:hidden">Add List</span>
-            </Button>
+
+            <DrawerDialogButtonList />
             <ShareButton typeSearch="Movie" />
           </div>
         </div>
@@ -104,7 +96,8 @@ export default function FirstContainer({ response, typeM }: Props) {
           </div>
           <div className="button-left mt-3 flex gap-2">
             <WatchListButton shwoId={tvRes.id} />
-            <AddListButton />
+            <DrawerDialogButtonList />
+
             <ShareButton typeSearch="Movie" />
           </div>
         </div>
