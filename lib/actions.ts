@@ -65,32 +65,16 @@ type moviesBookSchemaType = z.infer<typeof bookmarksMoviesSchema>;
 export async function getMoviesBook(
   bookmarkId: string,
 ): Promise<moviesBookSchemaType[]> {
-  try {
-    // Fetch the movies with the given bookmarkId from the database
-    const bookmarkMovies = await db
-      .select()
-      .from(bookmarksMovies)
-      .where(eq(bookmarksMovies.bookmarkId, bookmarkId));
-
-    // Validate the fetched data against the schema
-    const validatedMovies = bookmarkMovies.map((movie) =>
-      bookmarksMoviesSchema.parse(movie),
-    );
-
-    return validatedMovies;
-  } catch (error: any) {
-    console.error("Error fetching or validating bookmarks:", error.message);
-
-    // Handle the error (could be logging, rethrowing, or custom handling)
-    throw new Error("Failed to fetch or validate bookmark movies.");
-  }
-}
-async function getMoviesInBookmark(bookmarkId: string) {
-  return await db
+  // Fetch the movies with the given bookmarkId from the database
+  const bookmarkMovies = await db
     .select()
     .from(bookmarksMovies)
     .where(eq(bookmarksMovies.bookmarkId, bookmarkId));
+
+  return bookmarkMovies;
 }
+
+//---------------------- handling adding movie
 
 export async function AddMovie(data: {
   bookmarkId: string;
@@ -98,12 +82,13 @@ export async function AddMovie(data: {
   movieId: string | number;
 }) {
   if (!data.review) data.review = "";
-  const existingMovie = await getMoviesInBookmark(data.bookmarkId);
 
   // handling movie if already on watchList or not
-  const existingMovieResponse = existingMovie.map((movie) => {
-    return movie.movieId === data.movieId;
-  });
+  const existingMovie = await getMoviesBook(data.bookmarkId);
+  const existingMovieResponse = existingMovie.some(
+    (movie) => movie.movieId == data.movieId,
+  );
+
   if (existingMovieResponse) return { already: true };
   if (!existingMovieResponse) {
     await db.insert(bookmarksMovies).values({
@@ -114,6 +99,7 @@ export async function AddMovie(data: {
     return { already: false };
   }
 }
+//---------------------------
 
 export async function CreateBookmark(data: {
   bookmarkName: string;

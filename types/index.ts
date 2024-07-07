@@ -25,5 +25,8 @@ export const bookmarksMoviesSchema = z.object({
   bookmarkId: z.string(),
   movieId: z.string(),
   review: z.string(),
-  addedAt: z.date().default(() => new Date()),
+  addedAt: z
+    .date()
+    .default(() => new Date())
+    .nullable(),
 });

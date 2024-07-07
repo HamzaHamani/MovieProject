@@ -5,8 +5,9 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ButtonAnimation } from "../ui/ButtonAnimation";
 import { TspecifiedTv } from "@/types/apiTv";
-import ShareButton from "../ui/shareButton";
-import WatchListButton from "./watchListButton";
+import ShareButton from "./buttons/shareButton";
+import WatchListButton from "./buttons/watchListButton";
+import AddListButton from "./buttons/addListButton";
 
 type TspecifiedMedia = TspecifiedMovie | TspecifiedTv;
 
@@ -103,15 +104,7 @@ export default function FirstContainer({ response, typeM }: Props) {
           </div>
           <div className="button-left mt-3 flex gap-2">
             <WatchListButton shwoId={tvRes.id} />
-            <Button
-              variant={"outline"}
-              className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"
-            >
-              <span>
-                <PlusCircle />
-              </span>{" "}
-              <span className="sss:hidden">Add List</span>
-            </Button>
+            <AddListButton />
             <ShareButton typeSearch="Movie" />
           </div>
         </div>

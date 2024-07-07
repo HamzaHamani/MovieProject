@@ -1,6 +1,6 @@
 "use client";
 import { Share2 } from "lucide-react";
-import { Button } from "./button";
+import { Button } from "../../ui/button";
 import { toast } from "sonner";
 
 type Props = {

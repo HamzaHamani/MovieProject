@@ -1,6 +1,6 @@
 "use client";
 import { Bookmark } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { AddMovie, CreateBookmark, getBookmarks, getUser } from "@/lib/actions";
 import { toast } from "sonner";
 
@@ -54,6 +54,8 @@ export default function WatchListButton({ shwoId }: Props) {
         movieId: shwoId,
         review: "",
       };
+
+      // geting reponse from addMovie, if already exist or nor it gonna show difrrent toast
       const response = await AddMovie(movieData);
 
       if (response?.already) {

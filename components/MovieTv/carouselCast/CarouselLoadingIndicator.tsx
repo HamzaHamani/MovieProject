@@ -1,4 +1,4 @@
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "../../ui/skeleton";
 import {
   Carousel,
   CarouselContent,
@@ -20,7 +20,7 @@ export default function CarouselLoadingIndicator({}: Props) {
         {Array.from({ length: 10 }, (_, index) => (
           <CarouselItem
             key={index}
-            className="Ctex6:basis-1/4 -ml-0 flex basis-1/6 items-center justify-center xds:basis-1/5 h1text8:basis-1/3 ss:basis-1/2 s:basis-52"
+            className="-ml-0 flex basis-1/6 items-center justify-center xds:basis-1/5 Ctex6:basis-1/4 h1text8:basis-1/3 ss:basis-1/2 s:basis-52"
           >
             <div
               className="flex w-[300px] items-center justify-center gap-2"

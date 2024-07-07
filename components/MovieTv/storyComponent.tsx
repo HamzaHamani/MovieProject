@@ -1,6 +1,4 @@
-import { TspecifiedMovie } from "@/types/api";
 import React from "react";
-import Cast from "./cast";
 
 type Props = {
   response: any;
