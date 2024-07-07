@@ -3,6 +3,7 @@ import SignOut from "@/components/SignOut";
 
 import { getBookmarks, getUser } from "@/lib/actions";
 import Create from "./_create/Create";
+import { ProfileForm } from "@/components/MovieTv/buttons/draweDialogButtonList";
 
 export default async function Home() {
   const user = await getUser();
@@ -36,6 +37,7 @@ export default async function Home() {
       ) : (
         <SignOut />
       )} */}
+      <ProfileForm />
     </main>
   );
 }

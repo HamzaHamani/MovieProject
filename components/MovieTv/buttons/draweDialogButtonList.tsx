@@ -25,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusCircle } from "lucide-react";
+import CreateListForm from "../createListForm";
 
 export function DrawerDialogButtonList() {
   const [open, setOpen] = React.useState(false);
@@ -88,20 +89,22 @@ export function DrawerDialogButtonList() {
   );
 }
 
-function ProfileForm({ className }: React.ComponentProps<"form">) {
+export function ProfileForm({ className }: React.ComponentProps<"form">) {
+  const [showForm, setShowForm] = React.useState(false);
   return (
-    <form className={cn("grid items-start gap-4", className)}>
-      <div className="my-9 flex flex-col items-center justify-center gap-2">
+    <div className={cn("grid items-start gap-4", className)}>
+      <div className="mb-2 mt-9 flex flex-col items-center justify-center gap-4">
         {" "}
-        <h2>You have no lists</h2>
-        <Button type="submit" className="bg-indigo-500">
-          Create one
-        </Button>
+        <h2>You have no lists, you must create one</h2>
       </div>
-
-      <Button type="submit" className="bg-primaryM-500" disabled>
-        Add
+      {showForm && <CreateListForm />}
+      <Button
+        type="submit"
+        className="j mt-2 w-full bg-indigo-500"
+        onClick={() => setShowForm((value) => !value)}
+      >
+        Create a List
       </Button>
-    </form>
+    </div>
   );
 }

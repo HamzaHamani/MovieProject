@@ -14,7 +14,7 @@ export const bookmarksSchema = z.object({
   id: z.string(),
   userId: z.string(),
   bookmarkName: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   image: z.string().optional(),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().default(() => new Date()),
