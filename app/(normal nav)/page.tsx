@@ -1,10 +1,11 @@
 import { auth } from "@/auth";
 import SignOut from "@/components/SignOut";
 
-import { getBookmarks } from "@/lib/actions";
+import { getBookmarks, getUser } from "@/lib/actions";
 import Create from "./_create/Create";
 
 export default async function Home() {
+  const user = await getUser();
   // const api_key = process.env.TMDB_API_KEY!;
   // console.log(api_key);
 

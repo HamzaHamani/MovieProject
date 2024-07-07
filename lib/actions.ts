@@ -16,16 +16,18 @@ import axios from "axios";
 import { TspecifiedTv } from "@/types/apiTv";
 import { TvideoApiSchema } from "@/types/video";
 import { TCreditsSchema } from "@/types/cast";
+import { cache } from "react";
 
 //------------------------------------------------------------------------#uilities for handlingath
+cache;
 
-export async function getUser() {
+// USED CACHE TO PERFORM APP, CHECK WEB CODY DEV VIDEO https://youtu.be/8vJ3JC9O2Eo
+export const getUser = cache(async () => {
   const session = await auth();
   const user = session?.user;
 
   return user;
-}
-
+});
 export async function getSession() {
   const session = await auth();
   return session;
@@ -83,22 +85,34 @@ export async function getMoviesBook(
     throw new Error("Failed to fetch or validate bookmark movies.");
   }
 }
+async function getMoviesInBookmark(bookmarkId: string) {
+  return await db
+    .select()
+    .from(bookmarksMovies)
+    .where(eq(bookmarksMovies.bookmarkId, bookmarkId));
+}
 
-//TODO VALIDATE THE DATA COMING FROM THE FORM
 export async function AddMovie(data: {
   bookmarkId: string;
-  review: string | null;
+  review?: string;
   movieId: string | number;
 }) {
-  // console.log(formData.get("bookmarkId") as string);
-  // console.log(formData.get("review") as string);
-  // console.log(formData.get("movieId") as string);
   if (!data.review) data.review = "";
-  await db.insert(bookmarksMovies).values({
-    bookmarkId: data.bookmarkId,
-    review: data.review,
-    movieId: data.movieId,
+  const existingMovie = await getMoviesInBookmark(data.bookmarkId);
+
+  // handling movie if already on watchList or not
+  const existingMovieResponse = existingMovie.map((movie) => {
+    return movie.movieId === data.movieId;
   });
+  if (existingMovieResponse) return { already: true };
+  if (!existingMovieResponse) {
+    await db.insert(bookmarksMovies).values({
+      bookmarkId: data.bookmarkId as string,
+      review: data.review,
+      movieId: data.movieId as string,
+    });
+    return { already: false };
+  }
 }
 
 export async function CreateBookmark(data: {

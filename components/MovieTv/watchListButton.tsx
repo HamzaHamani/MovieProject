@@ -43,7 +43,7 @@ export default function WatchListButton({ shwoId }: Props) {
         return;
       }
 
-      //TODO handling if movie exsit first dont add it , add the function where u get bookmarks in line 22
+      //TODO handling if movie exsit , handle it inside action.ts addMovie
       // if watchlist exists, add the movie to it
       const watchlist = bookmark.filter(
         (item) => item.bookmarkName === "watchlist",
@@ -54,11 +54,17 @@ export default function WatchListButton({ shwoId }: Props) {
         movieId: shwoId,
         review: "",
       };
-      await AddMovie(movieData);
-      toast.success("Added to watchlist");
-      console.log("watchlist", watchlist);
+      const response = await AddMovie(movieData);
+
+      if (response?.already) {
+        toast.info("Already in watchlist");
+        return;
+      } else if (!response?.already) {
+        toast.success("Added to watchlist");
+      }
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      toast.error("Error adding to watchlist");
     }
   }
 
