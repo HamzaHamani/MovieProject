@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import SignOut from "@/components/SignOut";
 
 import { getBookmarks, getUser } from "@/lib/actions";
-import Create from "./_create/Create";
 import { ProfileForm } from "@/components/MovieTv/buttons/draweDialogButtonList";
 
 export default async function Home() {
