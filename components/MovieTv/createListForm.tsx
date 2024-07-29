@@ -39,7 +39,7 @@ export default function CreateListForm({
     }
   };
 
-  console.log(watch("description")); // watch input value by passing the name of it
+  // console.log(watch("description")); // watch input value by passing the name of it
 
   // TODO USES SHADCN SCHEMA, WORK ON IT IN HOME PAGE TO SHOW CHANGES AUTOMAITCLY WITHOUT EACHTIME CLICKING  ON ADD LIST BUTTON
   return (
@@ -85,7 +85,7 @@ export default function CreateListForm({
           </span>
         )}
       </div>
-      <input type="hidden" {...register("id")} value="1" />
+      <input type="hidden" {...register("id")} value={userId} />
 
       <Button
         type="submit"
