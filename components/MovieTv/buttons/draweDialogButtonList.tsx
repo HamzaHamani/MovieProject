@@ -27,7 +27,7 @@ import { Label } from "@/components/ui/label";
 import { PlusCircle } from "lucide-react";
 import CreateListForm from "../createListForm";
 
-export function DrawerDialogButtonList() {
+export function DrawerDialogButtonList({ userId }: { userId: any }) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -52,7 +52,7 @@ export function DrawerDialogButtonList() {
               Make changes to your profile here. Click save when youre done.
             </DialogDescription> */}
           </DialogHeader>
-          <ProfileForm />
+          <ProfileForm userId={userId} />
         </DialogContent>
       </Dialog>
     );
@@ -73,12 +73,12 @@ export function DrawerDialogButtonList() {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle>Edit profile</DrawerTitle>
+          <DrawerTitle>Add to your lists</DrawerTitle>
           <DrawerDescription>
-            Make changes to your profile here. Click save when youre done.
+            {/* Make changes to your profile here. Click save when youre done. */}
           </DrawerDescription>
         </DrawerHeader>
-        <ProfileForm className="px-4" />
+        <ProfileForm className="px-4" userId={userId} />
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
@@ -89,7 +89,14 @@ export function DrawerDialogButtonList() {
   );
 }
 
-export function ProfileForm({ className }: React.ComponentProps<"form">) {
+export function ProfileForm({
+  className,
+  userId,
+}: {
+  className?: any;
+  userId: any;
+}) {
+  // React.ComponentProps<"form">
   const [showForm, setShowForm] = React.useState(false);
   return (
     <div className={cn("grid items-start gap-4", className)}>
@@ -97,13 +104,13 @@ export function ProfileForm({ className }: React.ComponentProps<"form">) {
         {" "}
         <h2>You have no lists, you must create one</h2>
       </div>
-      {showForm && <CreateListForm />}
+      {showForm && <CreateListForm userId={userId} />}
       <Button
         type="submit"
         className="j mt-2 w-full bg-indigo-500"
         onClick={() => setShowForm((value) => !value)}
       >
-        Create a List
+        {showForm ? "Close" : "Create List"}
       </Button>
     </div>
   );

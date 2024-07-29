@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { GlobalContextProvider } from "@/context/globalContext";
 import ReactQueryProvider from "@/provider/reaxtQueryProvider";
 import { Toaster } from "sonner";
+import NextAuthProvider from "@/provider/nextAuthProvider";
 
 export const metadata: Metadata = {
   title: {
@@ -50,14 +51,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={` relative bg-backgroundM font-normal text-textMain ${chillax.className} relative`}
+        className={`relative bg-backgroundM font-normal text-textMain ${chillax.className} relative`}
       >
         {" "}
         <GlobalContextProvider>
-          <ReactQueryProvider>
-            {children}
-            <Toaster richColors position="bottom-center" />
-          </ReactQueryProvider>
+          <NextAuthProvider>
+            <ReactQueryProvider>
+              {children}
+              <Toaster richColors position="bottom-center" />
+            </ReactQueryProvider>
+          </NextAuthProvider>
         </GlobalContextProvider>
       </body>
     </html>

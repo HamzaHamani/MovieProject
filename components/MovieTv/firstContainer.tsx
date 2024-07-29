@@ -7,6 +7,7 @@ import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
 import WatchListButton from "./buttons/watchListButton";
 import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
+import { getUser } from "@/lib/actions";
 
 type TspecifiedMedia = TspecifiedMovie | TspecifiedTv;
 
@@ -15,7 +16,9 @@ type Props = {
   typeM: "movie" | "tv";
 };
 
-export default function FirstContainer({ response, typeM }: Props) {
+export default async function FirstContainer({ response, typeM }: Props) {
+  const user = await getUser();
+
   if (typeM === "movie") {
     const movieRes = response as TspecifiedMovie;
     const runtime = convertRuntime(movieRes.runtime);
@@ -50,7 +53,7 @@ export default function FirstContainer({ response, typeM }: Props) {
           <div className="button-left mt-3 flex gap-2">
             <WatchListButton shwoId={movieRes.id} />
 
-            <DrawerDialogButtonList />
+            <DrawerDialogButtonList userId={user?.id} />
             <ShareButton typeSearch="Movie" />
           </div>
         </div>
@@ -96,7 +99,7 @@ export default function FirstContainer({ response, typeM }: Props) {
           </div>
           <div className="button-left mt-3 flex gap-2">
             <WatchListButton shwoId={tvRes.id} />
-            <DrawerDialogButtonList />
+            <DrawerDialogButtonList userId={user?.id} />
 
             <ShareButton typeSearch="Movie" />
           </div>

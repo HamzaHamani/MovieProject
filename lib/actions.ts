@@ -25,6 +25,7 @@ cache;
 export const getUser = cache(async () => {
   const session = await auth();
   const user = session?.user;
+  console.log("1");
 
   return user;
 });
