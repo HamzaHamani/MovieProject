@@ -57,7 +57,7 @@ export default function RootLayout({
         <GlobalContextProvider>
           <NextAuthProvider>
             <ReactQueryProvider>
-              {children}
+              <>{children}</>
               <Toaster richColors position="bottom-center" />
             </ReactQueryProvider>
           </NextAuthProvider>

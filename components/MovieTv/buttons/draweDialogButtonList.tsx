@@ -128,10 +128,9 @@ export function ProfileForm({
     queryKey: ["bookmarks", userId],
     queryFn: () => getBookmarks(userId),
   });
-  console.log(data, isLoading);
   if (isLoading) return <p>loading</p>;
   return (
-    <div className={cn("grid items-start gap-4 self-start", className)}>
+    <div className={cn("grid items-start gap-4", className)}>
       <div className="mb-2 mt-9 flex flex-col items-center justify-center gap-4">
         {" "}
         {data ? (
