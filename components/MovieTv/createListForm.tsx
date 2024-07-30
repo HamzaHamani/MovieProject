@@ -11,6 +11,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Input } from "../ui/input";
 import { CreateBookmark } from "@/lib/actions";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 // import { Label } from "../ui/label";
 
 type Inputs = {
@@ -26,6 +27,7 @@ export default function CreateListForm({
   userId: string | number;
   setShowForm: any;
 }) {
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -43,13 +45,13 @@ export default function CreateListForm({
 
       await CreateBookmark(values);
       toast.success("List created successfully");
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       setShowForm((value: any) => !value);
     } catch (e) {
       console.log(e);
       toast.error("Errro");
     }
   };
-
 
   return (
     /* "handleSubmit" will validate your inputs before invoking "onSubmit" */

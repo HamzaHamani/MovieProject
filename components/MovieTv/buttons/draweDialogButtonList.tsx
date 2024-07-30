@@ -128,25 +128,29 @@ export function ProfileForm({
     queryKey: ["bookmarks", userId],
     queryFn: () => getBookmarks(userId),
   });
+
   if (isLoading) return <p>loading</p>;
+  if (error) return <p>error</p>;
+  const bookmarksData = data ?? [];
   return (
     <div className={cn("grid items-start gap-4", className)}>
       <div className="mb-2 mt-9 flex flex-col items-center justify-center gap-4">
         {" "}
-        {data ? (
-          <ListDisplay data={data} />
-        ) : (
+        {data?.length === 0 ? (
           <h2>You have no lists, you must create one</h2>
+        ) : (
+          <ListDisplay data={bookmarksData} />
         )}
       </div>
       {showForm && <CreateListForm setShowForm={setShowForm} userId={userId} />}
-
-      <Button
-        disabled={true}
-        className="j mt-2 items-end justify-end self-end bg-indigo-500 text-end"
-      >
-        Add
-      </Button>
+      {data?.length !== 0 && (
+        <Button
+          disabled={true}
+          className="j mt-2 items-end justify-end self-end bg-indigo-500 text-end"
+        >
+          Add
+        </Button>
+      )}
 
       <Button
         type="submit"
