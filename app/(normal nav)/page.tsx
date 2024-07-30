@@ -36,7 +36,7 @@ export default async function Home() {
       ) : (
         <SignOut />
       )} */}
-      <ProfileForm />
+      {/* <ProfileForm /> */}
     </main>
   );
 }
