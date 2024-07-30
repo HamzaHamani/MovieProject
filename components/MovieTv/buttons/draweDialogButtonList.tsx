@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -24,6 +23,12 @@ import {
 } from "@/components/ui/drawer";
 import { PlusCircle } from "lucide-react";
 import CreateListForm from "../createListForm";
+import { useQuery } from "@tanstack/react-query";
+import { getBookmarks } from "@/lib/actions";
+import { Checkbox } from "@/components/ui/checkbox";
+import { bookmarksSchema } from "@/types";
+import { z } from "zod";
+type bookSchemaType = z.infer<typeof bookmarksSchema>;
 
 export function DrawerDialogButtonList({ userId }: { userId: any }) {
   const [open, setOpen] = React.useState(false);
@@ -86,6 +91,29 @@ export function DrawerDialogButtonList({ userId }: { userId: any }) {
     </Drawer>
   );
 }
+function ListDisplay({ data }: { data: bookSchemaType[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {" "}
+      {data.map((val) => {
+        return (
+          <div key={val.bookmarkName} className="flex items-center space-x-2">
+            <Checkbox
+              id="terms"
+              className="h-6 w-6 border-[0.5px] border-white"
+            />
+            <label
+              htmlFor="terms"
+              className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {val.bookmarkName}
+            </label>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function ProfileForm({
   className,
@@ -96,13 +124,31 @@ export function ProfileForm({
 }) {
   // React.ComponentProps<"form">
   const [showForm, setShowForm] = React.useState(false);
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ["bookmarks", userId],
+    queryFn: () => getBookmarks(userId),
+  });
+  console.log(data, isLoading);
+  if (isLoading) return <p>loading</p>;
   return (
-    <div className={cn("grid items-start gap-4", className)}>
+    <div className={cn("grid items-start gap-4 self-start", className)}>
       <div className="mb-2 mt-9 flex flex-col items-center justify-center gap-4">
         {" "}
-        <h2>You have no lists, you must create one</h2>
+        {data ? (
+          <ListDisplay data={data} />
+        ) : (
+          <h2>You have no lists, you must create one</h2>
+        )}
       </div>
-      {showForm && <CreateListForm userId={userId} />}
+      {showForm && <CreateListForm setShowForm={setShowForm} userId={userId} />}
+
+      <Button
+        disabled={true}
+        className="j mt-2 items-end justify-end self-end bg-indigo-500 text-end"
+      >
+        Add
+      </Button>
+
       <Button
         type="submit"
         className="j mt-2 w-full bg-indigo-500"

@@ -1,7 +1,6 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { cp } from "fs";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -27,8 +26,6 @@ export const AnimatedSubscribeButton: React.FC<
   const [isSubscribed, setIsSubscribed] = useState<boolean>(subscribeStatus);
 
   const copyUrlToClipboard = () => {
-
-
     const currentUrl = window.location.href;
     navigator.clipboard
       .writeText(currentUrl)

@@ -9,21 +9,23 @@ import { Button } from "../ui/button";
 import { useForm, SubmitHandler } from "react-hook-form";
 // import { z } from "zod";
 import { Input } from "../ui/input";
+import { CreateBookmark } from "@/lib/actions";
+import { toast } from "sonner";
 // import { Label } from "../ui/label";
 
 type Inputs = {
   name: string;
   description: string;
-  id: string | number;
+  id: string;
 };
 
 export default function CreateListForm({
   userId,
+  setShowForm,
 }: {
   userId: string | number;
+  setShowForm: any;
 }) {
-  console.log(userId);
-
   const {
     register,
     handleSubmit,
@@ -31,17 +33,24 @@ export default function CreateListForm({
     formState: { errors },
   } = useForm<Inputs>();
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      console.log(data, "submited");
+      const values = {
+        bookmarkName: data.name,
+        userId: data.id,
+        description: data.description,
+      };
+
+      await CreateBookmark(values);
+      toast.success("List created successfully");
+      setShowForm((value: any) => !value);
     } catch (e) {
       console.log(e);
+      toast.error("Errro");
     }
   };
 
-  // console.log(watch("description")); // watch input value by passing the name of it
 
-  // TODO USES SHADCN SCHEMA, WORK ON IT IN HOME PAGE TO SHOW CHANGES AUTOMAITCLY WITHOUT EACHTIME CLICKING  ON ADD LIST BUTTON
   return (
     /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
     <form

@@ -78,7 +78,6 @@ function RenderUi({
   query: string;
   children?: React.ReactNode;
 }) {
-  //TODO MAKE THIS MOVIENAVIGATION SERVER COMPONENT, CUZ THE PARENT IS   CHILD COMPONENT, SO U GOTTA USE THE METHOD
   return (
     <>
       <title>{`${query} | Cine-Sphere `}</title>

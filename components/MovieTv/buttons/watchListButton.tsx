@@ -39,7 +39,6 @@ export default function WatchListButton({ shwoId }: Props) {
         return;
       }
 
-      //TODO handling if movie exsit , handle it inside action.ts addMovie
       // if watchlist exists, add the movie to it
       const watchlist = bookmark.filter(
         (item) => item.bookmarkName === "watchlist",
