@@ -28,6 +28,7 @@ import { getBookmarks } from "@/lib/actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { bookmarksSchema } from "@/types";
 import { z } from "zod";
+import CheckBoxes from "@/components/general/checkBoxes";
 type bookSchemaType = z.infer<typeof bookmarksSchema>;
 
 export function DrawerDialogButtonList({ userId }: { userId: any }) {
@@ -134,16 +135,18 @@ export function ProfileForm({
   const bookmarksData = data ?? [];
   return (
     <div className={cn("grid items-start gap-4", className)}>
-      <div className="mb-2 mt-9 flex flex-col items-center justify-center gap-4">
-        {" "}
-        {data?.length === 0 ? (
-          <h2>You have no lists, you must create one</h2>
-        ) : (
-          <ListDisplay data={bookmarksData} />
-        )}
+      <div className="mb-2 mt-9 flex w-96 flex-col items-center justify-center gap-4">
+        {!showForm ? (
+          bookmarksData.length === 0 ? (
+            <h2>You have no lists, you must create one</h2>
+          ) : (
+            <CheckBoxes data={bookmarksData} />
+          )
+        ) : // Render something else or nothing when showForm is false
+        null}
       </div>
       {showForm && <CreateListForm setShowForm={setShowForm} userId={userId} />}
-      {data?.length !== 0 && (
+      {!showForm && data?.length !== 0 && (
         <Button
           disabled={true}
           className="j mt-2 items-end justify-end self-end bg-indigo-500 text-end"
@@ -157,7 +160,7 @@ export function ProfileForm({
         className="j mt-2 w-full bg-indigo-500"
         onClick={() => setShowForm((value) => !value)}
       >
-        {showForm ? "Close" : "Create List"}
+        {showForm ? "Cancel" : "Create List"}
       </Button>
     </div>
   );

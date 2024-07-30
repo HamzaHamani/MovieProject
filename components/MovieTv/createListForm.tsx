@@ -57,7 +57,7 @@ export default function CreateListForm({
     /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="justify- items-cente flex flex-col gap-2 text-black"
+      className="justify- items-cente flex w-96 flex-col gap-2 text-black"
     >
       <div className="mb-2 flex flex-col gap-1">
         <Input
