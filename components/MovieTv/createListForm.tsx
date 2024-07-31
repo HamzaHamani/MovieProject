@@ -12,6 +12,7 @@ import { Input } from "../ui/input";
 import { CreateBookmark } from "@/lib/actions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 // import { Label } from "../ui/label";
 
 type Inputs = {
@@ -27,6 +28,7 @@ export default function CreateListForm({
   userId: string | number;
   setShowForm: any;
 }) {
+  const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const {
     register,
@@ -37,6 +39,7 @@ export default function CreateListForm({
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
+      setLoading(true);
       const values = {
         bookmarkName: data.name,
         userId: data.id,
@@ -47,9 +50,15 @@ export default function CreateListForm({
       toast.success("List created successfully");
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       setShowForm((value: any) => !value);
+      console.log(userId);
     } catch (e) {
+      console.log(userId);
       console.log(e);
-      toast.error("Errro");
+
+      if (!userId) toast.error("You need to be logged in to create a list");
+      else toast.error("We econtered an error, please try again");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,8 +110,9 @@ export default function CreateListForm({
       <Button
         type="submit"
         className="bg-indigo-400 text-white hover:bg-indigo-600"
+        disabled={loading}
       >
-        Create
+        {loading ? "Creating..." : "Create"}
       </Button>
     </form>
   );

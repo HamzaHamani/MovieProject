@@ -22,6 +22,7 @@ export default async function FirstContainer({ response, typeM }: Props) {
   if (typeM === "movie") {
     const movieRes = response as TspecifiedMovie;
     const runtime = convertRuntime(movieRes.runtime);
+    // TODO FIX WACHLIST BUTTON AND ADD LIST SIZE IN MOBILE , AND CATEGORIES IN CERTAIN MOBILES THEY COLAPSE AND ALSO THE TOAST LOOKS BIG ON THE MOBILE
 
     return (
       <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
