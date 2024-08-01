@@ -13,6 +13,7 @@ import { CreateBookmark } from "@/lib/actions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import SmallLoadingIndicator from "../general/smallLoadingIndicator";
 // import { Label } from "../ui/label";
 
 type Inputs = {
@@ -50,7 +51,6 @@ export default function CreateListForm({
       toast.success("List created successfully");
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       setShowForm((value: any) => !value);
-      console.log(userId);
     } catch (e) {
       console.log(userId);
       console.log(e);
@@ -109,10 +109,10 @@ export default function CreateListForm({
 
       <Button
         type="submit"
-        className="bg-indigo-400 text-white hover:bg-indigo-600"
+        className={`bg-indigo-400 text-white hover:bg-indigo-600 ${loading ? "cursor-not-allowed" : ""}`}
         disabled={loading}
       >
-        {loading ? "Creating..." : "Create"}
+        {loading ? <SmallLoadingIndicator /> : "Create"}
       </Button>
     </form>
   );
