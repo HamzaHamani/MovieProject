@@ -138,3 +138,12 @@
 .opacity-65 {
   opacity: 0.65; /* Adjust the opacity as needed */
 }
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+it-scrollbar {
+  display: none; /* 
+.hide-scrollbar::-webkSafari and Chrome */
+}

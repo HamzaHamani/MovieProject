@@ -25,7 +25,6 @@ cache;
 export const getUser = cache(async () => {
   const session = await auth();
   const user = session?.user;
-  console.log("1");
 
   return user;
 });
@@ -71,6 +70,19 @@ export async function getMoviesBook(
     .select()
     .from(bookmarksMovies)
     .where(eq(bookmarksMovies.bookmarkId, bookmarkId));
+
+  return bookmarkMovies;
+}
+
+//   fetch only SPECIFIED MOVIEID FROM BOOKMARKSMOVIES
+export async function getMovieLists(
+  movieId: string,
+): Promise<moviesBookSchemaType[]> {
+  // Fetch the movies with the given bookmarkId from the database
+  const bookmarkMovies = await db
+    .select()
+    .from(bookmarksMovies)
+    .where(eq(bookmarksMovies.movieId, movieId));
 
   return bookmarkMovies;
 }

@@ -24,14 +24,20 @@ import {
 import { PlusCircle } from "lucide-react";
 import CreateListForm from "../createListForm";
 import { useQuery } from "@tanstack/react-query";
-import { getBookmarks } from "@/lib/actions";
+import { getBookmarks, getMovieLists } from "@/lib/actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { bookmarksSchema } from "@/types";
 import { z } from "zod";
 import CheckBoxes from "@/components/general/checkBoxes";
 type bookSchemaType = z.infer<typeof bookmarksSchema>;
 
-export function DrawerDialogButtonList({ userId }: { userId: any }) {
+export function DrawerDialogButtonList({
+  userId,
+  movieId,
+}: {
+  userId: any;
+  movieId: any;
+}) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -56,7 +62,7 @@ export function DrawerDialogButtonList({ userId }: { userId: any }) {
               Make changes to your profile here. Click save when youre done.
             </DialogDescription> */}
           </DialogHeader>
-          <ProfileForm userId={userId} />
+          <ProfileForm userId={userId} movieId={movieId} />
         </DialogContent>
       </Dialog>
     );
@@ -82,7 +88,7 @@ export function DrawerDialogButtonList({ userId }: { userId: any }) {
             {/* Make changes to your profile here. Click save when youre done. */}
           </DrawerDescription>
         </DrawerHeader>
-        <ProfileForm className="px-4" userId={userId} />
+        <ProfileForm className="px-4" userId={userId} movieId={movieId} />
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
@@ -117,14 +123,23 @@ function ListDisplay({ data }: { data: bookSchemaType[] }) {
 }
 
 export function ProfileForm({
+  movieId,
   className,
   userId,
 }: {
   className?: any;
   userId: any;
+  movieId: any;
 }) {
+  const { data: MoiveListsData } = useQuery({
+    queryKey: ["movieLists", movieId],
+    queryFn: () => getMovieLists(movieId),
+  });
   // React.ComponentProps<"form">
   const [showForm, setShowForm] = React.useState(false);
+  const [selectedLists, setSelectedLists] = React.useState<string | number[]>(
+    [],
+  );
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ["bookmarks", userId],
     queryFn: () => getBookmarks(userId),
@@ -140,20 +155,19 @@ export function ProfileForm({
           bookmarksData.length === 0 ? (
             <h2>You have no lists, you must create one</h2>
           ) : (
-            <CheckBoxes data={bookmarksData} />
+            <CheckBoxes
+              MoiveListsData={MoiveListsData}
+              movieId={movieId}
+              data={bookmarksData}
+              setSelectedLists={setSelectedLists}
+              showForm={showForm}
+              selectedLists={selectedLists}
+            />
           )
         ) : // Render something else or nothing when showForm is false
         null}
       </div>
       {showForm && <CreateListForm setShowForm={setShowForm} userId={userId} />}
-      {!showForm && data?.length !== 0 && (
-        <Button
-          disabled={true}
-          className="j mt-2 items-end justify-end self-end bg-indigo-500 text-end"
-        >
-          Add
-        </Button>
-      )}
 
       <Button
         type="submit"

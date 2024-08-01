@@ -54,7 +54,7 @@ export default async function FirstContainer({ response, typeM }: Props) {
           <div className="button-left mt-3 flex gap-2">
             <WatchListButton shwoId={movieRes.id} />
 
-            <DrawerDialogButtonList userId={user?.id} />
+            <DrawerDialogButtonList userId={user?.id} movieId={movieRes.id} />
             <ShareButton typeSearch="Movie" />
           </div>
         </div>
@@ -100,7 +100,7 @@ export default async function FirstContainer({ response, typeM }: Props) {
           </div>
           <div className="button-left mt-3 flex gap-2">
             <WatchListButton shwoId={tvRes.id} />
-            <DrawerDialogButtonList userId={user?.id} />
+            <DrawerDialogButtonList userId={user?.id} movieId={tvRes.id} />
 
             <ShareButton typeSearch="Movie" />
           </div>
