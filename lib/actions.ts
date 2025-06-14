@@ -22,6 +22,7 @@ import { cache } from "react";
 cache;
 
 // USED CACHE TO PERFORM APP, CHECK WEB CODY DEV VIDEO https://youtu.be/8vJ3JC9O2Eo
+
 export const getUser = cache(async () => {
   const session = await auth();
   const user = session?.user;

@@ -8,14 +8,14 @@ import Link from "next/link";
 type Props = {
   data: TsearchMovie;
 };
-
+  
 export default function SearchMoviesDisplay({ data }: Props) {
   return (
-    <div className="ds:grid-cols-3 xssmd:grid-cols-2 relative mt-10 grid w-full grid-cols-5 items-center gap-5 xxl:grid-cols-4 lg:grid-cols-3 smd:grid-cols-2 s:grid-cols-1">
+    <div className="relative mt-10 grid w-full grid-cols-5 items-center gap-5 xxl:grid-cols-4 ds:grid-cols-3 lg:grid-cols-3 xssmd:grid-cols-2 smd:grid-cols-2 s:grid-cols-1">
       {data?.results?.map((movie) => (
         <div className="flex flex-col gap-3" key={movie.id}>
           <div
-            className={`after-img xxds:w-[350px] xlx:w-[350px] xlx:h-[500px] xxxl:w-[370px] xds:w-[330px] xds:h-[500px] group relative flex h-[550px] w-[400px] cursor-pointer self-center overflow-hidden rounded xl:h-[430px] xl:w-[310px] lg:w-[290px] h1text8:h-[400px] h1text8:w-[250px] xsmd:h-[450px] xsmd:w-[300px] smd:h-[350px] smd:w-[250px] sss:h-[330px] sss:w-[210px] ${movie.poster_path ? "" : "items-center justify-center bg-gray-600"} xssmd:w-[330px] xssmd:h-[500px] s:h-[370px] s:w-[230px]`}
+            className={`after-img group relative flex h-[550px] w-[400px] cursor-pointer self-center overflow-hidden rounded xxxl:w-[370px] xlx:h-[500px] xlx:w-[350px] xxds:w-[350px] xds:h-[500px] xds:w-[330px] xl:h-[430px] xl:w-[310px] lg:w-[290px] h1text8:h-[400px] h1text8:w-[250px] xsmd:h-[450px] xsmd:w-[300px] smd:h-[350px] smd:w-[250px] sss:h-[330px] sss:w-[210px] ${movie.poster_path ? "" : "items-center justify-center bg-gray-600"} xssmd:h-[500px] xssmd:w-[330px] s:h-[370px] s:w-[230px]`}
           >
             {movie.poster_path ? (
               <img

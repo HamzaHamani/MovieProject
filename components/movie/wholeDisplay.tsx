@@ -3,6 +3,12 @@ import { TspecifiedMovie } from "@/types/api";
 import FirstContainer from "../MovieTv/firstContainer";
 import Story from "../MovieTv/storyComponent";
 import CastComponent from "../MovieTv/carouselCast/castComponent";
+import TrailerVideo from "../MovieTv/trailerVideo";
+import { Suspense } from "react";
+import VideoLoadingIndicator from "../MovieTv/videoLoadingIndicator";
+import { Badge } from "lucide-react";
+import { CarouselComponent } from "../MovieTv/carouselCast/carouselComponent";
+import TrailerComponent from "../MovieTv/carouselTrailer/trailerComponent";
 
 type Props = {
   response: TspecifiedMovie;
@@ -35,15 +41,21 @@ export default function WholeDisplay({ response }: Props) {
         </section>
         <section className="mx-auto mt-10 w-[90%]">
           <Story response={response} typeM="tv" />
-
-          <CastComponent typeM="movie" id={response.id} />
+          <Suspense
+            fallback={
+              <div className="flex h-20 items-center justify-center">
+                Loading Cast...
+              </div>
+            }
+          >
+            <CastComponent typeM="movie" id={response.id} />
+          </Suspense>
+          <Suspense fallback={<VideoLoadingIndicator />}>
+            <TrailerComponent typeM="movie" id={response.id} />
+          </Suspense>
         </section>
 
         <div className="h-screen"></div>
-
-        {/* <Suspense fallback={<VideoLoadingIndicator />}>
-          <TrailerVideo id={movieId} typeM="movie" />
-        </Suspense> */}
       </div>
     </div>
   );

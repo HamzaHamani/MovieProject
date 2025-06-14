@@ -75,7 +75,7 @@ export const accounts = pgTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-  })
+  }),
 );
 
 export const sessions = pgTable("session", {
@@ -97,7 +97,7 @@ export const verificationTokens = pgTable(
     compositePk: primaryKey({
       columns: [verificationToken.identifier, verificationToken.token],
     }),
-  })
+  }),
 );
 
 export const authenticators = pgTable(
@@ -118,7 +118,7 @@ export const authenticators = pgTable(
     compositePK: primaryKey({
       columns: [authenticator.userId, authenticator.credentialID],
     }),
-  })
+  }),
 );
 
 // Define relationships for users
@@ -145,5 +145,5 @@ export const bookmarkMoviesRelations = relations(
       fields: [bookmarksMovies.bookmarkId],
       references: [bookmarks.id],
     }),
-  })
+  }),
 );
