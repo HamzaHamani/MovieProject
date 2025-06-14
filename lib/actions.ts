@@ -39,7 +39,7 @@ export async function handleLogout() {
   await signOut();
 }
 
-type provider = "github" | "google";
+type provider = "github" | "google" | "twitter" | "facebook" | "reddit";
 export async function handleSignin(provider: provider) {
   await signIn(provider);
 }

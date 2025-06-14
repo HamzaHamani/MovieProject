@@ -16,9 +16,13 @@ export default function DivSignin({}: Props) {
   }
 
   return (
-    <div className="bg-red-70 flex items-center justify-center gap-2">
+    <div className="bg-red-70 flex w-full flex-col gap-4 [&>*]:w-full">
+      {" "}
       <ButtonSignIn provider="google" />
       <ButtonSignIn provider="github" />
+      <ButtonSignIn provider="twitter" />
+      <ButtonSignIn provider="facebook" />
+      <ButtonSignIn provider="reddit" />
     </div>
   );
 }
