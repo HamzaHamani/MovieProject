@@ -19,6 +19,7 @@ type Props = {
 };
 
 type SearchMovieQueryKey = [string, string, number];
+// ! TODO ISSUE WITH PAGINATION UCZ M USING, MULTI ENDPOINT SO I GET ALSO CHRATCHTERS BUT I FILTER THEM, BUT THAT CUZZ ISSUE WITH PAGINATION
 
 const Page = ({ params }: Props) => {
   const queryClient = useQueryClient();

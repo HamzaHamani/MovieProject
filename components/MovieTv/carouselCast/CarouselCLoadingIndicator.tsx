@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/carousel";
 type Props = {};
 
-export default function CarouselLoadingIndicator({}: Props) {
+export default function CarouselCLoadingIndicator({}: Props) {
   return (
     <Carousel
       opts={{

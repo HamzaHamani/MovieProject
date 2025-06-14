@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Cast from "./cast";
-import CarouselLoadingIndicator from "./CarouselLoadingIndicator";
+import CarouselCLoadingIndicator from "./CarouselCLoadingIndicator";
 
 type Props = {
   id: any;
@@ -13,7 +13,7 @@ export default function CastComponent({ id, typeM }: Props) {
       {" "}
       <h3 className="mb-4 text-3xl font-medium xl:text-2xl">Top Cast</h3>
       <div className="bg-ed-200">
-        <Suspense fallback={<CarouselLoadingIndicator />}>
+        <Suspense fallback={<CarouselCLoadingIndicator />}>
           <Cast typeM={typeM} id={id} />
         </Suspense>
       </div>

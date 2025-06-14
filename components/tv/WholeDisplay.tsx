@@ -3,6 +3,9 @@ import FirstContainer from "../MovieTv/firstContainer";
 import Story from "../MovieTv/storyComponent";
 
 import CastComponent from "../MovieTv/carouselCast/castComponent";
+import { Suspense } from "react";
+import TrailerComponent from "../MovieTv/carouselTrailer/trailerComponent";
+import VideoLoadingIndicator from "../MovieTv/videoLoadingIndicator";
 
 type Props = {
   response: TspecifiedTv;
@@ -38,6 +41,8 @@ export default function WholeDisplay({ response }: Props) {
           <Story response={response} typeM="tv" />
 
           <CastComponent typeM="tv" id={response.id} />
+
+          <TrailerComponent typeM="tv" id={response.id} />
         </section>
 
         <div className="h-screen"></div>

@@ -13,6 +13,7 @@ export default async function Cast({ typeM, id }: Props) {
     try {
       // await delay(2000);
       const res = await getCreditsTVMovie(id, "movie");
+      console.log(res.cast[0].name);
       return <CarouselComponent res={res} />;
     } catch (e) {
       throw new Error("we couldnt fetch the data about the casts");

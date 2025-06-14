@@ -7,6 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { TvideoApiSchema } from "@/types/video";
+import LazyYouTubeEmbed from "./LazyYouTubeEmbed";
 
 type Props = {
   res: TvideoApiSchema;
@@ -15,7 +16,8 @@ export function CarouselComponent({ res }: Props) {
   return (
     <Carousel
       opts={{
-        align: "start",
+        align: "center",
+        loop: true,
       }}
       className="w-full"
     >
@@ -23,31 +25,25 @@ export function CarouselComponent({ res }: Props) {
         {res.results.map((video, index) => (
           <CarouselItem
             key={index}
-            className="-ml-0 flex basis-1/6 items-center justify-center xds:basis-1/5 Ctex6:basis-1/4 h1text8:basis-1/3 ss:basis-1/2 s:basis-52"
+            className="s:basis-1/ -ml-0 flex basis-1/5 items-center justify-center xds:basis-1/4 Ctex6:basis-1/3 h1text8:basis-1/2 ss:basis-1/2"
           >
-            <div key={video.id} className="flex flex-col gap-2">
-              <div>
-                <iframe
-                  width="448"
-                  height="252"
-                  src={`https://www.youtube.com/embed/${video.key}?modestbranding=1&rel=0&iv_load_policy=3`}
-                  title={video.name}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+            <div key={video.id} className="flex h-full flex-col gap-2">
+              <div className="aspect-[268/151] w-[268px] max-w-[40vw] flex-shrink-0 overflow-hidden rounded-lg bg-black">
+                <LazyYouTubeEmbed videoId={video.key} />
               </div>
-              <h3>
+              <h3 className="w-full max-w-[268px]">
                 {(() => {
                   const name = video.name;
                   return name.length > 48 ? name.slice(0, 48) + "..." : name;
                 })()}
               </h3>
-              <div className="flex gap-2">
-                <Badge className="bg-slate-50 text-backgroundM">
-                  {video.type}
+              <div className="flex-1" />
+              <div className="mt-auto flex w-full max-w-[268px] items-end gap-2">
+                <Badge className="bg-slate-50 text-backgroundM smd:text-[10px]">
+                  {video.type === "Behind the Scenes" ? "BTS" : video.type}
                 </Badge>
                 <span className="text-muted-foreground">|</span>
-                <p>
+                <p className="sm:text-xs">
                   {new Date(video.published_at).getFullYear()}-
                   {(new Date(video.published_at).getMonth() + 1)
                     .toString()
