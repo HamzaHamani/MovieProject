@@ -11,7 +11,7 @@ const LazyYouTubeEmbed: React.FC<LazyYouTubeEmbedProps> = ({ videoId }) => {
   const thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
   return (
-    <div className="relative aspect-[268/151] w-full max-w-[268px] overflow-hidden rounded-lg bg-black">
+    <div className="relative aspect-[268/151] w-full max-w-[268px] overflow-hidden rounded-lg bg-black s:w-[320px] s:max-w-[90vw]">
       {!isIframeLoaded ? (
         <div
           className="h-full w-full cursor-pointer bg-cover bg-center"

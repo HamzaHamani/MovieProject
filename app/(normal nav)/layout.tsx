@@ -6,7 +6,7 @@ type Props = {
 
 export default function layout({ children }: Props) {
   return (
-    <div className="font-chillax">
+    <div className="">
       <Navbar type={"normal"} />
       {children}
     </div>

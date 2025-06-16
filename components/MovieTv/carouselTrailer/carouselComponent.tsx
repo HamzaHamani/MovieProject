@@ -25,10 +25,10 @@ export function CarouselComponent({ res }: Props) {
         {res.results.map((video, index) => (
           <CarouselItem
             key={index}
-            className="s:basis-1/ -ml-0 flex basis-1/5 items-center justify-center xds:basis-1/4 Ctex6:basis-1/3 h1text8:basis-1/2 ss:basis-1/2"
+            className="-ml-0 flex basis-1/5 items-center justify-center xds:basis-1/4 Ctex6:basis-1/3 h1text8:basis-1/2 ss:basis-1/2 s:basis-full"
           >
             <div key={video.id} className="flex h-full flex-col gap-2">
-              <div className="aspect-[268/151] w-[268px] max-w-[40vw] flex-shrink-0 overflow-hidden rounded-lg bg-black">
+              <div className="aspect-[268/151] w-[268px] max-w-[40vw] flex-shrink-0 overflow-hidden rounded-lg bg-black s:w-[320px] s:max-w-[90vw]">
                 <LazyYouTubeEmbed videoId={video.key} />
               </div>
               <h3 className="w-full max-w-[268px]">
@@ -38,7 +38,7 @@ export function CarouselComponent({ res }: Props) {
                 })()}
               </h3>
               <div className="flex-1" />
-              <div className="mt-auto flex w-full max-w-[268px] items-end gap-2">
+              <div className="mt-auto flex w-full max-w-[268px] items-center gap-2">
                 <Badge className="bg-slate-50 text-backgroundM smd:text-[10px]">
                   {video.type === "Behind the Scenes" ? "BTS" : video.type}
                 </Badge>

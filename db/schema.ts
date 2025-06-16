@@ -54,6 +54,20 @@ export const bookmarksMovies = pgTable("bookmarksMovies", {
   addedAt: timestamp("addedAt", { mode: "date" }).defaultNow(),
 });
 
+export const loggedMovies = pgTable("logged_movies", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  movieId: text("movieId").notNull(), // TMDb ID
+  review: text("review"),
+  rating: integer("rating"), // 0 to 10
+  watchedAt: timestamp("watchedAt", { mode: "date" }).defaultNow(),
+  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
+});
+
 export const accounts = pgTable(
   "account",
   {

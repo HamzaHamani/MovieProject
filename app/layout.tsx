@@ -5,6 +5,7 @@ import { GlobalContextProvider } from "@/context/globalContext";
 import ReactQueryProvider from "@/provider/reaxtQueryProvider";
 import { Toaster } from "sonner";
 import NextAuthProvider from "@/provider/nextAuthProvider";
+import { GeistMono } from "geist/font/mono";
 
 export const metadata: Metadata = {
   title: {
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
     template: "%s | Cine-Sphere",
   },
 };
+// GeistMono is already imported and can be used directly in your className or font configuration.
+
 const chillax = localFont({
   src: [
     {
@@ -51,7 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`relative bg-backgroundM font-normal text-textMain ${chillax.className} relative`}
+        className={`font-geist- relative bg-backgroundM font-normal text-textMain ${chillax.className} relative`}
       >
         {" "}
         <GlobalContextProvider>
