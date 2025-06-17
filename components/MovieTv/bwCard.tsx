@@ -1,8 +1,4 @@
-import { Bookmark, Heart, Share2, Star } from "lucide-react";
 import React, { useState } from "react";
-import { Separator } from "../ui/separator";
-import StarRating from "./starRating";
-import { ButtonAnimation } from "../ui/ButtonAnimation";
 
 type Props = {};
 
