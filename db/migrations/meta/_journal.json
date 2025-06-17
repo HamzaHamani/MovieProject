@@ -64,6 +64,20 @@
       "when": 1750100738970,
       "tag": "0008_nifty_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1750119531206,
+      "tag": "0009_hot_bloodstorm",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1750121176360,
+      "tag": "0010_ambitious_leader",
+      "breakpoints": true
     }
   ]
 }

@@ -91,3 +91,16 @@ export const specifiedTv = z.object({
   vote_count: z.number(),
 });
 export type TspecifiedTv = z.infer<typeof specifiedTv>;
+
+export const loggedMoviesSchema = z.object({
+  id: z.string().uuid().optional(), // optional if auto-generated
+  userId: z.string().min(1), // must not be empty
+  // TMDb ID, required
+  review: z.string().optional(),
+  showId: z.number().int(), // TMDb ID, required
+  reviewTitle: z.string(), // Optional title for the review
+  rating: z.number().int().min(0).max(5).optional(), // 0 to 10 scale
+  watchedAt: z.coerce.date().optional(), // accepts string/date and coerces to Date
+  createdAt: z.coerce.date().optional(),
+});
+export type TloggedMovies = z.infer<typeof loggedMoviesSchema>;

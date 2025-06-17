@@ -62,7 +62,7 @@ export default async function FirstContainer({ response, typeM }: Props) {
             <p>{((num: number) => num.toLocaleString())(movieRes.revenue)}$</p>
           </div>
           <div className="button-left mt-3 flex gap-2">
-            <LogTheMT shwoId={movieRes.id} typeM={typeM} />
+            <LogTheMT show={response} typeM={typeM} />
 
             <DrawerDialogButtonList userId={user?.id} movieId={movieRes.id} />
             <ShareButton typeSearch="Movie" />
@@ -112,7 +112,7 @@ export default async function FirstContainer({ response, typeM }: Props) {
             </div>
           </div>
           <div className="button-left mt-3 flex gap-2">
-            <LogTheMT shwoId={tvRes.id} typeM={typeM} />
+            <LogTheMT show={tvRes} typeM={typeM} />
 
             <DrawerDialogButtonList userId={user?.id} movieId={tvRes.id} />
 

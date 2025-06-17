@@ -1,7 +1,7 @@
 "use server";
 
 import { auth, signIn } from "@/auth";
-import { bookmarks, bookmarksMovies } from "@/db/schema";
+import { bookmarks, bookmarksMovies, loggedMovies } from "@/db/schema";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
 import { signOut } from "@/auth";
@@ -17,6 +17,7 @@ import { TspecifiedTv } from "@/types/apiTv";
 import { TvideoApiSchema } from "@/types/video";
 import { TCreditsSchema } from "@/types/cast";
 import { cache } from "react";
+import { log } from "console";
 
 //------------------------------------------------------------------------#uilities for handlingath
 cache;
@@ -190,4 +191,52 @@ export async function getSearchMovie(values: values): Promise<TsearchMovie> {
   );
   const data: TsearchMovie = await res.data;
   return data;
+}
+
+type Props = {
+  reviewTitle: string;
+  rating: number;
+  date: string;
+  review: string;
+  showId: string | number; // Assuming showId can be a string or number
+};
+
+export async function sendLoggedMovieTv({
+  reviewTitle,
+  rating,
+  date,
+  review,
+  showId,
+}: Props) {
+  const user = await getUser();
+
+  if (!user) throw new Error("User not authenticated");
+
+  const logData = {
+    reviewTitle,
+    rating,
+    date,
+    review,
+    userId: user.id,
+    showId,
+  };
+
+  console.log(logData);
+
+  // await db.insert(loggedMovies).values(logData).onConflictDoNothing();
+  await db
+    .insert(loggedMovies)
+    .values({
+      reviewTitle,
+      rating,
+      watchedAt: new Date(date),
+      review,
+      userId: user.id as string,
+      showId: showId as string,
+    })
+    .onConflictDoNothing();
+
+  // Here you would typically send this data to your backend or database
+  console.log("Log Data:", logData);
+  return logData; // Return the log data for further processing if needed
 }

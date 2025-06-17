@@ -61,10 +61,12 @@ export const loggedMovies = pgTable("logged_movies", {
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  movieId: text("movieId").notNull(), // TMDb ID
+  showId: text("showId").notNull(), // TMDb ID
   review: text("review"),
+  reviewTitle: text("reviewTitle"), // Optional title for the review
   rating: integer("rating"), // 0 to 10
-  watchedAt: timestamp("watchedAt", { mode: "date" }).defaultNow(),
+
+  watchedAt: timestamp("watchedAt", { mode: "date" }).notNull(),
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
 });
 
