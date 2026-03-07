@@ -1,9 +1,6 @@
 import WholeDisplay from "@/components/tv/WholeDisplay";
 import { getReviewsByType, getSimilarByType, getSpecifiedTV } from "@/lib/actions";
-import { TspecifiedMovie } from "@/types/api";
 import { TspecifiedTv } from "@/types/apiTv";
-import axios from "axios";
-import { Metadata } from "next";
 
 type Props = {
   params: { id: string };

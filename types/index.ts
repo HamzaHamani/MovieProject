@@ -19,7 +19,6 @@ export const bookmarksSchema = z.object({
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().default(() => new Date()),
 });
-data;
 export const bookmarksMoviesSchema = z.object({
   id: z.string(),
   bookmarkId: z.string(),

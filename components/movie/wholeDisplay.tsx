@@ -3,12 +3,10 @@ import { TspecifiedMovie } from "@/types/api";
 import FirstContainer from "../MovieTv/firstContainer";
 import Story from "../MovieTv/storyComponent";
 import CastComponent from "../MovieTv/carouselCast/castComponent";
-import TrailerVideo from "../MovieTv/trailerVideo";
 import { Suspense } from "react";
 import VideoLoadingIndicator from "../MovieTv/videoLoadingIndicator";
-import { Badge } from "lucide-react";
-import { CarouselComponent } from "../MovieTv/carouselCast/carouselComponent";
 import TrailerComponent from "../MovieTv/carouselTrailer/trailerComponent";
+
 import DetailTabs from "../MovieTv/detailTabs";
 import SimilarSection from "../MovieTv/similarSection";
 import { TReviewItem, TSimilarItem } from "@/lib/actions";

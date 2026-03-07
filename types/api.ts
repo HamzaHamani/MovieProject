@@ -1,4 +1,3 @@
-import { dataTagSymbol } from "@tanstack/react-query";
 import { z } from "zod";
 
 // EXPLORE SECTION API SCHEMA
@@ -50,11 +49,11 @@ export const SpokenLanguageSchema = z.object({
 export type SpokenLanguage = z.infer<typeof SpokenLanguageSchema>;
 
 export const specifiedMovie = z.object({
-  adult: z.boolean(), //true or false
-  backdrop_path: z.string(),// string ahah asdasd asdasd
+  adult: z.boolean(),
+  backdrop_path: z.string(),
   belongs_to_collection: z.null(),
   budget: z.number(),
-  genres: z.array(GenreSchema),// [djaj, safa, l7am]
+  genres: z.array(GenreSchema),
   homepage: z.string(),
   id: z.number(),
   imdb_id: z.string(),

@@ -5,7 +5,6 @@ import {
   getSpecifiedMovie,
 } from "@/lib/actions";
 import { TspecifiedMovie } from "@/types/api";
-import axios from "axios";
 import { Metadata } from "next";
 
 type Props = {

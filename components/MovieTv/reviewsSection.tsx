@@ -9,7 +9,9 @@ export default function ReviewsSection({ items }: Props) {
 
   return (
     <section className="mt-10">
-      <h3 className="mb-5 text-3xl font-medium xl:text-2xl smd:text-xl">Reviews</h3>
+      <h3 className="mb-5 text-3xl font-medium xl:text-2xl smd:text-xl">
+        Reviews
+      </h3>
 
       {list.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-[#101018] p-4 text-sm text-gray-300">
@@ -31,7 +33,9 @@ export default function ReviewsSection({ items }: Props) {
                 </div>
               </div>
 
-              <p className="line-clamp-4 text-sm text-gray-300">{review.content}</p>
+              <p className="line-clamp-4 text-sm text-gray-300">
+                {review.content}
+              </p>
 
               {typeof review.author_details?.rating === "number" && (
                 <p className="mt-2 text-xs text-primaryM-400">

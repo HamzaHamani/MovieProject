@@ -343,7 +343,6 @@ export async function getExploreMovieDetails(
 ): Promise<ExploreMediaDetails | null> {
   return getExploreMediaDetails("movie", id);
 }
-
 type Props = {
   reviewTitle: string;
   rating: number;
