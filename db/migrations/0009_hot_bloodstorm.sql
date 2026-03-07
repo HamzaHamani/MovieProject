@@ -1,0 +1,1 @@
+ALTER TABLE "logged_movies" ADD COLUMN "reviewTitle" text;

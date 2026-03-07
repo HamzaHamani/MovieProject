@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+@layer base {
+  :root {
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
+  .textGradient {
+    background: linear-gradient(to right, #fefaed, #e6e8ec);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+.grid {
+  justify-items: center;
+}
+.svg {
+  width: 3.25em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+}
+
+.circle {
+  fill: none;
+  stroke: whitesmoke;
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+}
+
+.list-with-circles li {
+  position: relative;
+  padding-right: 0.5rem;
+}
+.list-with-circles li::after {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  right: -10px;
+  margin-left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.list-with-circles li:last-child::after {
+  content: none;
+}
+.content-center {
+  position: absolute;
+  top: 38%;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+.bg-cover {
+  background-size: cover; /* Ensure the image covers the entire container */
+}
+
+.bg-center {
+  background-position: center; /* Center the background image */
+}
+
+.opacity-65 {
+  opacity: 0.65; /* Adjust the opacity as needed */
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+it-scrollbar {
+  display: none; /* 
+.hide-scrollbar::-webkSafari and Chrome */
+}

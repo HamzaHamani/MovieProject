@@ -1,0 +1,32 @@
+import { z } from "zod";
+
+export type Bookmark = {};
+
+export const usersSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  emailVerified: z.date().optional(),
+  image: z.string().optional(),
+  premium: z.boolean().default(false).optional(),
+});
+export const bookmarksSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  bookmarkName: z.string(),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
+});
+data;
+export const bookmarksMoviesSchema = z.object({
+  id: z.string(),
+  bookmarkId: z.string(),
+  movieId: z.string(),
+  review: z.string(),
+  addedAt: z
+    .date()
+    .default(() => new Date())
+    .nullable(),
+});
