@@ -47,9 +47,7 @@ export default async function Page({ params, searchParams }: Props) {
   const rawTab = searchParams?.tab;
   const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
   const tab =
-    tabValue === "news" || tabValue === "reviews"
-      ? tabValue
-      : "universe";
+    tabValue === "news" || tabValue === "reviews" ? tabValue : "universe";
 
   const reviews = tab === "reviews" ? await getReviewsByType(id, "movie") : [];
 

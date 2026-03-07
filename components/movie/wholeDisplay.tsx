@@ -20,7 +20,12 @@ type Props = {
   typeM?: "movie" | "tv";
 };
 
-export default function WholeDisplay({ response, similar, reviews, activeTab }: Props) {
+export default function WholeDisplay({
+  response,
+  similar,
+  reviews,
+  activeTab,
+}: Props) {
   const imageUrl = `https://image.tmdb.org/t/p/original${response.backdrop_path}`;
   return (
     <div className="relative min-h-screen pb-20">

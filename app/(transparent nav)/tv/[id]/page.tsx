@@ -1,5 +1,9 @@
 import WholeDisplay from "@/components/tv/WholeDisplay";
-import { getReviewsByType, getSimilarByType, getSpecifiedTV } from "@/lib/actions";
+import {
+  getReviewsByType,
+  getSimilarByType,
+  getSpecifiedTV,
+} from "@/lib/actions";
 import { TspecifiedTv } from "@/types/apiTv";
 
 type Props = {
