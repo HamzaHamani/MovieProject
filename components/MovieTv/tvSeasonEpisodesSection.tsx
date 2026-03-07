@@ -115,7 +115,9 @@ export default function TvSeasonEpisodesSection({ tvId, season }: Props) {
                         </h4>
                         <div className="mt-1 flex items-center gap-2 text-xs text-gray-200 smd:gap-1.5 smd:text-[11px] sss:text-[10px]">
                           <span>
-                            {episode.runtime ? `${episode.runtime} min` : "-- min"}
+                            {episode.runtime
+                              ? `${episode.runtime} min`
+                              : "-- min"}
                           </span>
                           <span>•</span>
                           <span>{episode.air_date?.slice(0, 4) || "----"}</span>

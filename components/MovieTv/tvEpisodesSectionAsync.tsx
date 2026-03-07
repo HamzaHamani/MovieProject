@@ -18,7 +18,12 @@ export default async function TvEpisodesSectionAsync({
   selectedSeason,
   selectedEpisode,
 }: Props) {
-  if (selectedSeason && selectedSeason > 0 && selectedEpisode && selectedEpisode > 0) {
+  if (
+    selectedSeason &&
+    selectedSeason > 0 &&
+    selectedEpisode &&
+    selectedEpisode > 0
+  ) {
     try {
       const episode = await getTVEpisodeDetails(
         String(id),

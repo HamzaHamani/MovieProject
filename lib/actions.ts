@@ -482,7 +482,8 @@ export async function getTVEpisodeDetails(
             name: String(p.name ?? "Unknown"),
             profile_path:
               typeof p.profile_path === "string" ? p.profile_path : null,
-            character: typeof p.character === "string" ? p.character : undefined,
+            character:
+              typeof p.character === "string" ? p.character : undefined,
           };
         })
       : [],
@@ -532,7 +533,8 @@ export async function getPersonCombinedCredits(
             .map((genreId: unknown) => Number(genreId))
             .filter((genreId: number) => Number.isFinite(genreId))
         : [],
-      poster_path: typeof item?.poster_path === "string" ? item.poster_path : null,
+      poster_path:
+        typeof item?.poster_path === "string" ? item.poster_path : null,
       backdrop_path:
         typeof item?.backdrop_path === "string" ? item.backdrop_path : null,
       title: typeof item?.title === "string" ? item.title : undefined,
@@ -543,7 +545,8 @@ export async function getPersonCombinedCredits(
         typeof item?.first_air_date === "string"
           ? item.first_air_date
           : undefined,
-      character: typeof item?.character === "string" ? item.character : undefined,
+      character:
+        typeof item?.character === "string" ? item.character : undefined,
       job: typeof item?.job === "string" ? item.job : undefined,
       vote_average: Number(item?.vote_average ?? 0),
       popularity: Number(item?.popularity ?? 0),
@@ -552,13 +555,17 @@ export async function getPersonCombinedCredits(
 
   const cast = Array.isArray(data?.cast)
     ? data.cast
-        .map((item: unknown) => normalizeCreditItem(item as Record<string, unknown>))
+        .map((item: unknown) =>
+          normalizeCreditItem(item as Record<string, unknown>),
+        )
         .filter((item: TPersonCreditItem) => item.id > 0)
     : [];
 
   const crew = Array.isArray(data?.crew)
     ? data.crew
-        .map((item: unknown) => normalizeCreditItem(item as Record<string, unknown>))
+        .map((item: unknown) =>
+          normalizeCreditItem(item as Record<string, unknown>),
+        )
         .filter((item: TPersonCreditItem) => item.id > 0)
     : [];
 

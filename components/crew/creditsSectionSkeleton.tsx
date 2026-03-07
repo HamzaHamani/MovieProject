@@ -1,10 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function CreditsSectionSkeleton({
-  title,
-}: {
-  title: string;
-}) {
+export default function CreditsSectionSkeleton({ title }: { title: string }) {
   return (
     <section className="space-y-4">
       <div className="flex items-end justify-between gap-3">

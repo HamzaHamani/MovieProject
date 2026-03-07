@@ -21,7 +21,11 @@ export default function DetailTabs({ items, active, typeM, id }: Props) {
   const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [indicator, setIndicator] = useState({ left: 0, width: 0, visible: false });
+  const [indicator, setIndicator] = useState({
+    left: 0,
+    width: 0,
+    visible: false,
+  });
 
   useEffect(() => {
     const updateIndicator = () => {

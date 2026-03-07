@@ -89,7 +89,7 @@ export default function WatchProvidersSection({ providers }: Props) {
                         return (
                           <CarouselItem
                             key={`${category.key}-${provider.provider_id}`}
-                            className="pl-3 basis-[180px] xds:basis-[170px] s:basis-[150px]"
+                            className="basis-[180px] pl-3 xds:basis-[170px] s:basis-[150px]"
                           >
                             <article className="h-full overflow-hidden rounded-lg border border-white/10 bg-white/[0.03]">
                               <div className="aspect-square w-full bg-black/30">

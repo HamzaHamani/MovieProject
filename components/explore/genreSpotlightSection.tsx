@@ -98,12 +98,6 @@ export default function GenreSpotlightSection({ groups }: Props) {
     });
   }, [genre, movieIndex, queryClient]);
 
-  if (!genre || !movie) {
-    return null;
-  }
-
-  const year = movie.release_date ? movie.release_date.slice(0, 4) : "----";
-
   const prefetchMovieAssets = useCallback((item: SpotlightMovie) => {
     if (typeof window === "undefined") {
       return;
@@ -135,6 +129,12 @@ export default function GenreSpotlightSection({ groups }: Props) {
       prefetchMovieAssets(firstMovie);
     });
   }, [prefetchMovieAssets, queryClient, validGroups]);
+
+  if (!genre || !movie) {
+    return null;
+  }
+
+  const year = movie.release_date ? movie.release_date.slice(0, 4) : "----";
 
   function handleGenre(index: number) {
     const selectedGenre = validGroups[index];

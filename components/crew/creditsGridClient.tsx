@@ -14,15 +14,13 @@ type Props = {
 
 function getCreditTitle(credit: TPersonCreditItem): string {
   return credit.media_type === "movie"
-    ? (credit.title ?? "Untitled Movie")
-    : (credit.name ?? "Untitled Show");
+    ? credit.title ?? "Untitled Movie"
+    : credit.name ?? "Untitled Show";
 }
 
 function getCreditYear(credit: TPersonCreditItem): string {
   const date =
-    credit.media_type === "movie"
-      ? credit.release_date
-      : credit.first_air_date;
+    credit.media_type === "movie" ? credit.release_date : credit.first_air_date;
   return date ? date.slice(0, 4) : "----";
 }
 
@@ -77,7 +75,9 @@ function getCreditGenre(credit: TPersonCreditItem): string {
 }
 
 function getCreditRating(credit: TPersonCreditItem): string {
-  return Number.isFinite(credit.vote_average) ? credit.vote_average.toFixed(1) : "--";
+  return Number.isFinite(credit.vote_average)
+    ? credit.vote_average.toFixed(1)
+    : "--";
 }
 
 function buildCreditHref(credit: TPersonCreditItem): string {
@@ -100,7 +100,9 @@ export default function CreditsGridClient({ title, items, emptyText }: Props) {
     <section className="space-y-4">
       <div className="flex items-end justify-between gap-3">
         <h2 className="text-2xl font-semibold">{title}</h2>
-        <p className="text-sm text-zinc-400 md:text-xs">{items.length} credits</p>
+        <p className="text-sm text-zinc-400 md:text-xs">
+          {items.length} credits
+        </p>
       </div>
 
       {items.length === 0 ? (

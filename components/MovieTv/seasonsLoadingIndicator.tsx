@@ -22,7 +22,7 @@ export default function SeasonsLoadingIndicator({
         {Array.from({ length: 4 }).map((_, idx) => (
           <div
             key={`seasons-loading-${idx}`}
-            className="basis-[280px] shrink-0 pl-4 xl:basis-[250px] lg:basis-[220px] h1text8:basis-[200px] smd:basis-[180px] sss:basis-[165px] s:basis-[175px]"
+            className="shrink-0 basis-[280px] pl-4 xl:basis-[250px] lg:basis-[220px] h1text8:basis-[200px] smd:basis-[180px] sss:basis-[165px] s:basis-[175px]"
           >
             <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#101018]">
               <Skeleton className="h-[360px] w-full rounded-none bg-white/10 xl:h-[330px] lg:h-[300px] h1text8:h-[280px] smd:h-[250px] sss:h-[230px] s:h-[250px]" />

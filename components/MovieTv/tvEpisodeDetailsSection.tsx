@@ -61,10 +61,10 @@ export default function TvEpisodeDetailsSection({
             <div className="absolute inset-0 bg-gradient-to-t from-[#14131b] via-[#14131b]/40 to-transparent" />
 
             <div className="absolute inset-x-0 bottom-0 p-4">
-              <p className="text-sm font-medium text-gray-200">
-                Episode still
+              <p className="text-sm font-medium text-gray-200">Episode still</p>
+              <p className="text-xs text-gray-400">
+                S{seasonNumber} E{episode.episode_number}
               </p>
-              <p className="text-xs text-gray-400">S{seasonNumber} E{episode.episode_number}</p>
             </div>
           </div>
         </article>
@@ -102,7 +102,9 @@ export default function TvEpisodeDetailsSection({
               )}
             </div>
             {allCrew.length === 0 ? (
-              <p className="text-xs text-gray-400">No crew details available.</p>
+              <p className="text-xs text-gray-400">
+                No crew details available.
+              </p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {visibleCrew.map((person) => (
