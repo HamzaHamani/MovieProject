@@ -7,19 +7,32 @@ import { Suspense } from "react";
 import TrailerComponent from "../MovieTv/carouselTrailer/trailerComponent";
 import VideoLoadingIndicator from "../MovieTv/videoLoadingIndicator";
 import DetailTabs from "../MovieTv/detailTabs";
-import TvEpisodesSection from "../MovieTv/tvEpisodesSection";
 import SimilarSection from "../MovieTv/similarSection";
-import { TReviewItem, TSimilarItem } from "@/lib/actions";
-import ReviewsSection from "../MovieTv/reviewsSection";
+import { TSimilarItem } from "@/lib/actions";
+import SeasonsLoadingIndicator from "../MovieTv/seasonsLoadingIndicator";
+import ImagesLoadingIndicator from "../MovieTv/imagesLoadingIndicator";
+import TvEpisodesSectionAsync from "../MovieTv/tvEpisodesSectionAsync";
+import ImagesSectionAsync from "../MovieTv/imagesSectionAsync";
+import ReviewsLoadingIndicator from "../MovieTv/reviewsLoadingIndicator";
+import ReviewsSectionAsync from "../MovieTv/reviewsSectionAsync";
+import WatchProvidersSectionAsync from "../MovieTv/watchProvidersSectionAsync";
+import WatchProvidersLoadingIndicator from "../MovieTv/watchProvidersLoadingIndicator";
 
 type Props = {
   response: TspecifiedTv;
   similar: TSimilarItem[];
-  reviews: TReviewItem[];
-  activeTab: "seasons" | "universe" | "news" | "reviews";
+  activeTab: "seasons" | "videos" | "images" | "reviews" | "providers";
+  selectedSeason?: number | null;
+  selectedEpisode?: number | null;
 };
 
-export default function WholeDisplay({ response, similar, reviews, activeTab }: Props) {
+export default function WholeDisplay({
+  response,
+  similar,
+  activeTab,
+  selectedSeason,
+  selectedEpisode,
+}: Props) {
   const imageUrl = `https://image.tmdb.org/t/p/original${response.backdrop_path}`;
   return (
     <div className="relative min-h-screen pb-20">
@@ -45,12 +58,17 @@ export default function WholeDisplay({ response, similar, reviews, activeTab }: 
         </section>
 
         <section className="mx-auto mt-12 w-[90%]">
+          <Story response={response} typeM="tv" />
+
+          <CastComponent typeM="tv" id={response.id} />
+
           <DetailTabs
             items={[
               { key: "seasons", label: "Seasons" },
-              { key: "universe", label: "Universe" },
-              { key: "news", label: "News" },
+              { key: "videos", label: "Trailers / Videos" },
+              { key: "images", label: "Images" },
               { key: "reviews", label: "Reviews" },
+              { key: "providers", label: "Watch Providers" },
             ]}
             active={activeTab}
             typeM="tv"
@@ -58,33 +76,52 @@ export default function WholeDisplay({ response, similar, reviews, activeTab }: 
           />
 
           {activeTab === "seasons" && (
-            <>
-              <TvEpisodesSection response={response} />
-              <SimilarSection items={similar} typeM="tv" />
-            </>
+            <Suspense
+              fallback={
+                <SeasonsLoadingIndicator
+                  title={
+                    selectedEpisode
+                      ? `Seasons / Episodes / Episode ${selectedEpisode}`
+                      : selectedSeason
+                        ? "Seasons / Episodes"
+                        : "Seasons"
+                  }
+                />
+              }
+            >
+              <TvEpisodesSectionAsync
+                id={response.id}
+                selectedSeason={selectedSeason}
+                selectedEpisode={selectedEpisode}
+              />
+            </Suspense>
           )}
 
-          {activeTab === "universe" && (
-            <>
-              <Story response={response} typeM="tv" />
-              <CastComponent typeM="tv" id={response.id} />
-              <Suspense fallback={<VideoLoadingIndicator />}>
-                <TrailerComponent typeM="tv" id={response.id} />
-              </Suspense>
-              <SimilarSection items={similar} typeM="tv" />
-            </>
+          {activeTab === "videos" && (
+            <Suspense fallback={<VideoLoadingIndicator />}>
+              <TrailerComponent typeM="tv" id={response.id} />
+            </Suspense>
           )}
 
-          {activeTab === "news" && (
-            <>
-              <Suspense fallback={<VideoLoadingIndicator />}>
-                <TrailerComponent typeM="tv" id={response.id} />
-              </Suspense>
-              <SimilarSection items={similar} typeM="tv" />
-            </>
+          {activeTab === "images" && (
+            <Suspense fallback={<ImagesLoadingIndicator />}>
+              <ImagesSectionAsync id={response.id} typeM="tv" />
+            </Suspense>
           )}
 
-          {activeTab === "reviews" && <ReviewsSection items={reviews} />}
+          {activeTab === "reviews" && (
+            <Suspense fallback={<ReviewsLoadingIndicator />}>
+              <ReviewsSectionAsync id={response.id} typeM="tv" />
+            </Suspense>
+          )}
+
+          {activeTab === "providers" && (
+            <Suspense fallback={<WatchProvidersLoadingIndicator />}>
+              <WatchProvidersSectionAsync id={response.id} typeM="tv" />
+            </Suspense>
+          )}
+
+          <SimilarSection items={similar} typeM="tv" />
         </section>
       </div>
     </div>

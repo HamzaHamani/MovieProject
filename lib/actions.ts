@@ -215,6 +215,112 @@ export type TReviewItem = {
   };
 };
 
+export type TImageItem = {
+  file_path: string;
+  width: number;
+  height: number;
+  vote_average: number;
+};
+
+export type TWatchProviderItem = {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+  display_priority: number;
+};
+
+export type TWatchProvidersData = {
+  link: string | null;
+  flatrate: TWatchProviderItem[];
+  rent: TWatchProviderItem[];
+  buy: TWatchProviderItem[];
+};
+
+export type TTvEpisodeItem = {
+  id: number;
+  name: string;
+  episode_number: number;
+  still_path: string | null;
+  air_date: string | null;
+  runtime: number | null;
+};
+
+export type TTvSeasonDetails = {
+  id: number;
+  name: string;
+  season_number: number;
+  episodes: TTvEpisodeItem[];
+};
+
+export type TTvEpisodePerson = {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  character?: string;
+  job?: string;
+  department?: string;
+};
+
+export type TTvEpisodeDetails = {
+  id: number;
+  name: string;
+  overview: string;
+  episode_number: number;
+  season_number: number;
+  still_path: string | null;
+  air_date: string | null;
+  runtime: number | null;
+  vote_average: number;
+  vote_count: number;
+  crew: TTvEpisodePerson[];
+  guest_stars: TTvEpisodePerson[];
+};
+
+export type TPersonDetails = {
+  adult: boolean;
+  also_known_as: string[];
+  biography: string;
+  birthday: string | null;
+  deathday: string | null;
+  gender: number;
+  homepage: string | null;
+  id: number;
+  imdb_id: string | null;
+  known_for_department: string;
+  name: string;
+  place_of_birth: string | null;
+  popularity: number;
+  profile_path: string | null;
+};
+
+export type TPersonCreditItem = {
+  id: number;
+  media_type: "movie" | "tv";
+  genre_ids: number[];
+  poster_path: string | null;
+  backdrop_path: string | null;
+  title?: string;
+  name?: string;
+  release_date?: string;
+  first_air_date?: string;
+  character?: string;
+  job?: string;
+  vote_average: number;
+  popularity: number;
+};
+
+export type TPersonCombinedCredits = {
+  cast: TPersonCreditItem[];
+  crew: TPersonCreditItem[];
+};
+
+export type TPersonImageItem = {
+  file_path: string;
+  width: number;
+  height: number;
+  vote_average: number;
+};
+
 export async function getSimilarByType(
   id: string,
   typeM: "movie" | "tv",
@@ -235,6 +341,248 @@ export async function getReviewsByType(
   );
   const data = await res.data;
   return data?.results ?? [];
+}
+
+export async function getWatchProvidersByType(
+  id: string,
+  typeM: "movie" | "tv",
+): Promise<TWatchProvidersData> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/${typeM}/${id}/watch/providers?api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
+
+  const countryMap: Record<string, unknown> =
+    data?.results && typeof data.results === "object"
+      ? (data.results as Record<string, unknown>)
+      : {};
+
+  const usProviders = countryMap.US;
+  const fallbackProviders = Object.values(countryMap).find(
+    (value) => typeof value === "object" && value !== null,
+  );
+
+  const selected =
+    (usProviders as Record<string, unknown> | undefined) ??
+    (fallbackProviders as Record<string, unknown> | undefined) ??
+    {};
+
+  const normalizeProviders = (key: "flatrate" | "rent" | "buy") => {
+    const raw = selected[key];
+    if (!Array.isArray(raw)) return [] as TWatchProviderItem[];
+
+    return raw
+      .map((item: unknown) => {
+        const provider = item as Record<string, unknown>;
+        return {
+          provider_id: Number(provider.provider_id ?? 0),
+          provider_name: String(provider.provider_name ?? "Unknown Provider"),
+          logo_path:
+            typeof provider.logo_path === "string" ? provider.logo_path : null,
+          display_priority: Number(provider.display_priority ?? 0),
+        };
+      })
+      .filter((provider: TWatchProviderItem) => provider.provider_id > 0)
+      .sort(
+        (a: TWatchProviderItem, b: TWatchProviderItem) =>
+          a.display_priority - b.display_priority,
+      );
+  };
+
+  return {
+    link: typeof selected.link === "string" ? selected.link : null,
+    flatrate: normalizeProviders("flatrate"),
+    rent: normalizeProviders("rent"),
+    buy: normalizeProviders("buy"),
+  };
+}
+
+export async function getImagesByType(
+  id: string,
+  typeM: "movie" | "tv",
+): Promise<TImageItem[]> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/${typeM}/${id}/images?api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
+  const backdrops = Array.isArray(data?.backdrops) ? data.backdrops : [];
+  const posters = Array.isArray(data?.posters) ? data.posters : [];
+
+  return [...backdrops, ...posters]
+    .filter((item) => item?.file_path)
+    .slice(0, 24);
+}
+
+export async function getTVSeasonDetails(
+  tvId: string,
+  seasonNumber: number,
+): Promise<TTvSeasonDetails> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/tv/${tvId}/season/${seasonNumber}?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
+
+  return {
+    id: data.id,
+    name: data.name,
+    season_number: data.season_number,
+    episodes: Array.isArray(data.episodes)
+      ? data.episodes.map((episode: any) => ({
+          id: episode.id,
+          name: episode.name,
+          episode_number: episode.episode_number,
+          still_path: episode.still_path ?? null,
+          air_date: episode.air_date ?? null,
+          runtime: episode.runtime ?? null,
+        }))
+      : [],
+  };
+}
+
+export async function getTVEpisodeDetails(
+  tvId: string,
+  seasonNumber: number,
+  episodeNumber: number,
+): Promise<TTvEpisodeDetails> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
+
+  return {
+    id: data.id,
+    name: data.name,
+    overview: data.overview ?? "",
+    episode_number: data.episode_number ?? 0,
+    season_number: data.season_number ?? seasonNumber,
+    still_path: data.still_path ?? null,
+    air_date: data.air_date ?? null,
+    runtime: data.runtime ?? null,
+    vote_average: data.vote_average ?? 0,
+    vote_count: data.vote_count ?? 0,
+    crew: Array.isArray(data.crew)
+      ? data.crew.map((person: unknown) => {
+          const p = person as Record<string, unknown>;
+          return {
+            id: Number(p.id ?? 0),
+            name: String(p.name ?? "Unknown"),
+            profile_path:
+              typeof p.profile_path === "string" ? p.profile_path : null,
+            job: typeof p.job === "string" ? p.job : undefined,
+            department:
+              typeof p.department === "string" ? p.department : undefined,
+          };
+        })
+      : [],
+    guest_stars: Array.isArray(data.guest_stars)
+      ? data.guest_stars.map((person: unknown) => {
+          const p = person as Record<string, unknown>;
+          return {
+            id: Number(p.id ?? 0),
+            name: String(p.name ?? "Unknown"),
+            profile_path:
+              typeof p.profile_path === "string" ? p.profile_path : null,
+            character: typeof p.character === "string" ? p.character : undefined,
+          };
+        })
+      : [],
+  };
+}
+
+export async function getPersonDetails(id: string): Promise<TPersonDetails> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/person/${id}?api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
+
+  return {
+    adult: Boolean(data?.adult),
+    also_known_as: Array.isArray(data?.also_known_as) ? data.also_known_as : [],
+    biography: data?.biography ?? "",
+    birthday: data?.birthday ?? null,
+    deathday: data?.deathday ?? null,
+    gender: data?.gender ?? 0,
+    homepage: data?.homepage ?? null,
+    id: data?.id ?? 0,
+    imdb_id: data?.imdb_id ?? null,
+    known_for_department: data?.known_for_department ?? "Unknown",
+    name: data?.name ?? "Unknown",
+    place_of_birth: data?.place_of_birth ?? null,
+    popularity: data?.popularity ?? 0,
+    profile_path: data?.profile_path ?? null,
+  };
+}
+
+export async function getPersonCombinedCredits(
+  id: string,
+): Promise<TPersonCombinedCredits> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/person/${id}/combined_credits?api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
+
+  const normalizeCreditItem = (item: Record<string, unknown>) => {
+    const mediaType = item?.media_type === "tv" ? "tv" : "movie";
+
+    return {
+      id: Number(item?.id ?? 0),
+      media_type: mediaType,
+      genre_ids: Array.isArray(item?.genre_ids)
+        ? item.genre_ids
+            .map((genreId: unknown) => Number(genreId))
+            .filter((genreId: number) => Number.isFinite(genreId))
+        : [],
+      poster_path: typeof item?.poster_path === "string" ? item.poster_path : null,
+      backdrop_path:
+        typeof item?.backdrop_path === "string" ? item.backdrop_path : null,
+      title: typeof item?.title === "string" ? item.title : undefined,
+      name: typeof item?.name === "string" ? item.name : undefined,
+      release_date:
+        typeof item?.release_date === "string" ? item.release_date : undefined,
+      first_air_date:
+        typeof item?.first_air_date === "string"
+          ? item.first_air_date
+          : undefined,
+      character: typeof item?.character === "string" ? item.character : undefined,
+      job: typeof item?.job === "string" ? item.job : undefined,
+      vote_average: Number(item?.vote_average ?? 0),
+      popularity: Number(item?.popularity ?? 0),
+    } as TPersonCreditItem;
+  };
+
+  const cast = Array.isArray(data?.cast)
+    ? data.cast
+        .map((item: unknown) => normalizeCreditItem(item as Record<string, unknown>))
+        .filter((item: TPersonCreditItem) => item.id > 0)
+    : [];
+
+  const crew = Array.isArray(data?.crew)
+    ? data.crew
+        .map((item: unknown) => normalizeCreditItem(item as Record<string, unknown>))
+        .filter((item: TPersonCreditItem) => item.id > 0)
+    : [];
+
+  return { cast, crew };
+}
+
+export async function getPersonImages(id: string): Promise<TPersonImageItem[]> {
+  const res = await axios.get(
+    `https://api.themoviedb.org/3/person/${id}/images?api_key=${process.env.TMDB_API_KEY}`,
+  );
+  const data = await res.data;
+  const profiles: Array<Record<string, unknown>> = Array.isArray(data?.profiles)
+    ? data.profiles
+    : [];
+
+  return profiles
+    .filter((item: Record<string, unknown>) => item?.file_path)
+    .map((item: Record<string, unknown>) => ({
+      file_path: String(item.file_path),
+      width: Number(item.width ?? 0),
+      height: Number(item.height ?? 0),
+      vote_average: Number(item.vote_average ?? 0),
+    }))
+    .slice(0, 12);
 }
 
 export type ExploreMovieListItem = {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { GrDocumentMissing } from "react-icons/gr";
 import { RiStarSFill } from "react-icons/ri";
 
+import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -38,11 +39,11 @@ export default function MovieTvCard({
         )}
       >
         {posterPath ? (
-          <img
-            loading="lazy"
+          <LazyBlurImage
             src={`https://image.tmdb.org/t/p/w500/${posterPath}`}
             alt={`${title} poster`}
             className="h-full w-full object-cover transition-all duration-300 group-hover:scale-110"
+            placeholderClassName="bg-zinc-700/50"
           />
         ) : (
           <div className="flex h-full items-center justify-center">

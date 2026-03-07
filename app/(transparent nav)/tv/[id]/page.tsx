@@ -1,9 +1,5 @@
 import WholeDisplay from "@/components/tv/WholeDisplay";
-import {
-  getReviewsByType,
-  getSimilarByType,
-  getSpecifiedTV,
-} from "@/lib/actions";
+import { getSimilarByType, getSpecifiedTV } from "@/lib/actions";
 import { TspecifiedTv } from "@/types/apiTv";
 
 type Props = {
@@ -46,22 +42,40 @@ export default async function page({ params, searchParams }: Props) {
 
   const rawTab = searchParams?.tab;
   const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
+  const normalizedTab =
+    tabValue === "universe"
+      ? "videos"
+      : tabValue === "news"
+        ? "images"
+        : tabValue;
   const tab =
-    tabValue === "seasons" ||
-    tabValue === "universe" ||
-    tabValue === "news" ||
-    tabValue === "reviews"
-      ? tabValue
+    normalizedTab === "seasons" ||
+    normalizedTab === "videos" ||
+    normalizedTab === "images" ||
+    normalizedTab === "reviews" ||
+    normalizedTab === "providers"
+      ? normalizedTab
       : "seasons";
 
-  const reviews = tab === "reviews" ? await getReviewsByType(id, "tv") : [];
+  const rawSeason = searchParams?.season;
+  const seasonValue = Array.isArray(rawSeason) ? rawSeason[0] : rawSeason;
+  const parsedSeason = seasonValue ? Number.parseInt(seasonValue, 10) : NaN;
+  const selectedSeason =
+    Number.isInteger(parsedSeason) && parsedSeason > 0 ? parsedSeason : null;
+
+  const rawEpisode = searchParams?.episode;
+  const episodeValue = Array.isArray(rawEpisode) ? rawEpisode[0] : rawEpisode;
+  const parsedEpisode = episodeValue ? Number.parseInt(episodeValue, 10) : NaN;
+  const selectedEpisode =
+    Number.isInteger(parsedEpisode) && parsedEpisode > 0 ? parsedEpisode : null;
 
   return (
     <WholeDisplay
       response={response}
       similar={similar}
-      reviews={reviews}
       activeTab={tab}
+      selectedSeason={tab === "seasons" ? selectedSeason : null}
+      selectedEpisode={tab === "seasons" ? selectedEpisode : null}
     />
   );
 }

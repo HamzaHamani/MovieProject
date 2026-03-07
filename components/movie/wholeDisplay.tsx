@@ -9,23 +9,22 @@ import TrailerComponent from "../MovieTv/carouselTrailer/trailerComponent";
 
 import DetailTabs from "../MovieTv/detailTabs";
 import SimilarSection from "../MovieTv/similarSection";
-import { TReviewItem, TSimilarItem } from "@/lib/actions";
-import ReviewsSection from "../MovieTv/reviewsSection";
+import { TSimilarItem } from "@/lib/actions";
+import ImagesLoadingIndicator from "../MovieTv/imagesLoadingIndicator";
+import ImagesSectionAsync from "../MovieTv/imagesSectionAsync";
+import ReviewsLoadingIndicator from "../MovieTv/reviewsLoadingIndicator";
+import ReviewsSectionAsync from "../MovieTv/reviewsSectionAsync";
+import WatchProvidersSectionAsync from "../MovieTv/watchProvidersSectionAsync";
+import WatchProvidersLoadingIndicator from "../MovieTv/watchProvidersLoadingIndicator";
 
 type Props = {
   response: TspecifiedMovie;
   similar: TSimilarItem[];
-  reviews: TReviewItem[];
-  activeTab: "universe" | "news" | "reviews";
+  activeTab: "videos" | "images" | "reviews" | "providers";
   typeM?: "movie" | "tv";
 };
 
-export default function WholeDisplay({
-  response,
-  similar,
-  reviews,
-  activeTab,
-}: Props) {
+export default function WholeDisplay({ response, similar, activeTab }: Props) {
   const imageUrl = `https://image.tmdb.org/t/p/original${response.backdrop_path}`;
   return (
     <div className="relative min-h-screen pb-20">
@@ -51,49 +50,47 @@ export default function WholeDisplay({
         </section>
 
         <section className="mx-auto mt-12 w-[90%]">
+          <Story response={response} typeM="movie" />
+
+          <CastComponent typeM="movie" id={response.id} />
+
           <DetailTabs
             items={[
-              { key: "universe", label: "Universe" },
-              { key: "news", label: "News" },
+              { key: "videos", label: "Trailers / Videos" },
+              { key: "images", label: "Images" },
               { key: "reviews", label: "Reviews" },
+              { key: "providers", label: "Watch Providers" },
             ]}
             active={activeTab}
             typeM="movie"
             id={response.id}
           />
 
-          {activeTab === "universe" && (
-            <>
-              <Story response={response} typeM="movie" />
-
-              <Suspense
-                fallback={
-                  <div className="flex h-20 items-center justify-center">
-                    Loading Cast...
-                  </div>
-                }
-              >
-                <CastComponent typeM="movie" id={response.id} />
-              </Suspense>
-
-              <Suspense fallback={<VideoLoadingIndicator />}>
-                <TrailerComponent typeM="movie" id={response.id} />
-              </Suspense>
-
-              <SimilarSection items={similar} typeM="movie" />
-            </>
+          {activeTab === "videos" && (
+            <Suspense fallback={<VideoLoadingIndicator />}>
+              <TrailerComponent typeM="movie" id={response.id} />
+            </Suspense>
           )}
 
-          {activeTab === "news" && (
-            <>
-              <Suspense fallback={<VideoLoadingIndicator />}>
-                <TrailerComponent typeM="movie" id={response.id} />
-              </Suspense>
-              <SimilarSection items={similar} typeM="movie" />
-            </>
+          {activeTab === "images" && (
+            <Suspense fallback={<ImagesLoadingIndicator />}>
+              <ImagesSectionAsync id={response.id} typeM="movie" />
+            </Suspense>
           )}
 
-          {activeTab === "reviews" && <ReviewsSection items={reviews} />}
+          {activeTab === "reviews" && (
+            <Suspense fallback={<ReviewsLoadingIndicator />}>
+              <ReviewsSectionAsync id={response.id} typeM="movie" />
+            </Suspense>
+          )}
+
+          {activeTab === "providers" && (
+            <Suspense fallback={<WatchProvidersLoadingIndicator />}>
+              <WatchProvidersSectionAsync id={response.id} typeM="movie" />
+            </Suspense>
+          )}
+
+          <SimilarSection items={similar} typeM="movie" />
         </section>
       </div>
     </div>

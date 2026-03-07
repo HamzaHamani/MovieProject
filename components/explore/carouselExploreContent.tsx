@@ -1,6 +1,7 @@
 "use client";
 import { TexploreApiSchema } from "@/types/api";
 import { CarouselContent, CarouselItem } from "../ui/carousel";
+import LazyBlurImage from "../ui/lazyBlurImage";
 import { useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
@@ -52,12 +53,13 @@ export default function CarouselExploreContent({ data }: Props) {
             }`}
             onClick={() => activeCarouse(movie)}
           >
-            <img
+            <LazyBlurImage
               src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
               alt="movie poster "
               className={`h-full w-full rounded-lg object-cover transition-all ${
                 slectedMovie == movie.id ? "" : ""
               } `}
+              placeholderClassName="bg-zinc-700/50"
             />
           </div>
         </CarouselItem>

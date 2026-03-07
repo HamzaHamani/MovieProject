@@ -15,6 +15,7 @@ import Link from "next/link";
 import { GrDocumentMissing } from "react-icons/gr";
 import { RiStarSFill } from "react-icons/ri";
 import { useEffect, useMemo, useState } from "react";
+import LazyBlurImage from "../ui/lazyBlurImage";
 
 type FeaturedCard = {
   id: number;
@@ -132,11 +133,11 @@ export default function FeaturedRecentSection({ cards }: Props) {
             className={`group relative flex h-[280px] w-[200px] cursor-pointer overflow-hidden rounded lg:h-[255px] lg:w-[185px] h1text8:h-[235px] h1text8:w-[170px] smd:h-[210px] smd:w-[150px] s:h-[190px] s:w-[135px] ${selectedItem.poster_path ? "" : "items-center justify-center bg-gray-600"}`}
           >
             {selectedItem.poster_path ? (
-              <img
-                loading="lazy"
+              <LazyBlurImage
                 src={`https://image.tmdb.org/t/p/w500/${selectedItem.poster_path}`}
                 alt={`${selectedItem.title} poster`}
                 className="h-full w-full object-cover"
+                placeholderClassName="bg-zinc-700/50"
               />
             ) : (
               <h3 className="text-center">
@@ -231,11 +232,11 @@ export default function FeaturedRecentSection({ cards }: Props) {
                   }}
                 >
                   {item.poster_path ? (
-                    <img
-                      loading="lazy"
+                    <LazyBlurImage
                       src={`https://image.tmdb.org/t/p/w500/${item.poster_path}`}
                       alt={`${item.title} poster`}
                       className="h-full w-full object-cover"
+                      placeholderClassName="bg-zinc-700/50"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center">

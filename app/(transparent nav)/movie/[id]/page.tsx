@@ -1,9 +1,5 @@
 import WholeDisplay from "@/components/movie/wholeDisplay";
-import {
-  getReviewsByType,
-  getSimilarByType,
-  getSpecifiedMovie,
-} from "@/lib/actions";
+import { getSimilarByType, getSpecifiedMovie } from "@/lib/actions";
 import { TspecifiedMovie } from "@/types/api";
 import { Metadata } from "next";
 
@@ -46,16 +42,24 @@ export default async function Page({ params, searchParams }: Props) {
 
   const rawTab = searchParams?.tab;
   const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
+  const normalizedTab =
+    tabValue === "universe"
+      ? "videos"
+      : tabValue === "news"
+        ? "images"
+        : tabValue;
   const tab =
-    tabValue === "news" || tabValue === "reviews" ? tabValue : "universe";
-
-  const reviews = tab === "reviews" ? await getReviewsByType(id, "movie") : [];
+    normalizedTab === "videos" ||
+    normalizedTab === "images" ||
+    normalizedTab === "reviews" ||
+    normalizedTab === "providers"
+      ? normalizedTab
+      : "videos";
 
   return (
     <WholeDisplay
       response={response}
       similar={similar}
-      reviews={reviews}
       activeTab={tab}
       typeM={"movie"}
     />
