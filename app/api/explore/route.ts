@@ -7,7 +7,9 @@ const LIST_ENDPOINTS: EndpointMap = {
   "just-release": "movie/now_playing",
   "top-rated": "movie/top_rated",
   "popular-tv": "tv/popular",
-  "on-the-air": "tv/on_the_air",
+  "on-air-today": "tv/airing_today",
+  // Keep old key working so older links do not break.
+  "on-the-air": "tv/airing_today",
 };
 
 async function tmdbList(endpoint: string, page = 1) {

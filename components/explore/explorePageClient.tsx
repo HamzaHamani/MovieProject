@@ -20,7 +20,7 @@ import useNearViewport from "@/hooks/useNearViewport";
 import {
   fetchExploreGenreMovies,
   fetchExploreNowPlayingMovies,
-  fetchExploreOnTheAirTvShows,
+  fetchExploreOnAirTodayTvShows,
   fetchExplorePopularTvShows,
   fetchExploreTopRatedMovies,
   fetchExploreTrendingList,
@@ -365,12 +365,12 @@ export default function ExplorePageClient() {
     enabled: isPopularTvNear,
   });
 
-  const { ref: onTheAirRef, isNear: isOnTheAirNear } =
+  const { ref: onAirTodayRef, isNear: isOnAirTodayNear } =
     useNearViewport<HTMLDivElement>("120px");
-  const onTheAir = useQuery({
-    queryKey: ["explore", "on-the-air"],
-    queryFn: fetchExploreOnTheAirTvShows,
-    enabled: isOnTheAirNear,
+  const onAirToday = useQuery({
+    queryKey: ["explore", "on-air-today"],
+    queryFn: fetchExploreOnAirTodayTvShows,
+    enabled: isOnAirTodayNear,
   });
 
   const featuredCards = useMemo(
@@ -389,9 +389,9 @@ export default function ExplorePageClient() {
     () => mapTvCards(popularTv.data ?? []),
     [popularTv.data],
   );
-  const onTheAirCards = useMemo(
-    () => mapTvCards(onTheAir.data ?? []),
-    [onTheAir.data],
+  const onAirTodayCards = useMemo(
+    () => mapTvCards(onAirToday.data ?? []),
+    [onAirToday.data],
   );
 
   return (
@@ -483,22 +483,22 @@ export default function ExplorePageClient() {
           )}
         </div>
 
-        <div ref={onTheAirRef}>
+        <div ref={onAirTodayRef}>
           <div className="h-1 w-full" />
-          {(onTheAir.isPending || !onTheAir.data) && isOnTheAirNear && (
+          {(onAirToday.isPending || !onAirToday.data) && isOnAirTodayNear && (
             <SectionCarouselSkeleton />
           )}
-          {onTheAirCards.length > 0 && (
+          {onAirTodayCards.length > 0 && (
             <ExploreSection
-              title="on the air tv shows"
+              title="on air today tv shows"
               icon={Radio}
-              seeMoreHref="/explore/on-the-air"
-              cards={onTheAirCards}
+              seeMoreHref="/explore/on-air-today"
+              cards={onAirTodayCards}
             />
           )}
-          {onTheAir.isError && isOnTheAirNear && (
+          {onAirToday.isError && isOnAirTodayNear && (
             <p className="mt-8 text-sm text-red-300">
-              Could not load on the air tv shows.
+              Could not load on air today tv shows.
             </p>
           )}
         </div>

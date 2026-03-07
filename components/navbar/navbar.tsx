@@ -7,8 +7,8 @@ import { getUser } from "@/lib/actions";
 import { UserDropDown } from "./userDropDown";
 
 const links = [
-  { href: "/", label: "Home" },
   { href: "/explore", label: "Explore" },
+  { href: "/upcoming", label: "Upcoming" },
   { href: "/bookmarks", label: "Bookmarks" },
   { href: "/search", label: "Search" },
 ];

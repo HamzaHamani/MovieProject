@@ -13,6 +13,7 @@ const validTypes = new Set([
   "just-release",
   "top-rated",
   "popular-tv",
+  "on-air-today",
   "on-the-air",
   "genre",
 ]);
@@ -22,6 +23,7 @@ type ExploreType =
   | "just-release"
   | "top-rated"
   | "popular-tv"
+  | "on-air-today"
   | "on-the-air"
   | "genre";
 

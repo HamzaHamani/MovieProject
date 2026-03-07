@@ -33,9 +33,11 @@ export function fetchExplorePopularTvShows() {
   return getJson<ExploreTvListItem[]>("/api/explore?kind=popular-tv");
 }
 
-export function fetchExploreOnTheAirTvShows() {
-  return getJson<ExploreTvListItem[]>("/api/explore?kind=on-the-air");
+export function fetchExploreOnAirTodayTvShows() {
+  return getJson<ExploreTvListItem[]>("/api/explore?kind=on-air-today");
 }
+
+export const fetchExploreOnTheAirTvShows = fetchExploreOnAirTodayTvShows;
 
 export function fetchExploreGenreMovies(withGenres: string) {
   return getJson<ExploreMovieListItem[]>(
@@ -61,6 +63,7 @@ type PagedKind =
   | "just-release"
   | "top-rated"
   | "popular-tv"
+  | "on-air-today"
   | "on-the-air"
   | "genre";
 

@@ -19,6 +19,7 @@ type ExploreType =
   | "just-release"
   | "top-rated"
   | "popular-tv"
+  | "on-air-today"
   | "on-the-air"
   | "genre";
 
@@ -114,7 +115,8 @@ function Header({ type }: { type: ExploreType }) {
     "just-release": { title: "just release", Icon: Clapperboard },
     "top-rated": { title: "top rated movies", Icon: Trophy },
     "popular-tv": { title: "popular tv shows", Icon: Tv },
-    "on-the-air": { title: "on the air tv shows", Icon: Radio },
+    "on-air-today": { title: "on air today tv shows", Icon: Radio },
+    "on-the-air": { title: "on air today tv shows", Icon: Radio },
   };
 
   if (type === "genre") {
@@ -233,6 +235,7 @@ export default function ExploreTypePageClient({ type }: { type: ExploreType }) {
       case "featured":
         return mapTrendingCards(merged as ExploreTrendingItem[]);
       case "popular-tv":
+      case "on-air-today":
       case "on-the-air":
         return mapTvCards(merged as ExploreTvListItem[]);
       default:
