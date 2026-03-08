@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import MovieSkeleton from "@/components/general/movieSkeleton";
 
 type UpcomingMovie = {
   adult: boolean;
@@ -35,14 +36,6 @@ type DateWindow = {
   minimum: string;
   maximum: string;
 };
-
-function toMonthLabel(date: string) {
-  const parsed = new Date(`${date}T00:00:00`);
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    year: "numeric",
-  }).format(parsed);
-}
 
 function formatMonthLong(date: string) {
   const parsed = new Date(`${date}T00:00:00`);
@@ -139,9 +132,12 @@ export default function UpcomingPageClient({
 }: {
   initialPages: UpcomingResponse[];
 }) {
+  const BATCH_SIZE = 16;
+
   const [pages, setPages] = useState<UpcomingResponse[]>(initialPages);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoadingBatch, setIsLoadingBatch] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const [nextPage, setNextPage] = useState(() => {
     const loadedMax = Math.max(...initialPages.map((page) => page.page));
     return loadedMax + 1;
@@ -150,9 +146,7 @@ export default function UpcomingPageClient({
   const firstPage = pages[0] ?? null;
   const totalPages = firstPage?.total_pages ?? 1;
   const totalResults = firstPage?.total_results ?? 0;
-  const hasMore = nextPage <= totalPages;
-
-  const moviesForView = useMemo(() => {
+  const filteredMovies = useMemo(() => {
     const today = getLocalDateString();
 
     const allFetched = pages
@@ -160,44 +154,113 @@ export default function UpcomingPageClient({
       .filter((item) => Boolean(item.release_date))
       .filter((item) => item.release_date >= today);
 
-    const deduped = Array.from(
+    return Array.from(
       new Map(allFetched.map((movie) => [movie.id, movie])).values(),
     );
-
-    return deduped;
   }, [pages]);
+
+  const moviesForView = useMemo(
+    () => filteredMovies.slice(0, visibleCount),
+    [filteredMovies, visibleCount],
+  );
+
+  const hasMore =
+    visibleCount < filteredMovies.length || nextPage <= totalPages;
+
+  const fillUntilAtLeast = useCallback(
+    async (targetCount: number) => {
+      if (isLoadingBatch) {
+        return;
+      }
+
+      setIsLoadingBatch(true);
+      setLoadMoreError(null);
+
+      let workingPages = [...pages];
+      let workingNextPage = nextPage;
+
+      const getFilteredCount = (sourcePages: UpcomingResponse[]) => {
+        const today = getLocalDateString();
+        const allFetched = sourcePages
+          .flatMap((page) => page.results)
+          .filter((item) => Boolean(item.release_date))
+          .filter((item) => item.release_date >= today);
+
+        return Array.from(
+          new Map(allFetched.map((movie) => [movie.id, movie])).values(),
+        ).length;
+      };
+
+      try {
+        while (
+          getFilteredCount(workingPages) < targetCount &&
+          workingNextPage <= totalPages
+        ) {
+          const response = await fetch(`/api/upcoming?page=${workingNextPage}`);
+          if (!response.ok) {
+            throw new Error("Failed to load more upcoming movies");
+          }
+
+          const json = (await response.json()) as UpcomingResponse;
+          workingPages.push(json);
+          workingNextPage += 1;
+        }
+
+        setPages(workingPages);
+        setNextPage(workingNextPage);
+      } catch {
+        setLoadMoreError("Could not load more movies. Try again.");
+      } finally {
+        setIsLoadingBatch(false);
+      }
+    },
+    [isLoadingBatch, nextPage, pages, totalPages],
+  );
+
+  useEffect(() => {
+    if (
+      filteredMovies.length >= BATCH_SIZE ||
+      nextPage > totalPages ||
+      isLoadingBatch
+    ) {
+      if (visibleCount > filteredMovies.length) {
+        setVisibleCount(filteredMovies.length);
+      }
+      return;
+    }
+
+    void fillUntilAtLeast(BATCH_SIZE);
+  }, [
+    BATCH_SIZE,
+    fillUntilAtLeast,
+    filteredMovies.length,
+    isLoadingBatch,
+    nextPage,
+    totalPages,
+    visibleCount,
+  ]);
+
+  async function handleLoadMore() {
+    if (isLoadingBatch || !hasMore) {
+      return;
+    }
+
+    const target = visibleCount + BATCH_SIZE;
+
+    if (filteredMovies.length >= target) {
+      setVisibleCount(target);
+      return;
+    }
+
+    await fillUntilAtLeast(target);
+    setVisibleCount(target);
+  }
 
   const dateWindow = getDateWindow(moviesForView) ?? firstPage?.dates ?? null;
   const heroItems = useMemo(
     () => moviesForView.filter((movie) => movie.backdrop_path).slice(0, 6),
     [moviesForView],
   );
-
-  async function handleLoadMore() {
-    if (isLoadingMore || !hasMore) {
-      return;
-    }
-
-    setIsLoadingMore(true);
-    setLoadMoreError(null);
-
-    try {
-      const response = await fetch(`/api/upcoming?page=${nextPage}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to load more upcoming movies");
-      }
-
-      const json = (await response.json()) as UpcomingResponse;
-
-      setPages((prev) => [...prev, json]);
-      setNextPage((prev) => prev + 1);
-    } catch {
-      setLoadMoreError("Could not load more movies. Try again.");
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }
 
   return (
     <main className="min-h-screen bg-[#05060b] text-white">
@@ -230,8 +293,8 @@ export default function UpcomingPageClient({
                 Schedule release all movie around the world
               </h1>
               <p className="mt-2 text-xs text-gray-300 smd:text-[11px]">
-                Loaded {moviesForView.length} upcoming movies from TMDB pages 1
-                to {nextPage - 1} (total results: {totalResults}).
+                Showing {moviesForView.length} upcoming movies from TMDB pages 1
+                to {Math.max(1, nextPage - 1)} (total results: {totalResults}).
               </p>
               {dateWindow ? (
                 <p className="mt-1 text-xs text-gray-400 smd:text-[11px]">
@@ -247,11 +310,18 @@ export default function UpcomingPageClient({
               {moviesForView.map((movie) => (
                 <ReleaseRow key={`upcoming-${movie.id}`} movie={movie} />
               ))}
+
+              {isLoadingBatch &&
+                Array.from({ length: 4 }).map((_, index) => (
+                  <li key={`upcoming-skeleton-${index}`}>
+                    <MovieSkeleton />
+                  </li>
+                ))}
             </ul>
 
             {moviesForView.length === 0 && (
               <p className="pt-6 text-sm text-gray-300">
-                No upcoming movies from today in loaded pages yet.
+                No upcoming movies in loaded pages yet.
               </p>
             )}
           </div>
@@ -262,10 +332,10 @@ export default function UpcomingPageClient({
                 <button
                   type="button"
                   onClick={handleLoadMore}
-                  disabled={isLoadingMore}
+                  disabled={isLoadingBatch}
                   className="rounded-md border border-white/20 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isLoadingMore ? "Loading..." : "Show more"}
+                  {isLoadingBatch ? "Loading..." : "Show more"}
                 </button>
               )}
 

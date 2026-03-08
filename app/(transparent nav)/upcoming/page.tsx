@@ -50,12 +50,5 @@ async function fetchUpcoming(page: number) {
 
 export default async function UpcomingPage() {
   const firstPage = await fetchUpcoming(1);
-
-  const initialPages = [firstPage];
-  if ((firstPage.total_pages || 1) > 1) {
-    const secondPage = await fetchUpcoming(2);
-    initialPages.push(secondPage);
-  }
-
-  return <UpcomingPageClient initialPages={initialPages} />;
+  return <UpcomingPageClient initialPages={[firstPage]} />;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { startTransition, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type TabItem = {
   key: string;
@@ -58,12 +58,12 @@ export default function DetailTabs({ items, active, typeM, id }: Props) {
   }, [active, items]);
 
   const onSelectTab = (tabKey: string) => {
+    if (tabKey === active) return;
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", tabKey);
 
-    startTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (
