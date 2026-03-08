@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const pageParam = Number(searchParams.get("page") ?? "1");
-  const page = Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
+  const page =
+    Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
 
   try {
     const response = await fetch(
@@ -20,7 +21,10 @@ export async function GET(request: NextRequest) {
     );
 
     if (!response.ok) {
-      return NextResponse.json({ error: "TMDB request failed" }, { status: 502 });
+      return NextResponse.json(
+        { error: "TMDB request failed" },
+        { status: 502 },
+      );
     }
 
     const json = await response.json();

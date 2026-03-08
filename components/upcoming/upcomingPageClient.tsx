@@ -230,11 +230,13 @@ export default function UpcomingPageClient({
                 Schedule release all movie around the world
               </h1>
               <p className="mt-2 text-xs text-gray-300 smd:text-[11px]">
-                Loaded {moviesForView.length} upcoming movies from TMDB pages 1 to {nextPage - 1} (total results: {totalResults}).
+                Loaded {moviesForView.length} upcoming movies from TMDB pages 1
+                to {nextPage - 1} (total results: {totalResults}).
               </p>
               {dateWindow ? (
                 <p className="mt-1 text-xs text-gray-400 smd:text-[11px]">
-                  Release range: {formatRange(dateWindow.minimum)} to {formatRange(dateWindow.maximum)}
+                  Release range: {formatRange(dateWindow.minimum)} to{" "}
+                  {formatRange(dateWindow.maximum)}
                 </p>
               ) : null}
             </div>
@@ -267,7 +269,9 @@ export default function UpcomingPageClient({
                 </button>
               )}
 
-              {loadMoreError && <p className="text-xs text-red-300">{loadMoreError}</p>}
+              {loadMoreError && (
+                <p className="text-xs text-red-300">{loadMoreError}</p>
+              )}
             </div>
           )}
         </div>
