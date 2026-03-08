@@ -325,11 +325,15 @@ export async function getSimilarByType(
   id: string,
   typeM: "movie" | "tv",
 ): Promise<TSimilarItem[]> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/${typeM}/${id}/similar?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
-  return data?.results ?? [];
+  try {
+    const res = await axios.get(
+      `https://api.themoviedb.org/3/${typeM}/${id}/similar?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
+    );
+    const data = await res.data;
+    return data?.results ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getReviewsByType(

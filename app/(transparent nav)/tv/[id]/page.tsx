@@ -1,10 +1,11 @@
 import WholeDisplay from "@/components/tv/WholeDisplay";
 import { getSimilarByType, getSpecifiedTV } from "@/lib/actions";
 import { TspecifiedTv } from "@/types/apiTv";
+import { notFound } from "next/navigation";
 
 type Props = {
-  params: { id: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 // export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -25,14 +26,15 @@ type Props = {
 //   };
 // }
 export default async function page({ params, searchParams }: Props) {
-  const { id } = params;
+  const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+
   async function fetch(): Promise<TspecifiedTv> {
     try {
       const data: TspecifiedTv = await getSpecifiedTV(id);
       return data;
     } catch (e) {
-      console.error(e);
-      throw new Error("Failed to fetch tv show");
+      notFound();
     }
   }
   const [response, similar] = await Promise.all([
@@ -40,7 +42,7 @@ export default async function page({ params, searchParams }: Props) {
     getSimilarByType(id, "tv"),
   ]);
 
-  const rawTab = searchParams?.tab;
+  const rawTab = resolvedSearchParams?.tab;
   const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
   const normalizedTab =
     tabValue === "universe"
@@ -57,13 +59,13 @@ export default async function page({ params, searchParams }: Props) {
       ? normalizedTab
       : "seasons";
 
-  const rawSeason = searchParams?.season;
+  const rawSeason = resolvedSearchParams?.season;
   const seasonValue = Array.isArray(rawSeason) ? rawSeason[0] : rawSeason;
   const parsedSeason = seasonValue ? Number.parseInt(seasonValue, 10) : NaN;
   const selectedSeason =
     Number.isInteger(parsedSeason) && parsedSeason > 0 ? parsedSeason : null;
 
-  const rawEpisode = searchParams?.episode;
+  const rawEpisode = resolvedSearchParams?.episode;
   const episodeValue = Array.isArray(rawEpisode) ? rawEpisode[0] : rawEpisode;
   const parsedEpisode = episodeValue ? Number.parseInt(episodeValue, 10) : NaN;
   const selectedEpisode =

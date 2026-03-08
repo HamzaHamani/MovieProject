@@ -2,19 +2,24 @@ import WholeDisplay from "@/components/movie/wholeDisplay";
 import { getSimilarByType, getSpecifiedMovie } from "@/lib/actions";
 import { TspecifiedMovie } from "@/types/api";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 type Props = {
-  params: { id: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = params;
+  const { id } = await params;
   async function fetchMovie(): Promise<TspecifiedMovie> {
     try {
       const data = await getSpecifiedMovie(id);
       return data as TspecifiedMovie;
     } catch (e) {
-      throw new Error("Failed to fetch the movie");
+      return {
+        id: 0,
+        title: "Movie",
+        overview: "Movie details",
+      } as TspecifiedMovie;
     }
   }
   const res = await fetchMovie();
@@ -25,13 +30,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function Page({ params, searchParams }: Props) {
-  const { id } = params;
+  const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+
   async function fetchMovie(): Promise<TspecifiedMovie> {
     try {
       const data = await getSpecifiedMovie(id);
       return data as TspecifiedMovie;
     } catch (e) {
-      throw new Error("Failed to fetch movie");
+      notFound();
     }
   }
 
@@ -40,7 +47,7 @@ export default async function Page({ params, searchParams }: Props) {
     getSimilarByType(id, "movie"),
   ]);
 
-  const rawTab = searchParams?.tab;
+  const rawTab = resolvedSearchParams?.tab;
   const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
   const normalizedTab =
     tabValue === "universe"

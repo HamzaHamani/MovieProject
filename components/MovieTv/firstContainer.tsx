@@ -24,6 +24,16 @@ export default async function FirstContainer({ response, typeM }: Props) {
 
   if (typeM === "movie") {
     const movieRes = response as TspecifiedMovie;
+    const primaryGenre = movieRes.genres?.[0]?.name ?? "Unknown";
+    const secondaryGenre = movieRes.genres?.[1]?.name;
+    const rating =
+      typeof movieRes.vote_average === "number"
+        ? movieRes.vote_average.toFixed(1)
+        : "--";
+    const revenueLabel =
+      typeof movieRes.revenue === "number"
+        ? `${movieRes.revenue.toLocaleString()}$`
+        : "--";
 
     const runtime = convertRuntime(movieRes.runtime);
     // TODO FIX WACHLIST BUTTON AND ADD LIST SIZE IN MOBILE , AND CATEGORIES IN CERTAIN MOBILES THEY COLAPSE AND ALSO THE TOAST LOOKS BIG ON THE MOBILE
@@ -48,18 +58,18 @@ export default async function FirstContainer({ response, typeM }: Props) {
               <p>{movieRes.first_air_date}</p>
             )}
             <span>•</span>
-            <p>{movieRes.genres[0].name}</p>
+            <p>{primaryGenre}</p>
 
             <span>•</span>
-            {movieRes.genres.length > 1 && <p>{movieRes.genres[1].name}</p>}
+            {secondaryGenre && <p>{secondaryGenre}</p>}
             <span>•</span>
 
             <div className="flex items-center gap-1">
               <StarIcon className="inline h-4 w-4 text-yellow-400" />
-              <span className="">{movieRes.vote_average.toFixed(1)}</span>
+              <span className="">{rating}</span>
             </div>
             <span>•</span>
-            <p>{((num: number) => num.toLocaleString())(movieRes.revenue)}$</p>
+            <p>{revenueLabel}</p>
           </div>
           <div className="button-left mt-3 flex gap-2">
             <LogTheMT show={response} typeM={typeM} />
@@ -83,6 +93,13 @@ export default async function FirstContainer({ response, typeM }: Props) {
   }
   if (typeM === "tv") {
     const tvRes = response as TspecifiedTv;
+    const primaryGenre = tvRes.genres?.[0]?.name ?? "Unknown";
+    const secondaryGenre = tvRes.genres?.[1]?.name;
+    const rating =
+      typeof tvRes.vote_average === "number"
+        ? tvRes.vote_average.toFixed(1)
+        : "--";
+
     return (
       <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
         <div className="flex flex-col gap-3">
@@ -102,13 +119,13 @@ export default async function FirstContainer({ response, typeM }: Props) {
             {/* <li className="circle">{}</li> */}
             <p>{tvRes.first_air_date}</p>
             <span>•</span>
-            <p>{tvRes.genres[0].name}</p>
+            <p>{primaryGenre}</p>
             <span>•</span>
-            {tvRes.genres.length > 1 && <p>{tvRes.genres[1].name}</p>}{" "}
+            {secondaryGenre && <p>{secondaryGenre}</p>} {" "}
             <span>•</span>
             <div className="flex items-center gap-1">
               <StarIcon className="inline h-4 w-4 text-yellow-400" />
-              <span className="">{tvRes.vote_average.toFixed(1)}</span>
+              <span className="">{rating}</span>
             </div>
           </div>
           <div className="button-left mt-3 flex gap-2">
