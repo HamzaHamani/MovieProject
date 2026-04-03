@@ -7,7 +7,7 @@ import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
 import WatchListButton from "./buttons/watchListButton";
 import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
-import { getUser } from "@/lib/actions";
+import { getLoggedMovieTv, getUser } from "@/lib/actions";
 import { Separator } from "../ui/separator";
 import BWCard from "./bwCard";
 import LogTheMT from "./buttons/logTheMT";
@@ -36,6 +36,7 @@ export default async function FirstContainer({ response, typeM }: Props) {
         : "--";
 
     const runtime = convertRuntime(movieRes.runtime);
+    const existingLog = user?.id ? await getLoggedMovieTv(movieRes.id) : null;
     // TODO FIX WACHLIST BUTTON AND ADD LIST SIZE IN MOBILE , AND CATEGORIES IN CERTAIN MOBILES THEY COLAPSE AND ALSO THE TOAST LOOKS BIG ON THE MOBILE
 
     return (
@@ -72,9 +73,19 @@ export default async function FirstContainer({ response, typeM }: Props) {
             <p>{revenueLabel}</p>
           </div>
           <div className="button-left mt-3 flex gap-2">
-            <LogTheMT show={response} typeM={typeM} />
+            <LogTheMT
+              show={response}
+              typeM={typeM}
+              userId={user?.id}
+              initialLog={existingLog}
+            />
 
-            <DrawerDialogButtonList userId={user?.id} movieId={movieRes.id} />
+            <DrawerDialogButtonList
+              userId={user?.id}
+              movieId={movieRes.id}
+              itemTitle={movieRes.title}
+              itemPosterPath={movieRes.poster_path}
+            />
             <ShareButton typeSearch="Movie" />
           </div>
         </div>
@@ -99,6 +110,7 @@ export default async function FirstContainer({ response, typeM }: Props) {
       typeof tvRes.vote_average === "number"
         ? tvRes.vote_average.toFixed(1)
         : "--";
+    const existingLog = user?.id ? await getLoggedMovieTv(tvRes.id) : null;
 
     return (
       <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
@@ -121,17 +133,26 @@ export default async function FirstContainer({ response, typeM }: Props) {
             <span>•</span>
             <p>{primaryGenre}</p>
             <span>•</span>
-            {secondaryGenre && <p>{secondaryGenre}</p>} {" "}
-            <span>•</span>
+            {secondaryGenre && <p>{secondaryGenre}</p>} <span>•</span>
             <div className="flex items-center gap-1">
               <StarIcon className="inline h-4 w-4 text-yellow-400" />
               <span className="">{rating}</span>
             </div>
           </div>
           <div className="button-left mt-3 flex gap-2">
-            <LogTheMT show={tvRes} typeM={typeM} />
+            <LogTheMT
+              show={tvRes}
+              typeM={typeM}
+              userId={user?.id}
+              initialLog={existingLog}
+            />
 
-            <DrawerDialogButtonList userId={user?.id} movieId={tvRes.id} />
+            <DrawerDialogButtonList
+              userId={user?.id}
+              movieId={tvRes.id}
+              itemTitle={tvRes.name}
+              itemPosterPath={tvRes.poster_path}
+            />
 
             <ShareButton typeSearch="Movie" />
           </div>

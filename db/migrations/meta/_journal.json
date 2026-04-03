@@ -78,6 +78,13 @@
       "when": 1750121176360,
       "tag": "0010_ambitious_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1775257248468,
+      "tag": "0011_outgoing_sunfire",
+      "breakpoints": true
     }
   ]
 }

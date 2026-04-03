@@ -1,25 +1,17 @@
 "use client";
-import { useSession } from "next-auth/react";
-
-// import { bookmarksSchema } from "@/types";
 import { Button } from "../ui/button";
 
-// import { zodResolver } from "@hookform/resolvers/zod";
-
 import { useForm, SubmitHandler } from "react-hook-form";
-// import { z } from "zod";
 import { Input } from "../ui/input";
 import { CreateBookmark } from "@/lib/actions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import SmallLoadingIndicator from "../general/smallLoadingIndicator";
-// import { Label } from "../ui/label";
 
 type Inputs = {
   name: string;
   description: string;
-  id: string;
 };
 
 export default function CreateListForm({
@@ -34,7 +26,6 @@ export default function CreateListForm({
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
 
@@ -43,13 +34,13 @@ export default function CreateListForm({
       setLoading(true);
       const values = {
         bookmarkName: data.name,
-        userId: data.id,
+        userId: String(userId),
         description: data.description,
       };
 
       await CreateBookmark(values);
       toast.success("List created successfully");
-      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks", userId] });
       setShowForm((value: any) => !value);
     } catch (e) {
       console.log(userId);
@@ -66,14 +57,18 @@ export default function CreateListForm({
     /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="justify- items-cente flex w-96 flex-col gap-2 text-black"
+      className="mt-3 flex w-full flex-col gap-3 text-black"
     >
+      <p className="text-xs uppercase tracking-wide text-gray-400">
+        Create new list
+      </p>
+
       <div className="mb-2 flex flex-col gap-1">
         <Input
           type="text"
           id="text"
-          placeholder="Name"
-          className="text-textMain"
+          placeholder="List name"
+          className="border-white/20 bg-white/5 text-textMain placeholder:text-gray-400"
           {...register("name", { required: "Name is required" })}
         />
 
@@ -88,8 +83,8 @@ export default function CreateListForm({
         <Input
           type="text"
           id="text"
-          placeholder="Description"
-          className="text-textMain"
+          placeholder="Short description"
+          className="border-white/20 bg-white/5 text-textMain placeholder:text-gray-400"
           {...register("description", {
             required: "Description is required",
             minLength: {
@@ -105,11 +100,10 @@ export default function CreateListForm({
           </span>
         )}
       </div>
-      <input type="hidden" {...register("id")} value={userId} />
 
       <Button
         type="submit"
-        className={`bg-indigo-400 text-white hover:bg-indigo-600 ${loading ? "cursor-not-allowed" : ""}`}
+        className={`bg-primaryM-500 text-black hover:bg-primaryM-600 ${loading ? "cursor-not-allowed" : ""}`}
         disabled={loading}
       >
         {loading ? <SmallLoadingIndicator /> : "Create"}

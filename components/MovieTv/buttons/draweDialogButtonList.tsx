@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -21,22 +23,22 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { PlusCircle } from "lucide-react";
+import { ListPlus, LogIn, PlusCircle } from "lucide-react";
 import CreateListForm from "../createListForm";
 import { useQuery } from "@tanstack/react-query";
 import { getBookmarks, getMovieLists } from "@/lib/actions";
-import { Checkbox } from "@/components/ui/checkbox";
-import { bookmarksSchema } from "@/types";
-import { z } from "zod";
 import CheckBoxes from "@/components/general/checkBoxes";
-type bookSchemaType = z.infer<typeof bookmarksSchema>;
 
 export function DrawerDialogButtonList({
   userId,
   movieId,
+  itemTitle,
+  itemPosterPath,
 }: {
-  userId: any;
-  movieId: any;
+  userId?: string;
+  movieId: string | number;
+  itemTitle: string;
+  itemPosterPath: string | null;
 }) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -47,7 +49,7 @@ export function DrawerDialogButtonList({
         <DialogTrigger asChild>
           <Button
             variant={"outline"}
-            className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"
+            className="flex items-center gap-2 border-gray-300/70 bg-transparent text-white hover:bg-white/10 xsmd:text-xs"
           >
             <span>
               <PlusCircle />
@@ -55,14 +57,22 @@ export function DrawerDialogButtonList({
             <span className="sss:hidden">Add List</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="border-none sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add to your lists</DialogTitle>
-            {/* <DialogDescription>
-              Make changes to your profile here. Click save when youre done.
-            </DialogDescription> */}
+        <DialogContent className="overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),transparent_48%),theme(colors.backgroundM)] text-textMain sm:max-w-[620px]">
+          <DialogHeader className="border-b border-white/10 pb-4">
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <ListPlus className="h-5 w-5 text-primaryM-500" /> Add to your
+              lists
+            </DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Select one of your lists or create a new one.
+            </DialogDescription>
           </DialogHeader>
-          <ProfileForm userId={userId} movieId={movieId} />
+          <ProfileForm
+            userId={userId}
+            movieId={movieId}
+            itemTitle={itemTitle}
+            itemPosterPath={itemPosterPath}
+          />
         </DialogContent>
       </Dialog>
     );
@@ -73,7 +83,7 @@ export function DrawerDialogButtonList({
       <DrawerTrigger asChild>
         <Button
           variant={"outline"}
-          className="flex items-center gap-2 border-gray-300 bg-transparent xsmd:text-xs"
+          className="flex items-center gap-2 border-gray-300/70 bg-transparent text-white hover:bg-white/10 xsmd:text-xs"
         >
           <span>
             <PlusCircle />
@@ -81,14 +91,22 @@ export function DrawerDialogButtonList({
           <span className="sss:hidden">Add List</span>
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className="bg-backgroundM">
         <DrawerHeader className="text-left">
-          <DrawerTitle>Add to your lists</DrawerTitle>
-          <DrawerDescription>
-            {/* Make changes to your profile here. Click save when youre done. */}
+          <DrawerTitle className="flex items-center gap-2 text-white">
+            <ListPlus className="h-5 w-5 text-primaryM-500" /> Add to your lists
+          </DrawerTitle>
+          <DrawerDescription className="text-gray-300">
+            Select one of your lists or create a new one.
           </DrawerDescription>
         </DrawerHeader>
-        <ProfileForm className="px-4" userId={userId} movieId={movieId} />
+        <ProfileForm
+          className="px-4"
+          userId={userId}
+          movieId={movieId}
+          itemTitle={itemTitle}
+          itemPosterPath={itemPosterPath}
+        />
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="outline">Cancel</Button>
@@ -98,80 +116,94 @@ export function DrawerDialogButtonList({
     </Drawer>
   );
 }
-function ListDisplay({ data }: { data: bookSchemaType[] }) {
-  return (
-    <div className="flex flex-col gap-2">
-      {" "}
-      {data.map((val) => {
-        return (
-          <div key={val.bookmarkName} className="flex items-center space-x-2">
-            <Checkbox
-              id="terms"
-              className="h-6 w-6 border-[0.5px] border-white"
-            />
-            <label
-              htmlFor="terms"
-              className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {val.bookmarkName}
-            </label>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export function ProfileForm({
   movieId,
   className,
   userId,
+  itemTitle,
+  itemPosterPath,
 }: {
   className?: any;
-  userId: any;
-  movieId: any;
+  userId?: string;
+  movieId: string | number;
+  itemTitle: string;
+  itemPosterPath: string | null;
 }) {
+  const isLoggedIn = Boolean(userId);
+
   const { data: MoiveListsData } = useQuery({
     queryKey: ["movieLists", movieId],
-    queryFn: () => getMovieLists(movieId),
+    queryFn: () => getMovieLists(String(movieId)),
+    enabled: isLoggedIn,
   });
   // React.ComponentProps<"form">
   const [showForm, setShowForm] = React.useState(false);
-  const [selectedLists, setSelectedLists] = React.useState<string | number[]>(
+  const [selectedLists, setSelectedLists] = React.useState<(string | number)[]>(
     [],
   );
-  const { data, error, isLoading, refetch } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ["bookmarks", userId],
-    queryFn: () => getBookmarks(userId),
+    queryFn: () => getBookmarks(userId as string),
+    enabled: isLoggedIn,
   });
 
-  if (isLoading) return <p>loading</p>;
-  if (error) return <p>error</p>;
+  if (!isLoggedIn) {
+    return (
+      <div className={cn("grid items-start gap-4", className)}>
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-gray-300">
+          You need to login first to view your lists and add this title.
+        </div>
+        <Button
+          asChild
+          className="w-full bg-primaryM-500 text-black hover:bg-primaryM-600"
+        >
+          <Link
+            href="/sign-in"
+            className="inline-flex items-center justify-center gap-2"
+          >
+            <LogIn className="h-4 w-4" /> Go to Sign In
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (isLoading)
+    return <p className="text-sm text-gray-300">Loading your lists...</p>;
+  if (error)
+    return <p className="text-sm text-red-400">Could not load your lists.</p>;
   const bookmarksData = data ?? [];
+
   return (
     <div className={cn("grid items-start gap-4", className)}>
-      <div className="mb-2 mt-9 flex w-96 flex-col items-center justify-center gap-4">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
         {!showForm ? (
           bookmarksData.length === 0 ? (
-            <h2>You have no lists, you must create one</h2>
+            <h2 className="rounded-lg border border-dashed border-white/20 bg-white/[0.02] p-5 text-center text-sm text-gray-300">
+              You have no lists yet. Create your first one.
+            </h2>
           ) : (
             <CheckBoxes
               MoiveListsData={MoiveListsData}
               movieId={movieId}
+              itemTitle={itemTitle}
+              itemPosterPath={itemPosterPath}
               data={bookmarksData}
               setSelectedLists={setSelectedLists}
               showForm={showForm}
               selectedLists={selectedLists}
             />
           )
-        ) : // Render something else or nothing when showForm is false
-        null}
+        ) : null}
+
+        {showForm && (
+          <CreateListForm setShowForm={setShowForm} userId={userId as string} />
+        )}
       </div>
-      {showForm && <CreateListForm setShowForm={setShowForm} userId={userId} />}
 
       <Button
         type="submit"
-        className="j mt-2 w-full bg-indigo-500"
+        className="mt-2 w-full bg-primaryM-500 text-black hover:bg-primaryM-600"
         onClick={() => setShowForm((value) => !value)}
       >
         {showForm ? "Cancel" : "Create List"}

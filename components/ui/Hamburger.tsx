@@ -52,23 +52,23 @@ export default async function Hamburger() {
         <div className="py-24">
           <ul className="flex flex-col gap-5 text-2xl">
             <SheetClose asChild>
-              <Link href="/">
+              <Link href="/explore">
                 <li className="flex items-center gap-2">
                   <span className="">
                     <CircleDot className="text-sm w-3" />
                   </span>
-                  Home
+                  Explore
                 </li>
               </Link>
             </SheetClose>
             <SheetClose asChild>
-              <Link href={"/explore"}>
+              <Link href={"/upcoming"}>
                 <li className="flex items-center gap-2">
                   {" "}
                   <span className="">
                     <CircleDot className="text-sm w-3" />
                   </span>
-                  Explore
+                  Upcoming
                 </li>
               </Link>
             </SheetClose>

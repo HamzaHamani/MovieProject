@@ -11,6 +11,7 @@ const links = [
   { href: "/upcoming", label: "Upcoming" },
   { href: "/bookmarks", label: "Bookmarks" },
   { href: "/search", label: "Search" },
+  { href: "/profile", label: "Profile" },
 ];
 
 type Props = {

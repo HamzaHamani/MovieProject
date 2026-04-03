@@ -3,7 +3,7 @@
 import { auth, signIn } from "@/auth";
 import { bookmarks, bookmarksMovies, loggedMovies } from "@/db/schema";
 import { db } from "@/db";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { signOut } from "@/auth";
 import {
   bookmarksMoviesSchema,
@@ -703,49 +703,192 @@ export async function getExploreMovieDetails(
   return getExploreMediaDetails("movie", id);
 }
 type Props = {
-  reviewTitle: string;
   rating: number;
   date: string;
   review: string;
+  watchType: "first" | "rewatch";
   showId: string | number; // Assuming showId can be a string or number
 };
 
+export type TExistingLog = {
+  id: string;
+  rating: number;
+  review: string;
+  watchedAt: string;
+  watchType: "first" | "rewatch";
+};
+
+function isMissingWatchTypeColumn(error: unknown): boolean {
+  const dbError = error as { code?: string; message?: string };
+  if (dbError?.code !== "42703") return false;
+
+  const message = dbError?.message ?? "";
+  return message.includes("watchType") || message.includes("watchtype");
+}
+
+export async function getLoggedMovieTv(
+  showId: string | number,
+): Promise<TExistingLog | null> {
+  const user = await getUser();
+
+  if (!user?.id) return null;
+
+  const normalizedShowId = String(showId);
+
+  let existingLog:
+    | Array<{
+        id: string;
+        rating: number | null;
+        review: string | null;
+        watchedAt: Date;
+        watchType: string | null;
+        reviewTitle: string | null;
+      }>
+    | Array<{
+        id: string;
+        rating: number | null;
+        review: string | null;
+        watchedAt: Date;
+        reviewTitle: string | null;
+      }>;
+
+  try {
+    existingLog = await db
+      .select({
+        id: loggedMovies.id,
+        rating: loggedMovies.rating,
+        review: loggedMovies.review,
+        watchedAt: loggedMovies.watchedAt,
+        watchType: loggedMovies.watchType,
+        reviewTitle: loggedMovies.reviewTitle,
+      })
+      .from(loggedMovies)
+      .where(
+        and(
+          eq(loggedMovies.userId, user.id as string),
+          eq(loggedMovies.showId, normalizedShowId),
+        ),
+      )
+      .orderBy(desc(loggedMovies.createdAt))
+      .limit(1);
+  } catch (error) {
+    if (!isMissingWatchTypeColumn(error)) throw error;
+
+    existingLog = await db
+      .select({
+        id: loggedMovies.id,
+        rating: loggedMovies.rating,
+        review: loggedMovies.review,
+        watchedAt: loggedMovies.watchedAt,
+        reviewTitle: loggedMovies.reviewTitle,
+      })
+      .from(loggedMovies)
+      .where(
+        and(
+          eq(loggedMovies.userId, user.id as string),
+          eq(loggedMovies.showId, normalizedShowId),
+        ),
+      )
+      .orderBy(desc(loggedMovies.createdAt))
+      .limit(1);
+  }
+
+  const row = existingLog[0];
+  if (!row) return null;
+
+  const parsedHalfRating = Number.parseFloat(row.reviewTitle ?? "");
+  const normalizedRating = Number.isFinite(parsedHalfRating)
+    ? parsedHalfRating
+    : Number(row.rating ?? 0);
+
+  return {
+    id: row.id,
+    rating: normalizedRating,
+    review: row.review ?? "",
+    watchedAt: row.watchedAt.toISOString(),
+    watchType:
+      "watchType" in row && row.watchType === "rewatch" ? "rewatch" : "first",
+  };
+}
+
 export async function sendLoggedMovieTv({
-  reviewTitle,
   rating,
   date,
   review,
+  watchType,
   showId,
 }: Props) {
   const user = await getUser();
 
-  if (!user) throw new Error("User not authenticated");
+  if (!user?.id) throw new Error("User not authenticated");
 
-  const logData = {
-    reviewTitle,
-    rating,
-    date,
-    review,
-    userId: user.id,
-    showId,
-  };
+  const normalizedShowId = String(showId);
+  const normalizedRating = Math.max(0, Math.min(5, rating));
+  const roundedRating = Math.round(normalizedRating);
 
-  console.log(logData);
+  const existingLog = await db
+    .select({ id: loggedMovies.id })
+    .from(loggedMovies)
+    .where(
+      and(
+        eq(loggedMovies.userId, user.id as string),
+        eq(loggedMovies.showId, normalizedShowId),
+      ),
+    )
+    .orderBy(desc(loggedMovies.createdAt))
+    .limit(1);
 
-  // await db.insert(loggedMovies).values(logData).onConflictDoNothing();
-  await db
-    .insert(loggedMovies)
-    .values({
-      reviewTitle,
-      rating,
+  if (existingLog.length > 0) {
+    try {
+      await db
+        .update(loggedMovies)
+        .set({
+          rating: roundedRating,
+          reviewTitle: String(normalizedRating),
+          watchedAt: new Date(date),
+          review,
+          watchType,
+        })
+        .where(eq(loggedMovies.id, existingLog[0].id));
+    } catch (error) {
+      if (!isMissingWatchTypeColumn(error)) throw error;
+
+      await db
+        .update(loggedMovies)
+        .set({
+          rating: roundedRating,
+          reviewTitle: String(normalizedRating),
+          watchedAt: new Date(date),
+          review,
+        })
+        .where(eq(loggedMovies.id, existingLog[0].id));
+    }
+
+    return { already: true as const, updated: true as const };
+  }
+
+  try {
+    await db.insert(loggedMovies).values({
+      rating: roundedRating,
+      reviewTitle: String(normalizedRating),
+      watchedAt: new Date(date),
+      review,
+      watchType,
+      userId: user.id as string,
+      showId: normalizedShowId,
+    });
+  } catch (error) {
+    if (!isMissingWatchTypeColumn(error)) throw error;
+
+    await db.insert(loggedMovies).values({
+      rating: roundedRating,
+      reviewTitle: String(normalizedRating),
       watchedAt: new Date(date),
       review,
       userId: user.id as string,
-      showId: showId as string,
-    })
-    .onConflictDoNothing();
+      showId: normalizedShowId,
+    });
+  }
 
-  // Here you would typically send this data to your backend or database
-  console.log("Log Data:", logData);
-  return logData; // Return the log data for further processing if needed
+  return { already: false as const, updated: false as const };
 }

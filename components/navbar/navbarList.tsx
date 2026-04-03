@@ -8,14 +8,23 @@ type Props = {
 
 export default function NavbarList({ links }: Props) {
   const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/explore") {
+      return pathname === "/explore" || pathname === "/";
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
-    <ul className="flex gap-7 font-light  items-center md:hidden">
+    <ul className="flex items-center gap-7 font-light md:hidden">
       {links.map((elm) => (
         <Link
           href={elm.href}
           key={elm.href}
           className={`cursor-pointer ${
-            elm.href == pathname ? "text-gray-100" : "text-gray-200"
+            isActive(elm.href) ? "text-gray-100" : "text-gray-200"
           } font-medium`}
         >
           {elm.label}
