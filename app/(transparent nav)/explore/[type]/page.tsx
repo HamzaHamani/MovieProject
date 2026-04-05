@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import ExploreTypePageClient from "@/components/explore/exploreTypePageClient";
 
 type Props = {
-  params: {
+  params: Promise<{
     type: string;
-  };
+  }>;
 };
 
 const validTypes = new Set([
@@ -27,10 +27,12 @@ type ExploreType =
   | "on-the-air"
   | "genre";
 
-export default function ExploreTypePage({ params }: Props) {
-  if (!validTypes.has(params.type)) {
+export default async function ExploreTypePage({ params }: Props) {
+  const { type } = await params;
+
+  if (!validTypes.has(type)) {
     notFound();
   }
 
-  return <ExploreTypePageClient type={params.type as ExploreType} />;
+  return <ExploreTypePageClient type={type as ExploreType} />;
 }

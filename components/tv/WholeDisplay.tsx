@@ -39,10 +39,9 @@ export default function WholeDisplay({
       <div className="relative h-[56vh] w-full s:h-[46vh]">
         {response.backdrop_path && (
           <div
-            className="absolute inset-0 h-full w-full bg-cover bg-center opacity-65"
+            className="absolute inset-0 h-full w-full bg-cover bg-center opacity-65 md:bg-top"
             style={{
               backgroundImage: `url(${imageUrl})`,
-              backgroundPosition: "top",
             }}
           ></div>
         )}
@@ -65,9 +64,9 @@ export default function WholeDisplay({
           <DetailTabs
             items={[
               { key: "seasons", label: "Seasons" },
+              { key: "reviews", label: "Reviews" },
               { key: "videos", label: "Trailers / Videos" },
               { key: "images", label: "Images" },
-              { key: "reviews", label: "Reviews" },
               { key: "providers", label: "Watch Providers" },
             ]}
             active={activeTab}

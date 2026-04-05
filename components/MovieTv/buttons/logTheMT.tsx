@@ -2,11 +2,12 @@
 import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { CirclePlus } from "lucide-react";
+import { CirclePlus, Pencil } from "lucide-react";
 import { TspecifiedMovie } from "@/types/api";
 import { TspecifiedTv } from "@/types/apiTv";
 import ModeleLog from "../ModeleLog";
 import { getLoggedMovieTv, type TExistingLog } from "@/lib/actions";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,9 @@ type Props = {
   userId?: string;
   initialLog?: TExistingLog | null;
   buttonLabel?: string;
+  iconOnly?: boolean;
+  useEditIcon?: boolean;
+  triggerClassName?: string;
 };
 
 export default function LogTheMT({
@@ -41,6 +45,9 @@ export default function LogTheMT({
   userId,
   initialLog,
   buttonLabel,
+  iconOnly = false,
+  useEditIcon = false,
+  triggerClassName,
 }: Props) {
   const [showCard, setShowCard] = useState(false);
   const [currentLog, setCurrentLog] = useState<TExistingLog | null>(
@@ -99,23 +106,36 @@ export default function LogTheMT({
     />
   );
 
+  const triggerText = buttonLabel
+    ? buttonLabel
+    : currentLog
+      ? `${typeM === "movie" ? "Movie" : "TV Show"} Already Logged`
+      : `Log The ${typeM === "movie" ? "Movie" : "Tv Show"}`;
+
+  const TriggerIcon = useEditIcon ? Pencil : CirclePlus;
+
   if (isDesktop) {
     return (
       <Dialog open={showCard} onOpenChange={setShowCard}>
         <DialogTrigger asChild>
-          <Button className="flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs">
+          <Button
+            className={cn(
+              "flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs",
+              triggerClassName,
+            )}
+          >
             <span className="xsmd:text-xs">
-              <CirclePlus />
+              <TriggerIcon className="h-4 w-4" />
             </span>
-            {buttonLabel
-              ? buttonLabel
-              : currentLog
-                ? `${typeM === "movie" ? "Movie" : "TV Show"} Already Logged`
-                : `Log The ${typeM === "movie" ? "Movie" : "Tv Show"}`}
+            {iconOnly ? (
+              <span className="sr-only">{triggerText}</span>
+            ) : (
+              triggerText
+            )}
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="max-h-[90vh] max-w-[980px] overflow-y-auto border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.12),transparent_45%),theme(colors.backgroundM)] p-5 pt-10 text-textMain xl:max-w-[900px] lg:max-w-[780px] md:max-w-[700px] sm:max-w-[94vw]">
+        <DialogContent className="max-h-[88svh] w-[min(980px,94vw)] overflow-y-auto border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 pt-10 text-textMain">
           <DialogHeader className="sr-only">
             <DialogTitle>
               Log The {typeM === "movie" ? "Movie" : "TV Show"}
@@ -157,18 +177,23 @@ export default function LogTheMT({
   return (
     <Drawer open={showCard} onOpenChange={setShowCard}>
       <DrawerTrigger asChild>
-        <Button className="flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs">
+        <Button
+          className={cn(
+            "flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs",
+            triggerClassName,
+          )}
+        >
           <span className="xsmd:text-xs">
-            <CirclePlus />
+            <TriggerIcon className="h-4 w-4" />
           </span>
-          {buttonLabel
-            ? buttonLabel
-            : currentLog
-              ? `${typeM === "movie" ? "Movie" : "TV Show"} Already Logged`
-              : `Log The ${typeM === "movie" ? "Movie" : "Tv Show"}`}
+          {iconOnly ? (
+            <span className="sr-only">{triggerText}</span>
+          ) : (
+            triggerText
+          )}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="h-[92vh] max-h-[92vh] overflow-y-auto border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.12),transparent_45%),theme(colors.backgroundM)] px-4 pb-5 text-textMain">
+      <DrawerContent className="max-h-[88svh] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 text-textMain">
         <DrawerHeader className="sr-only">
           <DrawerTitle>
             Log The {typeM === "movie" ? "Movie" : "TV Show"}
@@ -179,14 +204,16 @@ export default function LogTheMT({
         </DrawerHeader>
 
         {!userId && (
-          <DrawerHeader className="px-0 pb-2 pt-0 text-left">
+          <DrawerHeader className="px-0 pb-2 pt-2 text-left">
             <DrawerTitle className="text-white">Login Required</DrawerTitle>
             <DrawerDescription className="text-gray-300">
               Sign in to log your movie or TV show.
             </DrawerDescription>
           </DrawerHeader>
         )}
-        {content}
+        <div className="min-h-0 overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          {content}
+        </div>
       </DrawerContent>
     </Drawer>
   );

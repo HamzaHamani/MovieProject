@@ -30,6 +30,7 @@ export const users = pgTable(
     username: text("username"),
     emailVerified: timestamp("emailVerified", { mode: "date" }),
     image: text("image"),
+    bio: text("bio"),
     premium: boolean("premium").default(false),
   },
   (user) => ({

@@ -9,13 +9,14 @@ import { TsearchMovie } from "@/types/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NoResults from "@/components/search/noResults";
 import MovieLoadingIndicator from "@/components/search/movieLoadingIndicator";
+import { use, useEffect } from "react";
 
 export const dynamic = "force-dynamic";
 
 type Props = {
-  params: {
+  params: Promise<{
     query: string;
-  };
+  }>;
 };
 
 type SearchMovieQueryKey = [string, string, number];
@@ -23,7 +24,7 @@ type SearchMovieQueryKey = [string, string, number];
 
 const Page = ({ params }: Props) => {
   const queryClient = useQueryClient();
-  const { query } = params;
+  const { query } = use(params);
   const { page } = usePage();
 
   const prefetchNextPage = async () => {
@@ -57,7 +58,12 @@ const Page = ({ params }: Props) => {
     queryFn: fetchSearchMovie,
     queryKey: ["searchMovie", query, page],
   });
-  if (isSuccess) prefetchNextPage();
+
+  useEffect(() => {
+    if (!isSuccess) return;
+    prefetchNextPage();
+  }, [isSuccess, query, page]);
+
   if (isLoading) return <MovieLoadingIndicator />;
   if (error) return <div>Error: {error.message}</div>;
   if (data?.results.length == 0) return <NoResults />;

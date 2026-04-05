@@ -7,8 +7,11 @@ import {
   SiReddit,
 } from "react-icons/si";
 import { Button } from "./ui/button";
-import { handleSignin } from "@/lib/actions";
-import { showErrorNotification } from "@/components/notificationSystem";
+import { signIn } from "next-auth/react";
+import {
+  showErrorNotification,
+  showSuccessNotification,
+} from "@/components/notificationSystem";
 
 type Props = {
   provider: "github" | "google" | "twitter" | "facebook" | "reddit";
@@ -17,9 +20,32 @@ type Props = {
 export default function ButtonSignIn({ provider }: Props) {
   async function handle() {
     try {
-      await handleSignin(provider);
+      const result = await signIn(provider, {
+        redirect: false,
+        callbackUrl: "/explore",
+      });
+
+      if (!result || result.error) {
+        showErrorNotification(
+          "Authentication",
+          "Failed to sign in. Please try again.",
+        );
+        return;
+      }
+
+      showSuccessNotification("Sign in", "Redirecting...");
+
+      if (result.url) {
+        window.location.href = result.url;
+        return;
+      }
+
+      window.location.href = "/explore";
     } catch (e) {
-      showErrorNotification("Authentication", "Failed to sign in");
+      showErrorNotification(
+        "Authentication",
+        "Failed to sign in. Please try again.",
+      );
     }
   }
 

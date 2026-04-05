@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { addMovieToProfileSection } from "@/lib/actions";
+import type { StoredMediaType } from "@/lib/utils";
 
 type SectionType = "favorites" | "likes" | "watchlist";
 
@@ -9,6 +10,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       section?: SectionType;
       movieId?: string | number;
+      mediaType?: StoredMediaType;
     };
 
     if (!body?.section || !body?.movieId) {
@@ -25,6 +27,7 @@ export async function POST(request: NextRequest) {
     const result = await addMovieToProfileSection({
       section: body.section,
       movieId: body.movieId,
+      mediaType: body.mediaType,
     });
 
     return NextResponse.json(result);

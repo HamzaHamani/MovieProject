@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import ListLikeButton from "@/components/list/listLikeButton";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,10 +13,12 @@ import {
   getMoviesBook,
   getSpecifiedMovie,
   getSpecifiedTV,
+  getUserDbProfileById,
   getUser,
   removeMovieFromBookmark,
   updateBookmarkDetails,
 } from "@/lib/actions";
+import { decodeStoredMediaId } from "@/lib/utils";
 
 const systemLikesKeywords = ["likes", "like", "liked", "love", "loved"];
 const systemWatchlistKeywords = [
@@ -45,31 +48,76 @@ type ResolvedListMovie = {
 async function resolveSavedItem(
   movieId: string,
 ): Promise<ResolvedListMovie | null> {
-  try {
-    const movie = await getSpecifiedMovie(movieId);
-    return {
-      movieId,
-      title: movie.title ?? "Untitled",
-      posterPath: movie.poster_path,
-      mediaTypeLabel: "Movie",
-      year: movie.release_date?.slice(0, 4) ?? "----",
-      href: `/movie/${movieId}`,
-    };
-  } catch {
+  const decoded = decodeStoredMediaId(movieId);
+  const resolvedId = decoded.id;
+  if (!resolvedId) return null;
+
+  if (decoded.mediaType === "tv") {
     try {
-      const tv = await getSpecifiedTV(movieId);
+      const tv = await getSpecifiedTV(resolvedId);
       return {
         movieId,
         title: tv.name ?? "Untitled",
         posterPath: tv.poster_path,
         mediaTypeLabel: "TV",
         year: tv.first_air_date?.slice(0, 4) ?? "----",
-        href: `/tv/${movieId}`,
+        href: `/tv/${resolvedId}`,
       };
     } catch {
       return null;
     }
   }
+
+  if (decoded.mediaType === "movie") {
+    try {
+      const movie = await getSpecifiedMovie(resolvedId);
+      return {
+        movieId,
+        title: movie.title ?? "Untitled",
+        posterPath: movie.poster_path,
+        mediaTypeLabel: "Movie",
+        year: movie.release_date?.slice(0, 4) ?? "----",
+        href: `/movie/${resolvedId}`,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  try {
+    const movie = await getSpecifiedMovie(resolvedId);
+    return {
+      movieId,
+      title: movie.title ?? "Untitled",
+      posterPath: movie.poster_path,
+      mediaTypeLabel: "Movie",
+      year: movie.release_date?.slice(0, 4) ?? "----",
+      href: `/movie/${resolvedId}`,
+    };
+  } catch {
+    try {
+      const tv = await getSpecifiedTV(resolvedId);
+      return {
+        movieId,
+        title: tv.name ?? "Untitled",
+        posterPath: tv.poster_path,
+        mediaTypeLabel: "TV",
+        year: tv.first_air_date?.slice(0, 4) ?? "----",
+        href: `/tv/${resolvedId}`,
+      };
+    } catch {
+      return null;
+    }
+  }
+}
+
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) return "U";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+
+  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
 }
 
 export default async function Page({
@@ -86,9 +134,10 @@ export default async function Page({
   const isOwner = viewer?.id === list.userId;
   const isSystemList = isSystemListName(list.bookmarkName);
 
-  const [movies, likeStats] = await Promise.all([
+  const [movies, likeStats, ownerProfile] = await Promise.all([
     getMoviesBook(list.id),
     getListLikeStats(list.id),
+    getUserDbProfileById(list.userId),
   ]);
 
   const resolvedItems = await Promise.all(
@@ -154,6 +203,32 @@ export default async function Page({
               <p className="mt-3 text-xs text-gray-400">
                 {movies.length} item{movies.length === 1 ? "" : "s"}
               </p>
+
+              {ownerProfile?.username ? (
+                <Link
+                  href={`/profile/${ownerProfile.username}`}
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:border-primaryM-500/40 hover:bg-white/[0.06]"
+                >
+                  <Avatar className="h-8 w-8 border border-white/10">
+                    <AvatarImage
+                      src={ownerProfile.image ?? undefined}
+                      alt={ownerProfile.username}
+                    />
+                    <AvatarFallback className="bg-white/[0.08] text-xs text-white">
+                      {getInitials(ownerProfile.name ?? ownerProfile.username)}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="leading-tight">
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+                      List owner
+                    </p>
+                    <p className="text-sm font-medium text-white">
+                      @{ownerProfile.username}
+                    </p>
+                  </div>
+                </Link>
+              ) : null}
             </div>
             {!isSystemList ? (
               <ListLikeButton
@@ -195,6 +270,10 @@ export default async function Page({
                 Save changes
               </Button>
             </form>
+          ) : !isOwner ? (
+            <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-gray-300">
+              You can view and like this list, but only the owner can edit it.
+            </div>
           ) : null}
         </section>
 

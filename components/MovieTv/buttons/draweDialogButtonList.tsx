@@ -57,7 +57,7 @@ export function DrawerDialogButtonList({
             <span className="sss:hidden">Add List</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),transparent_48%),theme(colors.backgroundM)] text-textMain sm:max-w-[620px]">
+        <DialogContent className="max-h-[88svh] w-[min(700px,94vw)] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 text-textMain">
           <DialogHeader className="border-b border-white/10 pb-4">
             <DialogTitle className="flex items-center gap-2 text-white">
               <ListPlus className="h-5 w-5 text-primaryM-500" /> Add to your
@@ -91,8 +91,8 @@ export function DrawerDialogButtonList({
           <span className="sss:hidden">Add List</span>
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="bg-backgroundM">
-        <DrawerHeader className="text-left">
+      <DrawerContent className="max-h-[88svh] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 text-textMain">
+        <DrawerHeader className="px-0 pb-2 pt-2 text-left">
           <DrawerTitle className="flex items-center gap-2 text-white">
             <ListPlus className="h-5 w-5 text-primaryM-500" /> Add to your lists
           </DrawerTitle>
@@ -100,18 +100,20 @@ export function DrawerDialogButtonList({
             Select one of your lists or create a new one.
           </DrawerDescription>
         </DrawerHeader>
-        <ProfileForm
-          className="px-4"
-          userId={userId}
-          movieId={movieId}
-          itemTitle={itemTitle}
-          itemPosterPath={itemPosterPath}
-        />
-        <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
+        <div className="min-h-0 overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          <ProfileForm
+            className="px-0"
+            userId={userId}
+            movieId={movieId}
+            itemTitle={itemTitle}
+            itemPosterPath={itemPosterPath}
+          />
+          <DrawerFooter className="px-0 pt-2">
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </div>
       </DrawerContent>
     </Drawer>
   );

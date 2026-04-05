@@ -7,10 +7,12 @@ import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
 import WatchListButton from "./buttons/watchListButton";
 import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
-import { getLoggedMovieTv, getUser } from "@/lib/actions";
+import { getLoggedMovieTv, getUser, getWatchedByForShow } from "@/lib/actions";
 import { Separator } from "../ui/separator";
 import BWCard from "./bwCard";
 import LogTheMT from "./buttons/logTheMT";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import Link from "next/link";
 
 type TspecifiedMedia = TspecifiedMovie | TspecifiedTv;
 
@@ -21,6 +23,13 @@ type Props = {
 
 export default async function FirstContainer({ response, typeM }: Props) {
   const user = await getUser();
+
+  const getInitials = (label: string) => {
+    const parts = label.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "U";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+  };
 
   if (typeM === "movie") {
     const movieRes = response as TspecifiedMovie;
@@ -36,7 +45,12 @@ export default async function FirstContainer({ response, typeM }: Props) {
         : "--";
 
     const runtime = convertRuntime(movieRes.runtime);
-    const existingLog = user?.id ? await getLoggedMovieTv(movieRes.id) : null;
+    const [existingLog, watchedBy] = user?.id
+      ? await Promise.all([
+          getLoggedMovieTv(movieRes.id),
+          getWatchedByForShow(String(movieRes.id)),
+        ])
+      : [null, []];
     // TODO FIX WACHLIST BUTTON AND ADD LIST SIZE IN MOBILE , AND CATEGORIES IN CERTAIN MOBILES THEY COLAPSE AND ALSO THE TOAST LOOKS BIG ON THE MOBILE
 
     return (
@@ -88,6 +102,58 @@ export default async function FirstContainer({ response, typeM }: Props) {
             />
             <ShareButton typeSearch="Movie" />
           </div>
+
+          {watchedBy.length > 0 ? (
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+              <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
+                Watched by
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {watchedBy.slice(0, 8).map((item) => {
+                  const display = item.username || item.name || "User";
+                  const ratingLabel =
+                    typeof item.rating === "number"
+                      ? `${item.rating.toFixed(1)} ★`
+                      : "No rating";
+                  const relationLabel =
+                    item.source === "friend" ? "Friend" : "Following";
+
+                  const content = (
+                    <div className="min-w-[128px] rounded-xl border border-white/10 bg-black/30 p-2.5 transition hover:border-primaryM-500/35 hover:bg-black/40">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-7 w-7 border border-white/10">
+                          <AvatarImage
+                            src={item.image ?? undefined}
+                            alt={display}
+                          />
+                          <AvatarFallback className="bg-white/10 text-[10px] text-white">
+                            {getInitials(display)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="line-clamp-1 text-sm font-medium text-white">
+                          @{display}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-xs text-gray-300">
+                        {ratingLabel}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">
+                        {relationLabel}
+                      </p>
+                    </div>
+                  );
+
+                  return item.username ? (
+                    <Link key={item.userId} href={`/profile/${item.username}`}>
+                      {content}
+                    </Link>
+                  ) : (
+                    <div key={item.userId}>{content}</div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </div>
         <div className="shareR self-end">
           {" "}

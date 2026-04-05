@@ -113,9 +113,26 @@ export default async function Page({
             </Link>
 
             <div className="min-w-0 flex-1">
-              <p className="text-xs uppercase tracking-[0.22em] text-gray-500">
-                Log entry
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs uppercase tracking-[0.22em] text-gray-500">
+                  Log entry
+                </p>
+                {isOwner && show ? (
+                  <LogTheMT
+                    show={show}
+                    typeM={typeM}
+                    userId={viewer?.id}
+                    buttonLabel="Edit Log"
+                    initialLog={{
+                      id: log.id,
+                      rating: log.rating ?? 0,
+                      review: log.review ?? "",
+                      watchedAt: log.watchedAt.toISOString(),
+                      watchType: log.watchType,
+                    }}
+                  />
+                ) : null}
+              </div>
               <h1 className="mt-1 text-2xl font-semibold text-white sm:text-xl">
                 {media?.title ?? "Title unavailable"}
               </h1>
@@ -131,33 +148,11 @@ export default async function Page({
               ) : null}
 
               <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-gray-200">
-                {log.review?.trim().length
-                  ? log.review
-                  : "No written review for this log yet."}
+                {log.review?.trim().length ? log.review : "No written review"}
               </p>
             </div>
           </div>
         </article>
-
-        {isOwner && show ? (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-            <p className="mb-3 text-xs uppercase tracking-[0.22em] text-gray-400">
-              Modify
-            </p>
-            <LogTheMT
-              show={show}
-              typeM={typeM}
-              userId={viewer?.id}
-              initialLog={{
-                id: log.id,
-                rating: log.rating ?? 0,
-                review: log.review ?? "",
-                watchedAt: log.watchedAt.toISOString(),
-                watchType: log.watchType,
-              }}
-            />
-          </div>
-        ) : null}
       </div>
     </div>
   );

@@ -46,18 +46,18 @@ export default async function page({ params, searchParams }: Props) {
   const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
   const normalizedTab =
     tabValue === "universe"
-      ? "videos"
+      ? "reviews"
       : tabValue === "news"
         ? "images"
         : tabValue;
   const tab =
     normalizedTab === "seasons" ||
+    normalizedTab === "reviews" ||
     normalizedTab === "videos" ||
     normalizedTab === "images" ||
-    normalizedTab === "reviews" ||
     normalizedTab === "providers"
       ? normalizedTab
-      : "seasons";
+      : "reviews";
 
   const rawSeason = resolvedSearchParams?.season;
   const seasonValue = Array.isArray(rawSeason) ? rawSeason[0] : rawSeason;

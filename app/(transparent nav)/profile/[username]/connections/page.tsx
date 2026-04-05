@@ -40,7 +40,7 @@ export default async function Page({
   ];
 
   return (
-    <div className="container mt-6 pb-12 text-textMain">
+    <div className="container mt-16 pb-12 text-textMain">
       <div className="mx-auto max-w-3xl space-y-4">
         <div>
           <Link

@@ -8,5 +8,5 @@ type Props = {
 
 export default async function ReviewsSectionAsync({ id, typeM }: Props) {
   const items = await getReviewsByType(String(id), typeM);
-  return <ReviewsSection items={items} />;
+  return <ReviewsSection items={items} mediaId={id} mediaType={typeM} />;
 }

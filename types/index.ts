@@ -9,6 +9,7 @@ export const usersSchema = z.object({
   username: z.string().min(3).max(24).optional().nullable(),
   emailVerified: z.date().optional(),
   image: z.string().optional(),
+  bio: z.string().max(240).optional().nullable(),
   premium: z.boolean().default(false).optional(),
 });
 export const bookmarksSchema = z.object({

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import MovieSkeleton from "@/components/general/movieSkeleton";
+import useInViewport from "@/hooks/useInViewport";
 
 type UpcomingMovie = {
   adult: boolean;
@@ -142,6 +143,8 @@ export default function UpcomingPageClient({
     const loadedMax = Math.max(...initialPages.map((page) => page.page));
     return loadedMax + 1;
   });
+  const { ref: autoLoadRef, isInView: isAutoLoadInView } =
+    useInViewport<HTMLDivElement>("240px");
 
   const firstPage = pages[0] ?? null;
   const totalPages = firstPage?.total_pages ?? 1;
@@ -256,6 +259,19 @@ export default function UpcomingPageClient({
     setVisibleCount(target);
   }
 
+  useEffect(() => {
+    if (!isAutoLoadInView) return;
+    if (!hasMore || isLoadingBatch) return;
+
+    void handleLoadMore();
+  }, [
+    hasMore,
+    isAutoLoadInView,
+    isLoadingBatch,
+    visibleCount,
+    filteredMovies.length,
+  ]);
+
   const dateWindow = getDateWindow(moviesForView) ?? firstPage?.dates ?? null;
   const heroItems = useMemo(
     () => moviesForView.filter((movie) => movie.backdrop_path).slice(0, 6),
@@ -328,6 +344,8 @@ export default function UpcomingPageClient({
 
           {(hasMore || loadMoreError) && (
             <div className="mt-8 flex flex-col items-center gap-2">
+              <div ref={autoLoadRef} className="h-px w-full" />
+
               {hasMore && (
                 <button
                   type="button"

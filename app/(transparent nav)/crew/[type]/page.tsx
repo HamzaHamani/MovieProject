@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 type Props = {
-  params: { type: string };
+  params: Promise<{ type: string }>;
 };
 
 function normalizePersonId(raw: string): string | null {
@@ -44,7 +44,8 @@ function formatBirthday(
   return `${bornText} - ${diedText}`;
 }
 export default async function Page({ params }: Props) {
-  const personId = normalizePersonId(params.type);
+  const { type } = await params;
+  const personId = normalizePersonId(type);
   if (!personId) notFound();
 
   const [person, images] = await Promise.all([

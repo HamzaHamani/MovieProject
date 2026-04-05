@@ -1,21 +1,34 @@
 "use client";
-import { handleLogout } from "@/lib/actions";
+import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 import {
   showSuccessNotification,
   showErrorNotification,
 } from "@/components/notificationSystem";
+import { useRouter } from "next/navigation";
 
 export default function SignOutButton() {
-  async function handle(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const router = useRouter();
 
+  async function handle() {
     try {
-      await handleLogout();
+      const result = await signOut({
+        redirect: false,
+        callbackUrl: "/sign-in",
+      });
+
       showSuccessNotification(
         "Signed Out",
         "You have been logged out successfully",
       );
+
+      if (result?.url) {
+        window.location.href = result.url;
+        return;
+      }
+
+      router.push("/sign-in");
+      router.refresh();
     } catch (error) {
       showErrorNotification(
         "Logout Failed",
@@ -25,10 +38,8 @@ export default function SignOutButton() {
   }
 
   return (
-    <form onSubmit={handle}>
-      <button type="submit" className="flex w-[12vw]">
-        <LogOut className="mr-2 h-4 w-4" /> <span>Sign out</span>
-      </button>
-    </form>
+    <button type="button" onClick={handle} className="flex w-[12vw]">
+      <LogOut className="mr-2 h-4 w-4" /> <span>Sign out</span>
+    </button>
   );
 }

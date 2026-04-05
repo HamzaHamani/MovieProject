@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import Link from "next/link";
 
+import ListAddMovies from "@/components/bookmarks/listAddMovies";
+import CreateListQuick from "@/components/bookmarks/createListQuick";
+import RemoveFromListButton from "@/components/bookmarks/removeFromListButton";
 import MovieTvCard from "@/components/general/movieTvCard";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -11,6 +14,7 @@ import {
   getSpecifiedTV,
   getUser,
 } from "@/lib/actions";
+import { decodeStoredMediaId } from "@/lib/utils";
 
 const systemLikesKeywords = ["likes", "like", "liked", "love", "loved"];
 const systemWatchlistKeywords = [
@@ -45,28 +49,66 @@ type TResolvedSavedItem = {
 async function resolveSavedItem(
   movieId: string,
 ): Promise<TResolvedSavedItem | null> {
-  try {
-    const movie = await getSpecifiedMovie(movieId);
-    return {
-      id: movieId,
-      title: movie.title ?? "Untitled",
-      posterPath: movie.poster_path,
-      voteAverage: Number(movie.vote_average ?? 0),
-      mediaTypeLabel: "Movie",
-      year: movie.release_date?.slice(0, 4) ?? "----",
-      href: `/movie/${movieId}`,
-    };
-  } catch {
+  const decoded = decodeStoredMediaId(movieId);
+  const resolvedId = decoded.id;
+  if (!resolvedId) return null;
+
+  if (decoded.mediaType === "tv") {
     try {
-      const tv = await getSpecifiedTV(movieId);
+      const tv = await getSpecifiedTV(resolvedId);
       return {
-        id: movieId,
+        id: resolvedId,
         title: tv.name ?? "Untitled",
         posterPath: tv.poster_path,
         voteAverage: Number(tv.vote_average ?? 0),
         mediaTypeLabel: "TV",
         year: tv.first_air_date?.slice(0, 4) ?? "----",
-        href: `/tv/${movieId}`,
+        href: `/tv/${resolvedId}`,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  if (decoded.mediaType === "movie") {
+    try {
+      const movie = await getSpecifiedMovie(resolvedId);
+      return {
+        id: resolvedId,
+        title: movie.title ?? "Untitled",
+        posterPath: movie.poster_path,
+        voteAverage: Number(movie.vote_average ?? 0),
+        mediaTypeLabel: "Movie",
+        year: movie.release_date?.slice(0, 4) ?? "----",
+        href: `/movie/${resolvedId}`,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  try {
+    const movie = await getSpecifiedMovie(resolvedId);
+    return {
+      id: resolvedId,
+      title: movie.title ?? "Untitled",
+      posterPath: movie.poster_path,
+      voteAverage: Number(movie.vote_average ?? 0),
+      mediaTypeLabel: "Movie",
+      year: movie.release_date?.slice(0, 4) ?? "----",
+      href: `/movie/${resolvedId}`,
+    };
+  } catch {
+    try {
+      const tv = await getSpecifiedTV(resolvedId);
+      return {
+        id: resolvedId,
+        title: tv.name ?? "Untitled",
+        posterPath: tv.poster_path,
+        voteAverage: Number(tv.vote_average ?? 0),
+        mediaTypeLabel: "TV",
+        year: tv.first_air_date?.slice(0, 4) ?? "----",
+        href: `/tv/${resolvedId}`,
       };
     } catch {
       return null;
@@ -146,34 +188,37 @@ export default async function Saved() {
           custom lists.
         </p>
 
-        <div className="mt-5 grid grid-cols-3 gap-3 lg:grid-cols-2 sm:grid-cols-1">
-          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-400">
-              Total Lists
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-white">
-              {customListsWithMovies.length}
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-400">
-              Saved Items
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-white">
-              {totalSaved}
-            </p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-400">
-              Unique Titles
-            </p>
-            <p className="mt-2 text-2xl font-semibold text-white">
-              {uniqueMovieIds.length}
-            </p>
+        <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-1">
+          <div className="relative grid auto-rows-fr grid-cols-3 gap-2 lg:grid-cols-2 sm:grid-cols-1">
+            <div className="flex min-h-[170px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-[radial-gradient(circle_at_18%_18%,rgba(234,179,8,0.22),transparent_48%),linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] p-7 shadow-[0_12px_40px_rgba(0,0,0,0.3)] lg:min-h-[150px] lg:p-6 sm:min-h-[130px] sm:p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-gray-300">
+                Total Lists
+              </p>
+              <p className="mt-4 text-5xl font-semibold leading-none text-white lg:text-4xl sm:text-[34px]">
+                {customListsWithMovies.length}
+              </p>
+            </div>
+            <div className="flex min-h-[170px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-[radial-gradient(circle_at_50%_14%,rgba(234,179,8,0.2),transparent_50%),linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] p-7 shadow-[0_12px_40px_rgba(0,0,0,0.3)] lg:min-h-[150px] lg:p-6 sm:min-h-[130px] sm:p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-gray-300">
+                Saved Items
+              </p>
+              <p className="mt-4 text-5xl font-semibold leading-none text-white lg:text-4xl sm:text-[34px]">
+                {totalSaved}
+              </p>
+            </div>
+            <div className="flex min-h-[170px] w-full flex-col justify-between rounded-2xl border border-white/15 bg-[radial-gradient(circle_at_82%_18%,rgba(234,179,8,0.22),transparent_48%),linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))] p-7 shadow-[0_12px_40px_rgba(0,0,0,0.3)] lg:min-h-[150px] lg:p-6 sm:min-h-[130px] sm:p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-gray-300">
+                Unique Titles
+              </p>
+              <p className="mt-4 text-5xl font-semibold leading-none text-white lg:text-4xl sm:text-[34px]">
+                {uniqueMovieIds.length}
+              </p>
+            </div>
           </div>
         </div>
 
         <div className="mt-5 flex flex-wrap gap-2">
+          <CreateListQuick />
           <Button
             asChild
             className="bg-primaryM-500 text-black hover:bg-primaryM-600"
@@ -226,6 +271,12 @@ export default async function Saved() {
               <p className="break-words text-sm text-gray-300">
                 {list.description}
               </p>
+              <div className="mt-3">
+                <ListAddMovies
+                  bookmarkId={list.id}
+                  listName={list.bookmarkName}
+                />
+              </div>
             </div>
             <p className="text-sm text-gray-400">
               {movies.length} item{movies.length === 1 ? "" : "s"}
@@ -253,17 +304,25 @@ export default async function Saved() {
                 }
 
                 return (
-                  <MovieTvCard
-                    key={savedMovie.id}
-                    href={item.href}
-                    posterPath={item.posterPath}
-                    title={item.title}
-                    voteAverage={item.voteAverage}
-                    mediaTypeLabel={item.mediaTypeLabel}
-                    year={item.year}
-                    className="w-full"
-                    imageClassName="h-[320px] xl:h-[300px] lg:h-[280px] sm:h-[260px] s:h-[240px]"
-                  />
+                  <div key={savedMovie.id} className="relative">
+                    <MovieTvCard
+                      href={item.href}
+                      posterPath={item.posterPath}
+                      title={item.title}
+                      voteAverage={item.voteAverage}
+                      mediaTypeLabel={item.mediaTypeLabel}
+                      year={item.year}
+                      className="w-full"
+                      imageClassName="h-[320px] xl:h-[300px] lg:h-[280px] sm:h-[260px] s:h-[240px]"
+                    />
+                    <RemoveFromListButton
+                      bookmarkId={list.id}
+                      listName={list.bookmarkName}
+                      movieId={savedMovie.movieId}
+                      title={item.title}
+                      posterPath={item.posterPath}
+                    />
+                  </div>
                 );
               })}
             </div>

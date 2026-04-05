@@ -17,6 +17,7 @@ import { Metadata } from "next";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import FollowToggleButton from "@/components/profile/followToggleButton";
+import EditProfileDialog from "@/components/profile/editProfileDialog";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import { Button } from "@/components/ui/button";
 import RemoveFromSectionButton from "@/components/profile/removeFromSectionButton";
@@ -36,6 +37,7 @@ import {
   getUserDbProfileByUsername,
   getUserSocialStats,
 } from "@/lib/actions";
+import { decodeStoredMediaId } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -134,30 +136,68 @@ function collectShelfItems(
 }
 
 async function resolveMediaById(id: string): Promise<ResolvedMedia | null> {
-  try {
-    const movie = await getSpecifiedMovie(id);
+  const decoded = decodeStoredMediaId(id);
+  const resolvedId = decoded.id;
+  if (!resolvedId) return null;
 
-    return {
-      id,
-      title: movie.title ?? "Untitled",
-      posterPath: movie.poster_path,
-      voteAverage: Number(movie.vote_average ?? 0),
-      mediaTypeLabel: "Movie",
-      year: movie.release_date?.slice(0, 4) ?? "----",
-      href: `/movie/${id}`,
-    };
-  } catch {
+  if (decoded.mediaType === "tv") {
     try {
-      const tv = await getSpecifiedTV(id);
-
+      const tv = await getSpecifiedTV(resolvedId);
       return {
-        id,
+        id: resolvedId,
         title: tv.name ?? "Untitled",
         posterPath: tv.poster_path,
         voteAverage: Number(tv.vote_average ?? 0),
         mediaTypeLabel: "TV Show",
         year: tv.first_air_date?.slice(0, 4) ?? "----",
-        href: `/tv/${id}`,
+        href: `/tv/${resolvedId}`,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  if (decoded.mediaType === "movie") {
+    try {
+      const movie = await getSpecifiedMovie(resolvedId);
+      return {
+        id: resolvedId,
+        title: movie.title ?? "Untitled",
+        posterPath: movie.poster_path,
+        voteAverage: Number(movie.vote_average ?? 0),
+        mediaTypeLabel: "Movie",
+        year: movie.release_date?.slice(0, 4) ?? "----",
+        href: `/movie/${resolvedId}`,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  try {
+    const movie = await getSpecifiedMovie(resolvedId);
+
+    return {
+      id: resolvedId,
+      title: movie.title ?? "Untitled",
+      posterPath: movie.poster_path,
+      voteAverage: Number(movie.vote_average ?? 0),
+      mediaTypeLabel: "Movie",
+      year: movie.release_date?.slice(0, 4) ?? "----",
+      href: `/movie/${resolvedId}`,
+    };
+  } catch {
+    try {
+      const tv = await getSpecifiedTV(resolvedId);
+
+      return {
+        id: resolvedId,
+        title: tv.name ?? "Untitled",
+        posterPath: tv.poster_path,
+        voteAverage: Number(tv.vote_average ?? 0),
+        mediaTypeLabel: "TV Show",
+        year: tv.first_air_date?.slice(0, 4) ?? "----",
+        href: `/tv/${resolvedId}`,
       };
     } catch {
       return null;
@@ -291,12 +331,12 @@ function ActivityRow({
   profileUsername: string;
 }) {
   return (
-    <article className="h-full min-h-[156px] w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+    <Link
+      href={`/profile/${profileUsername}/review/${item.id}`}
+      className="block h-full min-h-[156px] w-full rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-primaryM-500/40 hover:bg-white/[0.05]"
+    >
       <div className="flex h-full gap-4 sm:gap-3">
-        <Link
-          href={`/profile/${profileUsername}/log/${item.id}`}
-          className="relative block w-[88px] shrink-0 overflow-hidden rounded-xl sm:w-[76px]"
-        >
+        <div className="relative -z-10 block w-[150px] shrink-0 overflow-hidden rounded-xl md:w-[200px] sm:w-[150px]">
           {media?.posterPath ? (
             <LazyBlurImage
               src={`https://image.tmdb.org/t/p/w342/${media.posterPath}`}
@@ -309,16 +349,14 @@ function ActivityRow({
               No poster
             </div>
           )}
-        </Link>
+        </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 p-4">
           <p className="text-xs uppercase tracking-[0.22em] text-gray-500">
             Recent activity
           </p>
           <h3 className="mt-1 line-clamp-1 text-lg font-semibold text-white sm:text-base">
-            <Link href={`/profile/${profileUsername}/log/${item.id}`}>
-              {media?.title ?? "Title unavailable"}
-            </Link>
+            {media?.title ?? "Title unavailable"}
           </h3>
           <p className="mt-2 flex items-center gap-2 text-sm text-gray-300">
             <span>
@@ -334,7 +372,7 @@ function ActivityRow({
           ) : null}
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
 
@@ -358,12 +396,12 @@ function ReviewRow({
   const review = item.review.trim();
 
   return (
-    <article className="h-full min-h-[260px] w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+    <Link
+      href={`/profile/${profileUsername}/review/${item.id}`}
+      className="block h-full min-h-[260px] w-full rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-primaryM-500/40 hover:bg-white/[0.05]"
+    >
       <div className="flex h-full gap-4 sm:gap-3">
-        <Link
-          href={`/profile/${profileUsername}/review/${item.id}`}
-          className="relative block w-[88px] shrink-0 overflow-hidden rounded-xl sm:w-[76px]"
-        >
+        <div className="relative -z-10 block w-[150px] shrink-0 overflow-hidden rounded-xl md:w-[200px] sm:w-[150px]">
           {media?.posterPath ? (
             <LazyBlurImage
               src={`https://image.tmdb.org/t/p/w342/${media.posterPath}`}
@@ -376,18 +414,16 @@ function ReviewRow({
               No poster
             </div>
           )}
-        </Link>
+        </div>
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 p-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-gray-500">
               <MessageSquareQuote className="h-3.5 w-3.5 text-primaryM-500" />
               <span>Recent review</span>
             </div>
             <h3 className="mt-1 line-clamp-1 text-lg font-semibold text-white sm:text-base">
-              <Link href={`/profile/${profileUsername}/review/${item.id}`}>
-                {media?.title ?? "Title unavailable"}
-              </Link>
+              {media?.title ?? "Title unavailable"}
             </h3>
             <p className="mt-2 flex items-center gap-2 text-sm text-gray-300">
               <span>
@@ -424,18 +460,15 @@ function ReviewRow({
                 ))}
               </div>
               {replies.length > 2 ? (
-                <Link
-                  href={`/profile/${profileUsername}/review/${item.id}`}
-                  className="mt-3 inline-block text-xs font-semibold text-primaryM-500 hover:text-primaryM-400"
-                >
+                <p className="mt-3 text-xs font-semibold text-primaryM-500">
                   See more replies
-                </Link>
+                </p>
               ) : null}
             </div>
           ) : null}
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
 
@@ -483,11 +516,11 @@ export default async function Page({
     matchesKeywords(list.bookmarkName, watchlistKeywords),
   );
   const allSavedMovies = collectShelfItems(bookmarksWithMovies, () => true);
-  const likedShelf = likedMovies.length > 0 ? likedMovies : allSavedMovies;
+  const likedShelf = likedMovies;
 
   const recentActivity = loggedMovies.slice(0, 6);
   const recentReviews = loggedMovies
-    .filter((item) => item.review.trim().length > 0)
+    .filter((item) => item.review.trim().length > 0 || item.rating !== null)
     .slice(0, 6);
 
   const idsToResolve = Array.from(
@@ -510,6 +543,9 @@ export default async function Page({
 
   const displayName =
     profileUser.name?.trim() || profileUser.email || "Profile";
+  const profileBio =
+    profileUser.bio?.trim() ||
+    "Tracking films, writing reviews, and building lists.";
   const initials = getInitials(displayName);
   const isPremium = profileUser.premium === true;
   const username = profileUser.username ?? null;
@@ -559,11 +595,11 @@ export default async function Page({
   }
 
   return (
-    <div className="container mt-5 pb-12 text-textMain">
+    <div className="container mt-16 pb-12 text-textMain">
       <div className="space-y-8">
         <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_14%_18%,rgba(245,207,77,0.14),transparent_30%),radial-gradient(circle_at_85%_22%,rgba(59,130,246,0.18),transparent_34%),linear-gradient(110deg,#0a0f16_0%,#101722_35%,#0f131b_68%,#0d0f14_100%)] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.28)] lg:p-5 sm:p-4">
           <div className="grid grid-cols-[minmax(0,1fr)_560px] items-start gap-6 xl:grid-cols-[minmax(0,1fr)_500px] xmd:grid-cols-1">
-            <div className="flex items-start gap-5 sm:flex-col sm:items-start">
+            <div className="flex items-start gap-5 sm:flex-col sm:items-center">
               <Avatar className="h-28 w-28 border-2 border-white/20 bg-black/20 ring-4 ring-white/5 sm:h-20 sm:w-20">
                 {profileUser.image ? (
                   <AvatarImage src={profileUser.image} alt={displayName} />
@@ -600,9 +636,7 @@ export default async function Page({
                     ) : null}
                   </div>
                 ) : null}
-                <p className="mt-1 text-sm text-gray-400">
-                  Tracking films, writing reviews, and building lists.
-                </p>
+                <p className="mt-1 text-sm text-gray-400">{profileBio}</p>
                 <div className="mt-4 flex flex-wrap gap-2 text-xs text-gray-300">
                   <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
                     {loggedMovies.length} film
@@ -663,19 +697,19 @@ export default async function Page({
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex items-center justify-center gap-2">
+            {isOwner && username ? (
+              <EditProfileDialog
+                currentUsername={username}
+                currentBio={profileUser.bio ?? ""}
+                currentImage={profileUser.image ?? ""}
+              />
+            ) : null}
             <Button
               asChild
               className="bg-primaryM-500 text-black hover:bg-primaryM-600"
             >
               <Link href="/explore">Explore Movies</Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="border-white/15 bg-white/5 text-white hover:bg-white/10"
-            >
-              <Link href="/bookmarks">Open Lists</Link>
             </Button>
           </div>
         </section>
@@ -759,10 +793,7 @@ export default async function Page({
                   : "This user has no recent activity yet."}
               </div>
             ) : (
-              <div
-                className="grid gap-3 md:grid-cols-1"
-                style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
-              >
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
                 {recentActivity.map((item) => (
                   <ActivityRow
                     key={item.id}
@@ -783,7 +814,7 @@ export default async function Page({
                   <span>Recent Reviews</span>
                 </div>
                 <p className="mt-2 max-w-2xl text-sm text-gray-300">
-                  Only titles with written reviews appear here.
+                  Your latest rated or written reviews appear here.
                 </p>
               </div>
               <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-gray-300">
@@ -795,14 +826,11 @@ export default async function Page({
             {recentReviews.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-gray-300">
                 {isOwner
-                  ? "Add a written review to see it surface here."
+                  ? "Rate or review a title to see it surface here."
                   : "This user has no reviews yet."}
               </div>
             ) : (
-              <div
-                className="grid gap-3 md:grid-cols-1"
-                style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
-              >
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
                 {recentReviews.map((item) => (
                   <div
                     key={item.id}
@@ -884,15 +912,12 @@ export default async function Page({
                   : "This user has no lists yet."}
               </div>
             ) : (
-              <div
-                className="grid gap-3 md:grid-cols-1"
-                style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
-              >
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
                 {customBookmarksWithMovies.map(({ list, movies }) => (
                   <Link
                     key={list.id}
                     href={`/list/${list.id}`}
-                    className="block h-full min-h-[150px] w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.05]"
+                    className="block h-full min-h-[150px] w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-primaryM-500/40 hover:bg-white/[0.05]"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">

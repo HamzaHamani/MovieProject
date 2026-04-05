@@ -27,6 +27,11 @@ import { TvideoApiSchema } from "@/types/video";
 import { TCreditsSchema } from "@/types/cast";
 import { cache } from "react";
 import { log } from "console";
+import {
+  StoredMediaType,
+  encodeStoredMediaId,
+  decodeStoredMediaId,
+} from "@/lib/utils";
 
 //------------------------------------------------------------------------#uilities for handlingath
 cache;
@@ -49,6 +54,10 @@ export async function getCurrentUserDbProfile() {
     .select({
       id: users.id,
       username: users.username,
+      name: users.name,
+      email: users.email,
+      image: users.image,
+      bio: users.bio,
       premium: users.premium,
     })
     .from(users)
@@ -69,9 +78,26 @@ export async function getUserDbProfileByUsername(usernameInput: string) {
       name: users.name,
       email: users.email,
       image: users.image,
+      bio: users.bio,
     })
     .from(users)
     .where(eq(users.username, username))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
+export async function getUserDbProfileById(userId: string) {
+  const rows = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      name: users.name,
+      image: users.image,
+      bio: users.bio,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
     .limit(1);
 
   return rows[0] ?? null;
@@ -120,6 +146,26 @@ function isSystemListName(name: string) {
   );
 }
 
+function getStoredMovieIdCandidates(
+  id: string | number,
+  mediaType?: StoredMediaType,
+) {
+  const raw = String(id).trim();
+  const candidates = new Set<string>();
+
+  if (raw) {
+    candidates.add(raw);
+    candidates.add(encodeStoredMediaId(raw, "movie"));
+    candidates.add(encodeStoredMediaId(raw, "tv"));
+  }
+
+  if (mediaType) {
+    candidates.add(encodeStoredMediaId(raw, mediaType));
+  }
+
+  return [...candidates];
+}
+
 async function ensureDefaultSystemListsForUser(userId: string) {
   const current = await db
     .select()
@@ -162,6 +208,24 @@ async function ensureDefaultSystemListsForUser(userId: string) {
 
 function isValidUsername(username: string) {
   return /^[a-z0-9_]{3,24}$/.test(username);
+}
+
+const profileUpdateSchema = z.object({
+  username: z.string().trim().min(3).max(24),
+  bio: z.string().trim().max(240).optional().nullable(),
+  image: z.string().url().optional().nullable(),
+});
+
+function isAllowedProfileImageUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return false;
+
+    const host = parsed.hostname.toLowerCase();
+    return host.includes("utfs.io") || host.includes("ufs.sh");
+  } catch {
+    return false;
+  }
 }
 
 export async function isUsernameAvailable(
@@ -213,6 +277,71 @@ export async function completeUsernameSetup(usernameInput: string) {
   await db.update(users).set({ username }).where(eq(users.id, user.id));
 
   return { ok: true as const, username };
+}
+
+export async function updateMyProfile(input: {
+  username?: string;
+  bio?: string | null;
+  image?: string | null;
+}) {
+  const user = await getUser();
+
+  if (!user?.id) {
+    throw new Error("User not authenticated");
+  }
+
+  const parsed = profileUpdateSchema.safeParse({
+    username: String(input.username ?? ""),
+    bio: input.bio ?? null,
+    image: input.image ?? null,
+  });
+
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0]?.message ?? "Invalid profile data";
+    return { ok: false as const, error: issue };
+  }
+
+  const normalizedUsername = normalizeUsername(parsed.data.username);
+  const usernameValidity = await isUsernameAvailable(
+    normalizedUsername,
+    user.id,
+  );
+
+  if (!usernameValidity.available) {
+    return {
+      ok: false as const,
+      error:
+        usernameValidity.reason === "invalid"
+          ? "Username must be 3-24 chars and use only lowercase letters, numbers, or underscores."
+          : "That username is already taken.",
+    };
+  }
+
+  const nextBio = parsed.data.bio?.trim() || null;
+  const nextImage = parsed.data.image?.trim() || null;
+
+  if (nextImage && !isAllowedProfileImageUrl(nextImage)) {
+    return {
+      ok: false as const,
+      error: "Invalid profile image URL. Please upload via UploadThing.",
+    };
+  }
+
+  await db
+    .update(users)
+    .set({
+      username: normalizedUsername,
+      bio: nextBio,
+      image: nextImage,
+    })
+    .where(eq(users.id, user.id));
+
+  return {
+    ok: true as const,
+    username: normalizedUsername,
+    bio: nextBio,
+    image: nextImage,
+  };
 }
 
 export async function followUserByUsername(targetUsernameInput: string) {
@@ -650,13 +779,16 @@ export async function AddMovie(data: {
   bookmarkId: string;
   review?: string;
   movieId: string | number;
+  mediaType?: StoredMediaType;
 }) {
   if (!data.review) data.review = "";
+
+  const storedMovieId = encodeStoredMediaId(data.movieId, data.mediaType);
 
   // handling movie if already on watchList or not
   const existingMovie = await getMoviesBook(data.bookmarkId);
   const existingMovieResponse = existingMovie.some(
-    (movie) => movie.movieId == data.movieId,
+    (movie) => movie.movieId === storedMovieId,
   );
 
   if (existingMovieResponse) return { already: true };
@@ -664,7 +796,7 @@ export async function AddMovie(data: {
     await db.insert(bookmarksMovies).values({
       bookmarkId: data.bookmarkId as string,
       review: data.review,
-      movieId: data.movieId as string,
+      movieId: storedMovieId,
     });
     return { already: false };
   }
@@ -673,9 +805,13 @@ export async function AddMovie(data: {
 export async function RemoveMovie(data: {
   bookmarkId: string;
   movieId: string | number;
+  mediaType?: StoredMediaType;
 }) {
   const existingMovie = await getMoviesBook(data.bookmarkId);
-  const match = existingMovie.find((movie) => movie.movieId == data.movieId);
+  const candidates = getStoredMovieIdCandidates(data.movieId, data.mediaType);
+  const match = existingMovie.find((movie) =>
+    candidates.includes(movie.movieId),
+  );
 
   if (!match) return { removed: false as const };
 
@@ -687,6 +823,7 @@ export async function RemoveMovie(data: {
 export async function addMovieToProfileSection(data: {
   section: "favorites" | "likes" | "watchlist";
   movieId: string | number;
+  mediaType?: StoredMediaType;
 }) {
   const user = await getUser();
 
@@ -740,6 +877,7 @@ export async function addMovieToProfileSection(data: {
   const response = await AddMovie({
     bookmarkId: targetListId,
     movieId: String(data.movieId),
+    mediaType: data.mediaType,
     review: "",
   });
 
@@ -841,8 +979,11 @@ export type TSimilarItem = {
 export type TReviewItem = {
   id: string;
   author: string;
+  authorUsername?: string | null;
+  authorUserId?: string | null;
   content: string;
   created_at: string;
+  source?: "you" | "friend" | "following" | "tmdb";
   author_details?: {
     avatar_path?: string | null;
     rating?: number | null;
@@ -974,11 +1115,292 @@ export async function getReviewsByType(
   id: string,
   typeM: "movie" | "tv",
 ): Promise<TReviewItem[]> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/${typeM}/${id}/reviews?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
+  const socialReviews = await getSocialReviewsByType(id);
+
+  let tmdbReviews: TReviewItem[] = [];
+  try {
+    const res = await axios.get(
+      `https://api.themoviedb.org/3/${typeM}/${id}/reviews?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
+    );
+    const data = await res.data;
+    const results = Array.isArray(data?.results) ? data.results : [];
+    tmdbReviews = results.map((item: TReviewItem) => ({
+      ...item,
+      source: "tmdb",
+    }));
+  } catch {
+    tmdbReviews = [];
+  }
+
+  return [...socialReviews, ...tmdbReviews];
+}
+
+async function getSocialReviewsByType(id: string): Promise<TReviewItem[]> {
+  const viewer = await getUser();
+
+  let localPrioritized: TReviewItem[] = [];
+
+  if (viewer?.id) {
+    const [followingRows, followerRows] = await Promise.all([
+      db
+        .select({ followingId: userFollows.followingId })
+        .from(userFollows)
+        .where(eq(userFollows.followerId, viewer.id)),
+      db
+        .select({ followerId: userFollows.followerId })
+        .from(userFollows)
+        .where(eq(userFollows.followingId, viewer.id)),
+    ]);
+
+    const followingIds = followingRows.map((row) => row.followingId);
+    const followerSet = new Set(followerRows.map((row) => row.followerId));
+    const friendIds = followingIds.filter((userId) => followerSet.has(userId));
+    const friendSet = new Set(friendIds);
+    const followingOnlyIds = followingIds.filter(
+      (userId) => !friendSet.has(userId),
+    );
+
+    const targetIds = Array.from(
+      new Set([viewer.id, ...friendIds, ...followingOnlyIds]),
+    );
+
+    if (targetIds.length > 0) {
+      const rawRows = await db
+        .select({
+          reviewId: loggedMovies.id,
+          userId: loggedMovies.userId,
+          review: loggedMovies.review,
+          rating: loggedMovies.rating,
+          watchedAt: loggedMovies.watchedAt,
+          createdAt: loggedMovies.createdAt,
+          username: users.username,
+          name: users.name,
+          image: users.image,
+        })
+        .from(loggedMovies)
+        .leftJoin(users, eq(users.id, loggedMovies.userId))
+        .where(
+          and(
+            eq(loggedMovies.showId, id),
+            inArray(loggedMovies.userId, targetIds),
+          ),
+        )
+        .orderBy(desc(loggedMovies.createdAt));
+
+      const normalizedRows = rawRows
+        .map((row) => ({
+          ...row,
+          review: (row.review ?? "").trim(),
+          createdAtDate: row.createdAt ?? row.watchedAt,
+        }))
+        .filter((row) => row.review.length > 0 || row.rating !== null);
+
+      // Keep one review per person (their most recent one for this title).
+      const byUser = new Map<string, (typeof normalizedRows)[number]>();
+      normalizedRows.forEach((row) => {
+        if (!byUser.has(row.userId)) {
+          byUser.set(row.userId, row);
+        }
+      });
+
+      const viewerReviews: TReviewItem[] = [];
+      const friendReviews: TReviewItem[] = [];
+      const followingReviews: TReviewItem[] = [];
+
+      byUser.forEach((row) => {
+        const ratingOutOfTen =
+          typeof row.rating === "number"
+            ? Number((row.rating * 2).toFixed(1))
+            : null;
+
+        const base: TReviewItem = {
+          id: `local-${row.reviewId}`,
+          author: row.name || row.username || "User",
+          authorUsername: row.username ?? null,
+          authorUserId: row.userId,
+          content: row.review,
+          created_at: row.createdAtDate.toISOString(),
+          author_details: {
+            avatar_path: row.image,
+            rating: ratingOutOfTen,
+          },
+        };
+
+        if (row.userId === viewer.id) {
+          viewerReviews.push({ ...base, source: "you" });
+          return;
+        }
+
+        if (friendSet.has(row.userId)) {
+          friendReviews.push({ ...base, source: "friend" });
+          return;
+        }
+
+        if (followingOnlyIds.includes(row.userId)) {
+          followingReviews.push({ ...base, source: "following" });
+        }
+      });
+
+      const sortNewestFirst = (left: TReviewItem, right: TReviewItem) =>
+        new Date(right.created_at).getTime() -
+        new Date(left.created_at).getTime();
+
+      viewerReviews.sort(sortNewestFirst);
+      friendReviews.sort(sortNewestFirst);
+      followingReviews.sort(sortNewestFirst);
+
+      localPrioritized = [
+        ...viewerReviews,
+        ...friendReviews,
+        ...followingReviews,
+      ];
+    }
+  }
+
+  return localPrioritized;
+}
+
+export type TWatchedByItem = {
+  userId: string;
+  username: string | null;
+  name: string | null;
+  image: string | null;
+  rating: number | null;
+  watchedAt: Date;
+  source: "friend" | "following";
+};
+
+export async function getWatchedByForShow(
+  showId: string,
+): Promise<TWatchedByItem[]> {
+  const viewer = await getUser();
+  if (!viewer?.id) return [];
+
+  const [followingRows, followerRows] = await Promise.all([
+    db
+      .select({ followingId: userFollows.followingId })
+      .from(userFollows)
+      .where(eq(userFollows.followerId, viewer.id)),
+    db
+      .select({ followerId: userFollows.followerId })
+      .from(userFollows)
+      .where(eq(userFollows.followingId, viewer.id)),
+  ]);
+
+  const followingIds = followingRows.map((row) => row.followingId);
+  const followerSet = new Set(followerRows.map((row) => row.followerId));
+  const friendIds = followingIds.filter((userId) => followerSet.has(userId));
+  const friendSet = new Set(friendIds);
+  const followingOnlyIds = followingIds.filter(
+    (userId) => !friendSet.has(userId),
   );
-  const data = await res.data;
-  return data?.results ?? [];
+  const targetIds = [...friendIds, ...followingOnlyIds];
+
+  if (targetIds.length === 0) return [];
+
+  const rows = await db
+    .select({
+      userId: loggedMovies.userId,
+      rating: loggedMovies.rating,
+      watchedAt: loggedMovies.watchedAt,
+      createdAt: loggedMovies.createdAt,
+      username: users.username,
+      name: users.name,
+      image: users.image,
+    })
+    .from(loggedMovies)
+    .leftJoin(users, eq(users.id, loggedMovies.userId))
+    .where(
+      and(
+        eq(loggedMovies.showId, showId),
+        inArray(loggedMovies.userId, targetIds),
+      ),
+    )
+    .orderBy(desc(loggedMovies.createdAt));
+
+  // Keep only the most recent watch for each person.
+  const byUser = new Map<string, (typeof rows)[number]>();
+  rows.forEach((row) => {
+    if (!byUser.has(row.userId)) {
+      byUser.set(row.userId, row);
+    }
+  });
+
+  const watchedBy: TWatchedByItem[] = [];
+  byUser.forEach((row) => {
+    const watchedAt = row.createdAt ?? row.watchedAt;
+    if (!watchedAt) return;
+
+    watchedBy.push({
+      userId: row.userId,
+      username: row.username,
+      name: row.name,
+      image: row.image,
+      rating: row.rating,
+      watchedAt,
+      source: friendSet.has(row.userId) ? "friend" : "following",
+    });
+  });
+
+  watchedBy.sort(
+    (left, right) => right.watchedAt.getTime() - left.watchedAt.getTime(),
+  );
+  return watchedBy;
+}
+
+export async function getCategorizedReviewsByType(params: {
+  id: string;
+  typeM: "movie" | "tv";
+  category: "social" | "critic";
+  page?: number;
+  pageSize?: number;
+}): Promise<{ items: TReviewItem[]; hasMore: boolean }> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.max(1, params.pageSize ?? 10);
+  const limit = page * pageSize;
+
+  if (params.category === "social") {
+    const socialReviews = await getSocialReviewsByType(params.id);
+    return {
+      items: socialReviews.slice(0, limit),
+      hasMore: socialReviews.length > limit,
+    };
+  }
+
+  const collected: TReviewItem[] = [];
+  let hasMore = false;
+
+  for (let currentPage = 1; currentPage <= page; currentPage += 1) {
+    try {
+      const res = await axios.get(
+        `https://api.themoviedb.org/3/${params.typeM}/${params.id}/reviews?language=en-US&page=${currentPage}&api_key=${process.env.TMDB_API_KEY}`,
+      );
+      const data = await res.data;
+      const results = Array.isArray(data?.results) ? data.results : [];
+      const mapped = results.map((item: TReviewItem) => ({
+        ...item,
+        source: "tmdb" as const,
+      }));
+
+      collected.push(...mapped);
+
+      const totalPages = Number(data?.total_pages ?? currentPage);
+      hasMore = Number.isFinite(totalPages) ? currentPage < totalPages : false;
+
+      if (results.length === 0) {
+        hasMore = false;
+        break;
+      }
+    } catch {
+      hasMore = false;
+      break;
+    }
+  }
+
+  return {
+    items: collected.slice(0, limit),
+    hasMore,
+  };
 }
 
 export async function getWatchProvidersByType(

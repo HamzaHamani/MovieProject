@@ -39,7 +39,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async session({ session, user }) {
       const userMeta = await db
-        .select({ username: users.username, premium: users.premium })
+        .select({
+          username: users.username,
+          premium: users.premium,
+          image: users.image,
+          bio: users.bio,
+        })
         .from(users)
         .where(eq(users.id, user.id))
         .limit(1);
@@ -50,6 +55,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = user.id;
         session.user.username = dbUser?.username ?? null;
         session.user.premium = dbUser?.premium ?? false;
+        session.user.image = dbUser?.image ?? session.user.image;
+        session.user.bio = dbUser?.bio ?? null;
       }
 
       return session;
