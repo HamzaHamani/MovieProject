@@ -10,9 +10,11 @@ import {
   listLikes,
   userFollows,
   users,
+  notifications,
+  listCollaborators,
 } from "@/db/schema";
 import { db } from "@/db";
-import { and, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, ne, sum, avg, count } from "drizzle-orm";
 import { signOut } from "@/auth";
 import {
   bookmarksMoviesSchema,
@@ -115,7 +117,7 @@ export async function handleLogout() {
 
 type provider = "github" | "google" | "twitter" | "facebook" | "reddit";
 export async function handleSignin(provider: provider) {
-  await signIn(provider);
+  await signIn(provider, { callbackUrl: "/explore" });
 }
 
 function normalizeUsername(input: string) {
@@ -129,6 +131,7 @@ const SYSTEM_WATCHLIST_KEYWORDS = [
   "to watch",
   "queue",
 ];
+const SYSTEM_FAVORITES_KEYWORDS = ["favorite", "favourite", "fav"];
 
 function normalizeListName(input: string) {
   return input.trim().toLowerCase();
@@ -141,9 +144,28 @@ function matchesAnyListKeyword(value: string, keywords: string[]) {
 
 function isSystemListName(name: string) {
   return (
+    matchesAnyListKeyword(name, SYSTEM_FAVORITES_KEYWORDS) ||
     matchesAnyListKeyword(name, SYSTEM_LIKES_KEYWORDS) ||
     matchesAnyListKeyword(name, SYSTEM_WATCHLIST_KEYWORDS)
   );
+}
+
+async function cleanupSystemListCollaborations() {
+  const rows = await db
+    .select({ id: bookmarks.id, bookmarkName: bookmarks.bookmarkName })
+    .from(bookmarks);
+
+  const systemListIds = rows
+    .filter((row) => isSystemListName(row.bookmarkName))
+    .map((row) => row.id);
+
+  if (systemListIds.length === 0) return 0;
+
+  await db
+    .delete(listCollaborators)
+    .where(inArray(listCollaborators.bookmarkId, systemListIds));
+
+  return systemListIds.length;
 }
 
 function getStoredMovieIdCandidates(
@@ -360,10 +382,30 @@ export async function followUserByUsername(targetUsernameInput: string) {
   if (targetUser.id === user.id)
     return { ok: false as const, reason: "self" as const };
 
+  const alreadyFollowing = await db
+    .select({ followerId: userFollows.followerId })
+    .from(userFollows)
+    .where(
+      and(
+        eq(userFollows.followerId, user.id),
+        eq(userFollows.followingId, targetUser.id),
+      ),
+    )
+    .limit(1);
+
   await db
     .insert(userFollows)
     .values({ followerId: user.id, followingId: targetUser.id })
     .onConflictDoNothing();
+
+  if (!alreadyFollowing[0]) {
+    await createNotification({
+      userId: targetUser.id,
+      type: "follow",
+      sourceUserId: user.id,
+      message: `${user.name ?? "Someone"} started following you`,
+    });
+  }
 
   return { ok: true as const };
 }
@@ -499,6 +541,23 @@ export async function toggleReviewLike(reviewId: string) {
     reviewId,
   });
 
+  const targetReview = await db
+    .select({ userId: loggedMovies.userId })
+    .from(loggedMovies)
+    .where(eq(loggedMovies.id, reviewId))
+    .limit(1);
+
+  const reviewOwnerId = targetReview[0]?.userId;
+  if (reviewOwnerId && reviewOwnerId !== user.id) {
+    await createNotification({
+      userId: reviewOwnerId,
+      type: "review_like",
+      sourceUserId: user.id,
+      referenceId: reviewId,
+      message: `${user.name ?? "Someone"} liked your review`,
+    });
+  }
+
   return { liked: true as const };
 }
 
@@ -522,6 +581,23 @@ export async function addReviewReply(reviewId: string, content: string) {
       content: normalizedContent,
     })
     .returning({ id: reviewReplies.id, createdAt: reviewReplies.createdAt });
+
+  const targetReview = await db
+    .select({ userId: loggedMovies.userId })
+    .from(loggedMovies)
+    .where(eq(loggedMovies.id, reviewId))
+    .limit(1);
+
+  const reviewOwnerId = targetReview[0]?.userId;
+  if (reviewOwnerId && reviewOwnerId !== user.id) {
+    await createNotification({
+      userId: reviewOwnerId,
+      type: "review_reply",
+      sourceUserId: user.id,
+      referenceId: reviewId,
+      message: `${user.name ?? "Someone"} replied to your review`,
+    });
+  }
 
   return { ok: true as const, reply: inserted[0] };
 }
@@ -605,7 +681,9 @@ export async function removeMovieFromBookmark(data: {
 
   const bookmark = await getBookmarkById(data.bookmarkId);
   if (!bookmark) throw new Error("List not found");
-  if (bookmark.userId !== user.id) throw new Error("Not allowed");
+
+  const canEdit = await canUserEditBookmark(data.bookmarkId);
+  if (!canEdit) throw new Error("Not allowed");
 
   return RemoveMovie(data);
 }
@@ -668,6 +746,7 @@ export async function getListLikeStats(bookmarkId: string) {
 type bookSchemaType = z.infer<typeof bookmarksSchema>;
 export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
   await ensureDefaultSystemListsForUser(userId);
+  await cleanupSystemListCollaborations();
 
   const boks = await db
     .select()
@@ -798,6 +877,19 @@ export async function AddMovie(data: {
       review: data.review,
       movieId: storedMovieId,
     });
+
+    const actor = await getUser();
+    const bookmark = await getBookmarkById(data.bookmarkId);
+    if (actor?.id && bookmark?.userId && bookmark.userId !== actor.id) {
+      await createNotification({
+        userId: bookmark.userId,
+        type: "list_update",
+        sourceUserId: actor.id,
+        referenceId: data.bookmarkId,
+        message: `${actor.name ?? "A collaborator"} added a title to your list`,
+      });
+    }
+
     return { already: false };
   }
 }
@@ -816,6 +908,18 @@ export async function RemoveMovie(data: {
   if (!match) return { removed: false as const };
 
   await db.delete(bookmarksMovies).where(eq(bookmarksMovies.id, match.id));
+
+  const actor = await getUser();
+  const bookmark = await getBookmarkById(data.bookmarkId);
+  if (actor?.id && bookmark?.userId && bookmark.userId !== actor.id) {
+    await createNotification({
+      userId: bookmark.userId,
+      type: "list_update",
+      sourceUserId: actor.id,
+      referenceId: data.bookmarkId,
+      message: `${actor.name ?? "A collaborator"} removed a title from your list`,
+    });
+  }
 
   return { removed: true as const };
 }
@@ -1986,4 +2090,676 @@ export async function sendLoggedMovieTv({
   }
 
   return { already: false as const, updated: false as const };
+}
+
+//---------------------------
+// NOTIFICATIONS
+//---------------------------
+
+export async function getUserNotifications(
+  limit: number = 20,
+  offset: number = 0,
+) {
+  const user = await getUser();
+  if (!user?.id) return [];
+
+  const rows = await db
+    .select({
+      id: notifications.id,
+      type: notifications.type,
+      message: notifications.message,
+      isRead: notifications.isRead,
+      createdAt: notifications.createdAt,
+      sourceUserId: notifications.sourceUserId,
+      sourceUserName: users.name,
+      sourceUserImage: users.image,
+      sourceUserUsername: users.username,
+      referenceId: notifications.referenceId,
+    })
+    .from(notifications)
+    .leftJoin(users, eq(users.id, notifications.sourceUserId))
+    .where(eq(notifications.userId, user.id))
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return rows;
+}
+
+export async function getUnreadNotificationCount() {
+  const user = await getUser();
+  if (!user?.id) return 0;
+
+  const result = await db
+    .select({ count: count() })
+    .from(notifications)
+    .where(
+      and(eq(notifications.userId, user.id), eq(notifications.isRead, false)),
+    );
+
+  return result[0]?.count ?? 0;
+}
+
+export async function markNotificationAsRead(notificationId: string) {
+  const user = await getUser();
+  if (!user?.id) return { success: false };
+
+  try {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(notifications.id, notificationId),
+          eq(notifications.userId, user.id),
+        ),
+      );
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
+
+export async function markAllNotificationsAsRead() {
+  const user = await getUser();
+  if (!user?.id) return { success: false };
+
+  try {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.userId, user.id));
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
+
+export async function createNotification(data: {
+  userId: string;
+  type: string;
+  sourceUserId?: string;
+  referenceId?: string;
+  message?: string;
+}) {
+  try {
+    const result = await db.insert(notifications).values({
+      userId: data.userId,
+      type: data.type,
+      sourceUserId: data.sourceUserId,
+      referenceId: data.referenceId,
+      message: data.message,
+      isRead: false,
+    });
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
+
+//---------------------------
+// USER STATISTICS
+//---------------------------
+
+export async function getUserStatistics(username: string) {
+  const targetUser = await getUserDbProfileByUsername(username);
+  if (!targetUser?.id) return null;
+
+  const userMovies = await db
+    .select({
+      showId: loggedMovies.showId,
+      rating: loggedMovies.rating,
+    })
+    .from(loggedMovies)
+    .where(eq(loggedMovies.userId, targetUser.id));
+
+  const totalMovies = userMovies.length;
+  const totalRatings = userMovies.filter((m) => m.rating !== null).length;
+
+  let averageRating = 0;
+  if (totalRatings > 0) {
+    const sumRatings = userMovies.reduce((sum, m) => sum + (m.rating ?? 0), 0);
+    averageRating = sumRatings / totalRatings;
+  }
+
+  const enrichedEntries = await Promise.all(
+    userMovies.slice(0, 120).map(async (entry) => {
+      const decoded = decodeStoredMediaId(entry.showId);
+      const resolvedId = decoded.id;
+      if (!resolvedId) return null;
+
+      const readMovie = async () => {
+        const movie = await getSpecifiedMovie(resolvedId);
+        const genres = Array.isArray((movie as any)?.genres)
+          ? (movie as any).genres
+          : [];
+        return {
+          runtime: Number((movie as any)?.runtime ?? 0),
+          genres: genres
+            .map((genre: any) => String(genre?.name ?? "").trim())
+            .filter(Boolean),
+        };
+      };
+
+      const readTv = async () => {
+        const tv = await getSpecifiedTV(resolvedId);
+        const genres = Array.isArray((tv as any)?.genres)
+          ? (tv as any).genres
+          : [];
+        const fallbackRuntime = Array.isArray((tv as any)?.episode_run_time)
+          ? Number((tv as any).episode_run_time[0] ?? 0)
+          : 0;
+
+        return {
+          runtime: Number((tv as any)?.runtime ?? fallbackRuntime ?? 0),
+          genres: genres
+            .map((genre: any) => String(genre?.name ?? "").trim())
+            .filter(Boolean),
+        };
+      };
+
+      try {
+        if (decoded.mediaType === "movie") return await readMovie();
+        if (decoded.mediaType === "tv") return await readTv();
+
+        try {
+          return await readMovie();
+        } catch {
+          return await readTv();
+        }
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  const totalMinutesWatched = enrichedEntries.reduce(
+    (sum, item) => sum + Number(item?.runtime ?? 0),
+    0,
+  );
+
+  const genreCounts = new Map<string, number>();
+  enrichedEntries.forEach((item) => {
+    item?.genres.forEach((genre) => {
+      genreCounts.set(genre, (genreCounts.get(genre) ?? 0) + 1);
+    });
+  });
+
+  const topGenres = [...genreCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([name]) => name);
+
+  return {
+    totalMoviesWatched: totalMovies,
+    averageRating: averageRating.toFixed(2),
+    totalHoursWatched: Number((totalMinutesWatched / 60).toFixed(1)),
+    topGenres,
+  };
+}
+
+//---------------------------
+// COLLABORATIVE LISTS
+//---------------------------
+
+export async function inviteCollaborator(
+  bookmarkId: string,
+  invitedUserId: string,
+) {
+  const user = await getUser();
+  if (!user?.id) return { success: false, error: "Not authenticated" };
+
+  try {
+    await cleanupSystemListCollaborations();
+
+    // Check if user is bookmark owner
+    const bookmark = await db
+      .select({ userId: bookmarks.userId, bookmarkName: bookmarks.bookmarkName })
+      .from(bookmarks)
+      .where(eq(bookmarks.id, bookmarkId))
+      .limit(1);
+
+    if (!bookmark[0] || bookmark[0].userId !== user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    if (isSystemListName(bookmark[0].bookmarkName)) {
+      return {
+        success: false,
+        error: "Profile system lists cannot have collaborators",
+      };
+    }
+
+    // Friend-only rule: both users must follow each other.
+    const [ownerFollowsInvited, invitedFollowsOwner] = await Promise.all([
+      db
+        .select({ followerId: userFollows.followerId })
+        .from(userFollows)
+        .where(
+          and(
+            eq(userFollows.followerId, user.id),
+            eq(userFollows.followingId, invitedUserId),
+          ),
+        )
+        .limit(1),
+      db
+        .select({ followerId: userFollows.followerId })
+        .from(userFollows)
+        .where(
+          and(
+            eq(userFollows.followerId, invitedUserId),
+            eq(userFollows.followingId, user.id),
+          ),
+        )
+        .limit(1),
+    ]);
+
+    if (!ownerFollowsInvited[0] || !invitedFollowsOwner[0]) {
+      return {
+        success: false,
+        error: "You can invite only friends (mutual follows)",
+      };
+    }
+
+    // Check if already a collaborator
+    const existing = await db
+      .select({ id: listCollaborators.id })
+      .from(listCollaborators)
+      .where(
+        and(
+          eq(listCollaborators.bookmarkId, bookmarkId),
+          eq(listCollaborators.userId, invitedUserId),
+        ),
+      )
+      .limit(1);
+
+    if (existing[0]) {
+      return { success: false, error: "Already a collaborator" };
+    }
+
+    // Create collaborator record with pending status
+    await db.insert(listCollaborators).values({
+      bookmarkId,
+      userId: invitedUserId,
+      status: "pending",
+      addedBy: user.id,
+    });
+
+    // Create notification for invited user
+    await createNotification({
+      userId: invitedUserId,
+      type: "collab_invite",
+      sourceUserId: user.id,
+      referenceId: bookmarkId,
+      message: `${user.name ?? "Someone"} invited you to collaborate on a list`,
+    });
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function acceptCollaborationInvite(bookmarkId: string) {
+  const user = await getUser();
+  if (!user?.id) return { success: false, error: "Not authenticated" };
+
+  try {
+    const collaborator = await db
+      .select({ id: listCollaborators.id, status: listCollaborators.status })
+      .from(listCollaborators)
+      .where(
+        and(
+          eq(listCollaborators.bookmarkId, bookmarkId),
+          eq(listCollaborators.userId, user.id),
+        ),
+      )
+      .limit(1);
+
+    if (!collaborator[0]) {
+      return { success: false, error: "Invitation not found" };
+    }
+
+    const bookmarkRow = await db
+      .select({ bookmarkName: bookmarks.bookmarkName })
+      .from(bookmarks)
+      .where(eq(bookmarks.id, bookmarkId))
+      .limit(1);
+
+    if (bookmarkRow[0] && isSystemListName(bookmarkRow[0].bookmarkName)) {
+      await db
+        .delete(listCollaborators)
+        .where(
+          and(
+            eq(listCollaborators.bookmarkId, bookmarkId),
+            eq(listCollaborators.userId, user.id),
+          ),
+        );
+      return { success: true, removedInvalid: true };
+    }
+
+    if (collaborator[0].status === "accepted") {
+      return { success: true, alreadyAccepted: true };
+    }
+
+    await db
+      .update(listCollaborators)
+      .set({ status: "accepted" })
+      .where(eq(listCollaborators.id, collaborator[0].id));
+
+    // Notify list owner
+    const bookmark = await db
+      .select({ userId: bookmarks.userId })
+      .from(bookmarks)
+      .where(eq(bookmarks.id, bookmarkId))
+      .limit(1);
+
+    if (bookmark[0]) {
+      await createNotification({
+        userId: bookmark[0].userId,
+        type: "collab_accept",
+        sourceUserId: user.id,
+        referenceId: bookmarkId,
+        message: `${user.name ?? "Someone"} accepted your collaboration invite`,
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function declineCollaborationInvite(bookmarkId: string) {
+  const user = await getUser();
+  if (!user?.id) return { success: false, error: "Not authenticated" };
+
+  try {
+    await db
+      .delete(listCollaborators)
+      .where(
+        and(
+          eq(listCollaborators.bookmarkId, bookmarkId),
+          eq(listCollaborators.userId, user.id),
+          eq(listCollaborators.status, "pending"),
+        ),
+      );
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function getListCollaborators(bookmarkId: string) {
+  try {
+    const bookmark = await db
+      .select({ bookmarkName: bookmarks.bookmarkName })
+      .from(bookmarks)
+      .where(eq(bookmarks.id, bookmarkId))
+      .limit(1);
+
+    if (bookmark[0] && isSystemListName(bookmark[0].bookmarkName)) {
+      return [];
+    }
+
+    const collaborators = await db
+      .select({
+        id: listCollaborators.id,
+        userId: listCollaborators.userId,
+        status: listCollaborators.status,
+        userName: users.name,
+        userImage: users.image,
+        userUsername: users.username,
+      })
+      .from(listCollaborators)
+      .leftJoin(users, eq(users.id, listCollaborators.userId))
+      .where(eq(listCollaborators.bookmarkId, bookmarkId));
+
+    return collaborators;
+  } catch {
+    return [];
+  }
+}
+
+export async function canUserEditBookmark(bookmarkId: string) {
+  const user = await getUser();
+  if (!user?.id) return false;
+
+  // Owner can always edit
+  const bookmark = await db
+    .select({ userId: bookmarks.userId, bookmarkName: bookmarks.bookmarkName })
+    .from(bookmarks)
+    .where(eq(bookmarks.id, bookmarkId))
+    .limit(1);
+
+  if (bookmark[0]?.userId === user.id) return true;
+  if (bookmark[0] && isSystemListName(bookmark[0].bookmarkName)) return false;
+
+  const collaborator = await db
+    .select({ id: listCollaborators.id })
+    .from(listCollaborators)
+    .where(
+      and(
+        eq(listCollaborators.bookmarkId, bookmarkId),
+        eq(listCollaborators.userId, user.id),
+        eq(listCollaborators.status, "accepted"),
+      ),
+    )
+    .limit(1);
+
+  return Boolean(collaborator[0]);
+}
+
+export async function canUserModifyListMetadata(bookmarkId: string) {
+  const user = await getUser();
+  if (!user?.id) return false;
+
+  // Only owner can modify name/description
+  const bookmark = await db
+    .select({ userId: bookmarks.userId })
+    .from(bookmarks)
+    .where(eq(bookmarks.id, bookmarkId))
+    .limit(1);
+
+  return bookmark[0]?.userId === user.id;
+}
+
+export async function removeCollaborator(
+  bookmarkId: string,
+  collaboratorUserId: string,
+) {
+  const user = await getUser();
+  if (!user?.id) return { success: false, error: "Not authenticated" };
+
+  try {
+    // Only owner can remove collaborators
+    const bookmark = await db
+      .select({ userId: bookmarks.userId })
+      .from(bookmarks)
+      .where(eq(bookmarks.id, bookmarkId))
+      .limit(1);
+
+    if (!bookmark[0] || bookmark[0].userId !== user.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await db
+      .delete(listCollaborators)
+      .where(
+        and(
+          eq(listCollaborators.bookmarkId, bookmarkId),
+          eq(listCollaborators.userId, collaboratorUserId),
+        ),
+      );
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+export async function getIsFollowingUser(targetUserId: string) {
+  const user = await getUser();
+  if (!user?.id) return false;
+
+  const follow = await db
+    .select({ id: userFollows.followerId })
+    .from(userFollows)
+    .where(
+      and(
+        eq(userFollows.followerId, user.id),
+        eq(userFollows.followingId, targetUserId),
+      ),
+    )
+    .limit(1);
+
+  return !!follow[0];
+}
+
+export async function getMutualFriends(targetUserId: string) {
+  const user = await getUser();
+  if (!user?.id) return [];
+
+  // Get users that both follow
+  const result = await db
+    .select({ userId: userFollows.followingId })
+    .from(userFollows)
+    .where(eq(userFollows.followerId, user.id));
+
+  const userFollowingIds = new Set(result.map((r) => r.userId));
+
+  const targetFollowing = await db
+    .select({ userId: userFollows.followingId })
+    .from(userFollows)
+    .where(eq(userFollows.followerId, targetUserId));
+
+  const mutualIds = targetFollowing
+    .map((r) => r.userId)
+    .filter((id) => userFollowingIds.has(id));
+
+  return mutualIds;
+}
+
+export async function getFriendsForCurrentUser() {
+  const user = await getUser();
+  if (!user?.id) return [];
+
+  const followingRows = await db
+    .select({ userId: userFollows.followingId })
+    .from(userFollows)
+    .where(eq(userFollows.followerId, user.id));
+
+  const followersRows = await db
+    .select({ userId: userFollows.followerId })
+    .from(userFollows)
+    .where(eq(userFollows.followingId, user.id));
+
+  const followingSet = new Set(followingRows.map((row) => row.userId));
+  const friendIds = followersRows
+    .map((row) => row.userId)
+    .filter((id) => followingSet.has(id));
+
+  if (friendIds.length === 0) return [];
+
+  const friendProfiles = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      username: users.username,
+      image: users.image,
+    })
+    .from(users)
+    .where(inArray(users.id, friendIds));
+
+  return friendProfiles;
+}
+
+export async function getCollaborativeBookmarksForCurrentUser() {
+  const user = await getUser();
+  if (!user?.id) return [];
+
+  await cleanupSystemListCollaborations();
+
+  const rows = await db
+    .select({
+      id: bookmarks.id,
+      userId: bookmarks.userId,
+      bookmarkName: bookmarks.bookmarkName,
+      description: bookmarks.description,
+      image: bookmarks.image,
+      createdAt: bookmarks.createdAt,
+      updatedAt: bookmarks.updatedAt,
+    })
+    .from(listCollaborators)
+    .innerJoin(bookmarks, eq(bookmarks.id, listCollaborators.bookmarkId))
+    .where(
+      and(
+        eq(listCollaborators.userId, user.id),
+        eq(listCollaborators.status, "accepted"),
+      ),
+    );
+
+  return rows.filter((row) => !isSystemListName(row.bookmarkName));
+}
+
+export async function getLikedBookmarksForCurrentUser() {
+  const user = await getUser();
+  if (!user?.id) return [];
+
+  const rows = await db
+    .select({
+      id: bookmarks.id,
+      userId: bookmarks.userId,
+      bookmarkName: bookmarks.bookmarkName,
+      description: bookmarks.description,
+      image: bookmarks.image,
+      createdAt: bookmarks.createdAt,
+      updatedAt: bookmarks.updatedAt,
+    })
+    .from(listLikes)
+    .innerJoin(bookmarks, eq(bookmarks.id, listLikes.bookmarkId))
+    .where(and(eq(listLikes.userId, user.id), ne(bookmarks.userId, user.id)));
+
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    if (seen.has(row.id)) return false;
+    seen.add(row.id);
+    return !isSystemListName(row.bookmarkName);
+  });
+}
+
+export async function getCollaboratorsForBookmarks(bookmarkIds: string[]) {
+  if (bookmarkIds.length === 0) return [];
+
+  const rows = await db
+    .select({
+      bookmarkId: listCollaborators.bookmarkId,
+      userId: users.id,
+      name: users.name,
+      username: users.username,
+      image: users.image,
+      status: listCollaborators.status,
+    })
+    .from(listCollaborators)
+    .innerJoin(users, eq(users.id, listCollaborators.userId))
+    .where(inArray(listCollaborators.bookmarkId, bookmarkIds));
+
+  return rows;
+}
+
+export async function getBasicUsersByIds(userIds: string[]) {
+  if (userIds.length === 0) return [];
+
+  const rows = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      username: users.username,
+      image: users.image,
+    })
+    .from(users)
+    .where(inArray(users.id, userIds));
+
+  return rows;
 }

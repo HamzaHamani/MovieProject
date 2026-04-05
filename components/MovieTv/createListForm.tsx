@@ -3,14 +3,16 @@ import { Button } from "../ui/button";
 
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Input } from "../ui/input";
-import { CreateBookmark } from "@/lib/actions";
+import { CreateBookmark, getFriendsForCurrentUser } from "@/lib/actions";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SmallLoadingIndicator from "../general/smallLoadingIndicator";
 import {
   showSuccessNotification,
   showErrorNotification,
 } from "@/components/notificationSystem";
+
+type FriendUser = Awaited<ReturnType<typeof getFriendsForCurrentUser>>[number];
 
 type Inputs = {
   name: string;
@@ -25,12 +27,22 @@ export default function CreateListForm({
   setShowForm: any;
 }) {
   const [loading, setLoading] = useState(false);
+  const [friends, setFriends] = useState<FriendUser[]>([]);
+  const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>(
+    [],
+  );
   const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>();
+
+  useEffect(() => {
+    void getFriendsForCurrentUser()
+      .then(setFriends)
+      .catch(() => setFriends([]));
+  }, []);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
@@ -41,7 +53,24 @@ export default function CreateListForm({
         description: data.description,
       };
 
-      await CreateBookmark(values);
+      const created = await CreateBookmark(values);
+
+      if (created?.id && selectedCollaborators.length > 0) {
+        await Promise.all(
+          selectedCollaborators.map((userId) =>
+            fetch("/api/collaborators/manage", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "invite",
+                bookmarkId: created.id,
+                invitedUserId: userId,
+              }),
+            }),
+          ),
+        );
+      }
+
       showSuccessNotification("Success", "List created successfully");
       queryClient.invalidateQueries({ queryKey: ["bookmarks", userId] });
       setShowForm((value: any) => !value);
@@ -109,6 +138,54 @@ export default function CreateListForm({
           <span className="text-sm font-light text-red-500">
             {errors.description.message}
           </span>
+        )}
+      </div>
+
+      <div className="mb-2 flex flex-col gap-1">
+        <p className="text-xs uppercase tracking-wide text-gray-400">
+          Invite collaborators (friends)
+        </p>
+        {friends.length === 0 ? (
+          <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-gray-400">
+            No friends available to invite yet.
+          </p>
+        ) : (
+          <div className="max-h-36 space-y-2 overflow-y-auto rounded-lg border border-white/10 bg-white/[0.03] p-2 text-textMain">
+            {friends.map((friend) => {
+              const selected = selectedCollaborators.includes(friend.id);
+              return (
+                <label
+                  key={friend.id}
+                  className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 hover:bg-white/[0.04]"
+                >
+                  <span className="text-sm text-gray-200">
+                    {friend.name ?? friend.username ?? "User"}
+                    {friend.username ? (
+                      <span className="ml-1 text-xs text-gray-400">
+                        @{friend.username}
+                      </span>
+                    ) : null}
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={(event) => {
+                      if (event.target.checked) {
+                        setSelectedCollaborators((prev) => [
+                          ...prev,
+                          friend.id,
+                        ]);
+                      } else {
+                        setSelectedCollaborators((prev) =>
+                          prev.filter((id) => id !== friend.id),
+                        );
+                      }
+                    }}
+                  />
+                </label>
+              );
+            })}
+          </div>
         )}
       </div>
 

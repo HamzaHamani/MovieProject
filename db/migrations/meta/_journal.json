@@ -127,6 +127,20 @@
       "when": 1775404690815,
       "tag": "0017_watery_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1775410089116,
+      "tag": "0018_sleepy_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1775410318630,
+      "tag": "0019_wakeful_wendell_vaughn",
+      "breakpoints": true
     }
   ]
 }

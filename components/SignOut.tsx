@@ -38,8 +38,13 @@ export default function SignOutButton() {
   }
 
   return (
-    <button type="button" onClick={handle} className="flex w-[12vw]">
-      <LogOut className="mr-2 h-4 w-4" /> <span>Sign out</span>
+    <button
+      type="button"
+      onClick={handle}
+      className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm text-red-300 transition hover:bg-red-500/10 hover:text-red-200"
+    >
+      <LogOut className="mr-2 h-4 w-4" />
+      <span>Sign out</span>
     </button>
   );
 }

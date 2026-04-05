@@ -28,11 +28,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { getFriendsForCurrentUser } from "@/lib/actions";
+
+type FriendUser = Awaited<ReturnType<typeof getFriendsForCurrentUser>>[number];
 
 export default function CreateListQuick() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [friends, setFriends] = useState<FriendUser[]>([]);
+  const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>(
+    [],
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
@@ -40,6 +47,7 @@ export default function CreateListQuick() {
   const resetForm = () => {
     setName("");
     setDescription("");
+    setSelectedCollaborators([]);
   };
 
   const closeAndReset = () => {
@@ -51,7 +59,12 @@ export default function CreateListQuick() {
     setOpen(nextOpen);
     if (!nextOpen) {
       resetForm();
+      return;
     }
+
+    void getFriendsForCurrentUser()
+      .then(setFriends)
+      .catch(() => setFriends([]));
   };
 
   const handleSubmit = async (event?: FormEvent) => {
@@ -87,10 +100,26 @@ export default function CreateListQuick() {
         }),
       });
 
-      const json = (await response.json()) as { error?: string };
+      const json = (await response.json()) as { error?: string; id?: string };
 
       if (!response.ok) {
         throw new Error(json.error ?? "Could not create list");
+      }
+
+      if (json.id && selectedCollaborators.length > 0) {
+        await Promise.all(
+          selectedCollaborators.map((userId) =>
+            fetch("/api/collaborators/manage", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "invite",
+                bookmarkId: json.id,
+                invitedUserId: userId,
+              }),
+            }),
+          ),
+        );
       }
 
       showSuccessNotification("List created", `${trimmedName} is ready`);
@@ -136,6 +165,54 @@ export default function CreateListQuick() {
             className="min-h-[140px] resize-y border-white/15 bg-white/5 text-sm text-white"
             maxLength={180}
           />
+        </div>
+
+        <div>
+          <p className="mb-1 text-xs uppercase tracking-[0.2em] text-gray-400">
+            Invite collaborators (friends)
+          </p>
+          {friends.length === 0 ? (
+            <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-gray-400">
+              No friends available to invite yet.
+            </p>
+          ) : (
+            <div className="max-h-36 space-y-2 overflow-y-auto rounded-lg border border-white/10 bg-white/[0.03] p-2">
+              {friends.map((friend) => {
+                const selected = selectedCollaborators.includes(friend.id);
+                return (
+                  <label
+                    key={friend.id}
+                    className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 hover:bg-white/[0.04]"
+                  >
+                    <span className="text-sm text-gray-200">
+                      {friend.name ?? friend.username ?? "User"}
+                      {friend.username ? (
+                        <span className="ml-1 text-xs text-gray-400">
+                          @{friend.username}
+                        </span>
+                      ) : null}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={(event) => {
+                        if (event.target.checked) {
+                          setSelectedCollaborators((prev) => [
+                            ...prev,
+                            friend.id,
+                          ]);
+                        } else {
+                          setSelectedCollaborators((prev) =>
+                            prev.filter((id) => id !== friend.id),
+                          );
+                        }
+                      }}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

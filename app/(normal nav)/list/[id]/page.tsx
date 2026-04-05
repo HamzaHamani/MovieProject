@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import ListLikeButton from "@/components/list/listLikeButton";
+import ListAddMovies from "@/components/bookmarks/listAddMovies";
+import ListCollaboratorsManager from "@/components/profile/listCollaboratorsManager";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -10,17 +12,20 @@ import { Input } from "@/components/ui/input";
 import {
   getBookmarkById,
   getListLikeStats,
+  getListCollaborators,
   getMoviesBook,
   getSpecifiedMovie,
   getSpecifiedTV,
   getUserDbProfileById,
   getUser,
+  canUserEditBookmark,
   removeMovieFromBookmark,
   updateBookmarkDetails,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
 
 const systemLikesKeywords = ["likes", "like", "liked", "love", "loved"];
+const systemFavoritesKeywords = ["favorite", "favourite", "fav"];
 const systemWatchlistKeywords = [
   "watchlist",
   "watch later",
@@ -31,6 +36,7 @@ const systemWatchlistKeywords = [
 function isSystemListName(name: string) {
   const normalized = name.trim().toLowerCase();
   return (
+    systemFavoritesKeywords.some((key) => normalized.includes(key)) ||
     systemLikesKeywords.some((key) => normalized.includes(key)) ||
     systemWatchlistKeywords.some((key) => normalized.includes(key))
   );
@@ -133,12 +139,18 @@ export default async function Page({
 
   const isOwner = viewer?.id === list.userId;
   const isSystemList = isSystemListName(list.bookmarkName);
+  const canManageMovies = await canUserEditBookmark(list.id);
 
-  const [movies, likeStats, ownerProfile] = await Promise.all([
+  const [movies, likeStats, ownerProfile, collaborators] = await Promise.all([
     getMoviesBook(list.id),
     getListLikeStats(list.id),
     getUserDbProfileById(list.userId),
+    getListCollaborators(list.id),
   ]);
+
+  const visibleCollaborators = collaborators.filter((collab) =>
+    Boolean(collab.userId),
+  );
 
   const resolvedItems = await Promise.all(
     movies.map(async (item) => ({
@@ -167,7 +179,8 @@ export default async function Page({
   async function removeMovieAction(formData: FormData) {
     "use server";
 
-    if (!isOwner) throw new Error("Only the owner can edit this list");
+    if (!canManageMovies)
+      throw new Error("Only owner or accepted collaborators can edit movies");
 
     const movieId = String(formData.get("movieId") ?? "");
     if (!movieId) return;
@@ -204,31 +217,65 @@ export default async function Page({
                 {movies.length} item{movies.length === 1 ? "" : "s"}
               </p>
 
-              {ownerProfile?.username ? (
-                <Link
-                  href={`/profile/${ownerProfile.username}`}
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:border-primaryM-500/40 hover:bg-white/[0.06]"
-                >
-                  <Avatar className="h-8 w-8 border border-white/10">
-                    <AvatarImage
-                      src={ownerProfile.image ?? undefined}
-                      alt={ownerProfile.username}
-                    />
-                    <AvatarFallback className="bg-white/[0.08] text-xs text-white">
-                      {getInitials(ownerProfile.name ?? ownerProfile.username)}
-                    </AvatarFallback>
-                  </Avatar>
+              {(ownerProfile?.username || visibleCollaborators.length > 0) && (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {ownerProfile?.username ? (
+                    <Link
+                      href={`/profile/${ownerProfile.username}`}
+                      className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:border-primaryM-500/40 hover:bg-white/[0.06]"
+                    >
+                      <Avatar className="h-8 w-8 border border-white/10">
+                        <AvatarImage
+                          src={ownerProfile.image ?? undefined}
+                          alt={ownerProfile.username}
+                        />
+                        <AvatarFallback className="bg-white/[0.08] text-xs text-white">
+                          {getInitials(ownerProfile.name ?? ownerProfile.username)}
+                        </AvatarFallback>
+                      </Avatar>
 
-                  <div className="leading-tight">
-                    <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
-                      List owner
-                    </p>
-                    <p className="text-sm font-medium text-white">
-                      @{ownerProfile.username}
-                    </p>
-                  </div>
-                </Link>
-              ) : null}
+                      <div className="leading-tight">
+                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+                          List owner
+                        </p>
+                        <p className="text-sm font-medium text-white">
+                          @{ownerProfile.username}
+                        </p>
+                      </div>
+                    </Link>
+                  ) : null}
+
+                  {visibleCollaborators.map((collab) => (
+                    <Link
+                      key={collab.id}
+                      href={
+                        collab.userUsername
+                          ? `/profile/${collab.userUsername}`
+                          : "#"
+                      }
+                      className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:border-primaryM-500/40 hover:bg-white/[0.06]"
+                    >
+                      <Avatar className="h-8 w-8 border border-white/10">
+                        <AvatarImage src={collab.userImage ?? undefined} />
+                        <AvatarFallback className="bg-white/[0.08] text-xs text-white">
+                          {getInitials(
+                            collab.userName ?? collab.userUsername ?? "U",
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="leading-tight">
+                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+                          Collaborator
+                        </p>
+                        <p className="text-sm font-medium text-white">
+                          @{collab.userUsername ?? "user"}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
             {!isSystemList ? (
               <ListLikeButton
@@ -272,7 +319,25 @@ export default async function Page({
             </form>
           ) : !isOwner ? (
             <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-gray-300">
-              You can view and like this list, but only the owner can edit it.
+              You can view and like this list.
+              {canManageMovies
+                ? " You can also add and remove titles as an accepted collaborator."
+                : " Only the owner can edit list details."}
+            </div>
+          ) : null}
+
+          {!isSystemList ? (
+            <div className="mt-5 flex flex-wrap items-start gap-2">
+              {canManageMovies ? (
+                <ListAddMovies
+                  bookmarkId={list.id}
+                  listName={list.bookmarkName}
+                />
+              ) : null}
+              <ListCollaboratorsManager
+                bookmarkId={list.id}
+                isOwner={isOwner}
+              />
             </div>
           ) : null}
         </section>
@@ -322,7 +387,7 @@ export default async function Page({
                     </div>
                   </Link>
 
-                  {isOwner ? (
+                  {canManageMovies ? (
                     <form action={removeMovieAction}>
                       <input
                         type="hidden"

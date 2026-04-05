@@ -222,6 +222,50 @@ export const authenticators = pgTable(
   }),
 );
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // "follow", "review_like", "review_reply", "collab_invite", "collab_accept"
+  sourceUserId: text("sourceUserId").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  referenceId: text("referenceId"), // ID of related entity (review, list, etc.)
+  message: text("message"),
+  isRead: boolean("isRead").default(false),
+  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
+});
+
+// List Collaborators table
+export const listCollaborators = pgTable(
+  "list_collaborators",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    bookmarkId: text("bookmarkId")
+      .notNull()
+      .references(() => bookmarks.id, { onDelete: "cascade" }),
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("accepted"), // "accepted", "pending"
+    addedBy: text("addedBy")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
+  },
+  (table) => ({
+    collaboratorUnique: uniqueIndex(
+      "list_collaborators_bookmark_user_unique",
+    ).on(table.bookmarkId, table.userId),
+  }),
+);
+
 // Define relationships for users
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -231,6 +275,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   reviewLikes: many(reviewLikes),
   reviewReplies: many(reviewReplies),
   listLikes: many(listLikes),
+  notifications: many(notifications),
+  listCollaborations: many(listCollaborators),
 }));
 
 // Define relationships for bookmarks
@@ -300,3 +346,32 @@ export const listLikesRelations = relations(listLikes, ({ one }) => ({
     references: [bookmarks.id],
   }),
 }));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  sourceUser: one(users, {
+    fields: [notifications.sourceUserId],
+    references: [users.id],
+  }),
+}));
+
+export const listCollaboratorsRelations = relations(
+  listCollaborators,
+  ({ one }) => ({
+    bookmark: one(bookmarks, {
+      fields: [listCollaborators.bookmarkId],
+      references: [bookmarks.id],
+    }),
+    user: one(users, {
+      fields: [listCollaborators.userId],
+      references: [users.id],
+    }),
+    addedByUser: one(users, {
+      fields: [listCollaborators.addedBy],
+      references: [users.id],
+    }),
+  }),
+);

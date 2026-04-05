@@ -23,11 +23,13 @@ import { Button } from "@/components/ui/button";
 import RemoveFromSectionButton from "@/components/profile/removeFromSectionButton";
 import ReviewLikeButton from "@/components/profile/reviewLikeButton";
 import ShelfAddMovies from "@/components/profile/shelfAddMovies";
+import UserStatisticsSection from "../../../../components/profile/userStatisticsSection";
 import { ReplyForm } from "@/components/profile/replyForm";
 import { Separator } from "@/components/ui/separator";
 import {
   addReviewReply,
   getBookmarks,
+  getCollaborativeBookmarksForCurrentUser,
   getLoggedMoviesForUser,
   getMoviesBook,
   getReviewEngagement,
@@ -485,11 +487,38 @@ export default async function Page({
 
   const isOwner = viewer?.id === profileUser.id;
 
-  const [bookmarks, loggedMovies, socialStats] = await Promise.all([
+  const [ownedBookmarks, collaborativeBookmarks, loggedMovies, socialStats] =
+    await Promise.all([
     getBookmarks(profileUser.id),
+    isOwner ? getCollaborativeBookmarksForCurrentUser() : Promise.resolve([]),
     getLoggedMoviesForUser(profileUser.id),
     getUserSocialStats(profileUser.id),
   ]);
+
+  const normalizedCollaborativeBookmarks: BookmarkRow[] =
+    collaborativeBookmarks.map((list) => ({
+      ...list,
+      description: list.description ?? "",
+      image: list.image ?? "",
+      createdAt: list.createdAt ?? new Date(0),
+      updatedAt: list.updatedAt ?? list.createdAt ?? new Date(0),
+    }));
+
+  const bookmarks: BookmarkRow[] = [...ownedBookmarks];
+  const existingIds = new Set(ownedBookmarks.map((list) => list.id));
+  normalizedCollaborativeBookmarks.forEach((list) => {
+    if (!existingIds.has(list.id)) {
+      bookmarks.push(list);
+    }
+  });
+
+  const listRole = new Map<string, "owner" | "collaborator">();
+  ownedBookmarks.forEach((list) => listRole.set(list.id, "owner"));
+  normalizedCollaborativeBookmarks.forEach((list) => {
+    if (!listRole.has(list.id)) {
+      listRole.set(list.id, "collaborator");
+    }
+  });
 
   const orderedBookmarks = [...bookmarks].sort(
     (left, right) => toTimestamp(right.createdAt) - toTimestamp(left.createdAt),
@@ -502,9 +531,13 @@ export default async function Page({
     })),
   );
 
-  const customBookmarksWithMovies = bookmarksWithMovies.filter(
-    ({ list }) => !isSystemListName(list.bookmarkName),
-  );
+  const customBookmarksWithMovies = bookmarksWithMovies
+    .filter(({ list }) => !isSystemListName(list.bookmarkName))
+    .map(({ list, movies }) => ({
+      list,
+      movies,
+      role: listRole.get(list.id) ?? "owner",
+    }));
 
   const favoriteMovies = collectShelfItems(bookmarksWithMovies, (list) =>
     matchesKeywords(list.bookmarkName, favoriteKeywords),
@@ -714,6 +747,8 @@ export default async function Page({
           </div>
         </section>
 
+        <UserStatisticsSection username={username ?? usernameParam} />
+
         <Separator className="bg-white/10" />
 
         <div className="space-y-8">
@@ -768,7 +803,10 @@ export default async function Page({
             canEdit={isOwner}
           />
 
-          <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)] md:p-5 sm:p-4">
+          <section
+            id="reviews"
+            className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)] md:p-5 sm:p-4"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-gray-400">
@@ -913,7 +951,7 @@ export default async function Page({
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
-                {customBookmarksWithMovies.map(({ list, movies }) => (
+                {customBookmarksWithMovies.map(({ list, movies, role }) => (
                   <Link
                     key={list.id}
                     href={`/list/${list.id}`}
@@ -924,6 +962,15 @@ export default async function Page({
                         <h3 className="line-clamp-1 text-lg font-semibold text-white">
                           {list.bookmarkName}
                         </h3>
+                        <span
+                          className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.16em] ${
+                            role === "owner"
+                              ? "border-primaryM-500/40 bg-primaryM-500/12 text-primaryM-300"
+                              : "border-sky-400/35 bg-sky-500/12 text-sky-300"
+                          }`}
+                        >
+                          {role === "owner" ? "Owner" : "Collaborator"}
+                        </span>
                         <p className="mt-1 line-clamp-3 break-words text-sm text-gray-300">
                           {list.description}
                         </p>
