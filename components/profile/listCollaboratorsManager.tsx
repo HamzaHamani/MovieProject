@@ -155,7 +155,9 @@ export default function ListCollaboratorsManager({
             </div>
           ) : (
             filteredFriends.map((friend) => {
-              const collaboratorStatus = collaboratorStateByUserId.get(friend.id);
+              const collaboratorStatus = collaboratorStateByUserId.get(
+                friend.id,
+              );
               const isPending = collaboratorStatus === "pending";
               const isJoined = collaboratorStatus === "accepted";
               const isActionDisabled = isPending || isJoined || isLoading;
@@ -175,7 +177,9 @@ export default function ListCollaboratorsManager({
                     <p className="block w-full truncate pr-2 text-sm font-medium text-white">
                       {friend.name ?? friend.username ?? "User"}
                     </p>
-                    <p className="text-xs text-gray-400">@{friend.username ?? "unknown"}</p>
+                    <p className="text-xs text-gray-400">
+                      @{friend.username ?? "unknown"}
+                    </p>
                   </div>
                   <Button
                     size="sm"
@@ -185,7 +189,7 @@ export default function ListCollaboratorsManager({
                       isJoined
                         ? "border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/15"
                         : isPending
-                          ? "border border-yellow-500/35 bg-yellow-500/12 text-yellow-300 hover:bg-yellow-500/12"
+                          ? "bg-yellow-500/12 hover:bg-yellow-500/12 border border-yellow-500/35 text-yellow-300"
                           : "bg-primaryM-500 text-black hover:bg-primaryM-600"
                     }`}
                   >
@@ -248,7 +252,9 @@ export default function ListCollaboratorsManager({
                   size="sm"
                   variant="ghost"
                   disabled={removingUserId === collab.userId}
-                  onClick={() => collab.userId && handleRemoveCollaborator(collab.userId)}
+                  onClick={() =>
+                    collab.userId && handleRemoveCollaborator(collab.userId)
+                  }
                   className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-400"
                   title="Remove collaborator"
                 >
@@ -279,7 +285,9 @@ export default function ListCollaboratorsManager({
 
         <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 text-textMain">
           <DialogHeader className="pb-1">
-            <DialogTitle className="text-white">Invite Collaborators</DialogTitle>
+            <DialogTitle className="text-white">
+              Invite Collaborators
+            </DialogTitle>
             <DialogDescription className="text-gray-300">
               Invite friends to collaborate on this list. They can add or remove
               movies, but cannot delete the list or change its details.
@@ -304,9 +312,12 @@ export default function ListCollaboratorsManager({
             </DialogTrigger>
             <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 text-textMain">
               <DialogHeader className="pb-1">
-                <DialogTitle className="text-white">Manage Collaborators</DialogTitle>
+                <DialogTitle className="text-white">
+                  Manage Collaborators
+                </DialogTitle>
                 <DialogDescription className="text-gray-300">
-                  View all collaborators and remove selected users from this list.
+                  View all collaborators and remove selected users from this
+                  list.
                 </DialogDescription>
               </DialogHeader>
               {manageContent}
@@ -326,9 +337,12 @@ export default function ListCollaboratorsManager({
             </DrawerTrigger>
             <DrawerContent className="max-h-[88svh] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 text-textMain">
               <DrawerHeader className="px-0 pb-2 pt-2 text-left">
-                <DrawerTitle className="text-white">Manage Collaborators</DrawerTitle>
+                <DrawerTitle className="text-white">
+                  Manage Collaborators
+                </DrawerTitle>
                 <DrawerDescription className="text-gray-300">
-                  View all collaborators and remove selected users from this list.
+                  View all collaborators and remove selected users from this
+                  list.
                 </DrawerDescription>
               </DrawerHeader>
               <div className="min-h-0 overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))]">

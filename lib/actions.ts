@@ -60,6 +60,7 @@ export async function getCurrentUserDbProfile() {
       email: users.email,
       image: users.image,
       bio: users.bio,
+      backdropPath: users.backdropPath,
       premium: users.premium,
     })
     .from(users)
@@ -81,6 +82,7 @@ export async function getUserDbProfileByUsername(usernameInput: string) {
       email: users.email,
       image: users.image,
       bio: users.bio,
+      backdropPath: users.backdropPath,
     })
     .from(users)
     .where(eq(users.username, username))
@@ -97,6 +99,7 @@ export async function getUserDbProfileById(userId: string) {
       name: users.name,
       image: users.image,
       bio: users.bio,
+      backdropPath: users.backdropPath,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -236,6 +239,7 @@ const profileUpdateSchema = z.object({
   username: z.string().trim().min(3).max(24),
   bio: z.string().trim().max(240).optional().nullable(),
   image: z.string().url().optional().nullable(),
+  backdropPath: z.string().trim().max(255).optional().nullable(),
 });
 
 function isAllowedProfileImageUrl(url: string) {
@@ -305,6 +309,7 @@ export async function updateMyProfile(input: {
   username?: string;
   bio?: string | null;
   image?: string | null;
+  backdropPath?: string | null;
 }) {
   const user = await getUser();
 
@@ -316,6 +321,7 @@ export async function updateMyProfile(input: {
     username: String(input.username ?? ""),
     bio: input.bio ?? null,
     image: input.image ?? null,
+    backdropPath: input.backdropPath ?? null,
   });
 
   if (!parsed.success) {
@@ -341,6 +347,7 @@ export async function updateMyProfile(input: {
 
   const nextBio = parsed.data.bio?.trim() || null;
   const nextImage = parsed.data.image?.trim() || null;
+  const nextBackdropPath = parsed.data.backdropPath?.trim() || null;
 
   if (nextImage && !isAllowedProfileImageUrl(nextImage)) {
     return {
@@ -355,6 +362,7 @@ export async function updateMyProfile(input: {
       username: normalizedUsername,
       bio: nextBio,
       image: nextImage,
+      backdropPath: nextBackdropPath,
     })
     .where(eq(users.id, user.id));
 
@@ -363,6 +371,7 @@ export async function updateMyProfile(input: {
     username: normalizedUsername,
     bio: nextBio,
     image: nextImage,
+    backdropPath: nextBackdropPath,
   };
 }
 
@@ -2314,7 +2323,10 @@ export async function inviteCollaborator(
 
     // Check if user is bookmark owner
     const bookmark = await db
-      .select({ userId: bookmarks.userId, bookmarkName: bookmarks.bookmarkName })
+      .select({
+        userId: bookmarks.userId,
+        bookmarkName: bookmarks.bookmarkName,
+      })
       .from(bookmarks)
       .where(eq(bookmarks.id, bookmarkId))
       .limit(1);

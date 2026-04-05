@@ -18,6 +18,7 @@ import { Metadata } from "next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import FollowToggleButton from "@/components/profile/followToggleButton";
 import EditProfileDialog from "@/components/profile/editProfileDialog";
+import ProfileBackdropPicker from "@/components/profile/profileBackdropPicker";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import { Button } from "@/components/ui/button";
 import RemoveFromSectionButton from "@/components/profile/removeFromSectionButton";
@@ -489,11 +490,11 @@ export default async function Page({
 
   const [ownedBookmarks, collaborativeBookmarks, loggedMovies, socialStats] =
     await Promise.all([
-    getBookmarks(profileUser.id),
-    isOwner ? getCollaborativeBookmarksForCurrentUser() : Promise.resolve([]),
-    getLoggedMoviesForUser(profileUser.id),
-    getUserSocialStats(profileUser.id),
-  ]);
+      getBookmarks(profileUser.id),
+      isOwner ? getCollaborativeBookmarksForCurrentUser() : Promise.resolve([]),
+      getLoggedMoviesForUser(profileUser.id),
+      getUserSocialStats(profileUser.id),
+    ]);
 
   const normalizedCollaborativeBookmarks: BookmarkRow[] =
     collaborativeBookmarks.map((list) => ({
@@ -579,6 +580,9 @@ export default async function Page({
   const profileBio =
     profileUser.bio?.trim() ||
     "Tracking films, writing reviews, and building lists.";
+  const profileBackdropUrl = profileUser.backdropPath
+    ? `https://image.tmdb.org/t/p/original${profileUser.backdropPath}`
+    : null;
   const initials = getInitials(displayName);
   const isPremium = profileUser.premium === true;
   const username = profileUser.username ?? null;
@@ -628,362 +632,390 @@ export default async function Page({
   }
 
   return (
-    <div className="container mt-16 pb-12 text-textMain">
-      <div className="space-y-8">
-        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_14%_18%,rgba(245,207,77,0.14),transparent_30%),radial-gradient(circle_at_85%_22%,rgba(59,130,246,0.18),transparent_34%),linear-gradient(110deg,#0a0f16_0%,#101722_35%,#0f131b_68%,#0d0f14_100%)] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.28)] lg:p-5 sm:p-4">
-          <div className="grid grid-cols-[minmax(0,1fr)_560px] items-start gap-6 xl:grid-cols-[minmax(0,1fr)_500px] xmd:grid-cols-1">
-            <div className="flex items-start gap-5 sm:flex-col sm:items-center">
-              <Avatar className="h-28 w-28 border-2 border-white/20 bg-black/20 ring-4 ring-white/5 sm:h-20 sm:w-20">
-                {profileUser.image ? (
-                  <AvatarImage src={profileUser.image} alt={displayName} />
-                ) : null}
-                <AvatarFallback className="bg-white/10 text-lg font-semibold text-white">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+    <div className="relative min-h-screen text-textMain">
+      {profileBackdropUrl ? (
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-screen overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-[0.28]"
+            style={{
+              backgroundImage: `url(${profileBackdropUrl})`,
+            }}
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(13,12,15,0.02),rgba(13,12,15,0.45)_45%,#0d0c0f_88%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#0d0c0f] via-[#0d0c0f]/70 to-transparent" />
+        </div>
+      ) : null}
 
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-gray-400">
-                  <UserRound className="h-4 w-4 text-primaryM-500" />
-                  <span>Movie Profile</span>
-                </div>
-                <h1 className="mt-2 text-5xl font-semibold text-white lg:text-4xl sm:text-3xl">
-                  {displayName}
-                </h1>
-                <p className="mt-2 text-sm text-gray-300">
-                  {username
-                    ? `@${username}`
-                    : profileUser.email ?? "No email linked"}
-                </p>
-                {!isOwner && viewer?.id && username ? (
+      <div className="container relative z-10 pb-12 pt-40 lg:pt-20 sm:pt-16">
+        <div className="space-y-8">
+          <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[rgba(13,12,15,0.88)] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:p-5 sm:p-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_560px] items-start gap-6 xl:grid-cols-[minmax(0,1fr)_500px] xmd:grid-cols-1">
+              <div className="flex items-start gap-5 sm:flex-col sm:items-center">
+                <Avatar className="h-28 w-28 border-2 border-white/20 bg-black/20 ring-4 ring-white/5 sm:h-20 sm:w-20">
+                  {profileUser.image ? (
+                    <AvatarImage src={profileUser.image} alt={displayName} />
+                  ) : null}
+                  <AvatarFallback className="bg-white/10 text-lg font-semibold text-white">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="min-w-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-gray-400">
+                      <UserRound className="h-4 w-4 text-primaryM-500" />
+                      <span>Movie Profile</span>
+                    </div>
+                    {isOwner && (
+                      <ProfileBackdropPicker
+                        currentBackdropPath={profileUser.backdropPath ?? ""}
+                        username={profileUser.username ?? ""}
+                        bio={profileUser.bio ?? null}
+                        image={profileUser.image ?? null}
+                      />
+                    )}
+                  </div>
+                  <h1 className="mt-2 text-5xl font-semibold text-white lg:text-4xl sm:text-3xl">
+                    {displayName}
+                  </h1>
+                  <p className="mt-2 text-sm text-gray-300">
+                    {username
+                      ? `@${username}`
+                      : profileUser.email ?? "No email linked"}
+                  </p>
+                  <p className="mt-1 text-sm text-gray-400">{profileBio}</p>
+
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <FollowToggleButton
-                      username={username}
-                      initialFollowing={socialStats.isFollowing}
-                    />
+                    {isOwner && username ? (
+                      <EditProfileDialog
+                        currentUsername={username}
+                        currentBio={profileUser.bio ?? ""}
+                        currentImage={profileUser.image ?? ""}
+                        currentBackdropPath={profileUser.backdropPath ?? ""}
+                      />
+                    ) : null}
+                    <Button
+                      asChild
+                      className="border border-white/10 bg-white/[0.06] text-white hover:bg-white/[0.1]"
+                    >
+                      <Link href="/explore">Explore Movies</Link>
+                    </Button>
+                    {!isOwner && viewer?.id && username ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <FollowToggleButton
+                          username={username}
+                          initialFollowing={socialStats.isFollowing}
+                        />
 
-                    {socialStats.followsViewer ? (
-                      <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-gray-300">
-                        Follows you
+                        {socialStats.followsViewer ? (
+                          <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-gray-300">
+                            Follows you
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs text-gray-300">
+                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                      {loggedMovies.length} film
+                      {loggedMovies.length === 1 ? "" : "s"}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                      {favoriteMovies.length} favorite
+                      {favoriteMovies.length === 1 ? "" : "s"}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                      {likedShelf.length} like
+                      {likedShelf.length === 1 ? "" : "s"}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                      {watchlistMovies.length} watchlist
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                      {recentActivity.length} activit
+                      {recentActivity.length === 1 ? "y" : "ies"}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                      {totalSavedMovies} saved
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                      {reviewedCount} review{reviewedCount === 1 ? "" : "s"}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                      {customBookmarksWithMovies.length} list
+                      {customBookmarksWithMovies.length === 1 ? "" : "s"}
+                    </span>
+                    {isPremium ? (
+                      <span className="rounded-full border border-primaryM-500/40 bg-primaryM-500/10 px-3 py-1 text-primaryM-400">
+                        Premium
                       </span>
                     ) : null}
                   </div>
-                ) : null}
-                <p className="mt-1 text-sm text-gray-400">{profileBio}</p>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs text-gray-300">
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                    {loggedMovies.length} film
-                    {loggedMovies.length === 1 ? "" : "s"}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                    {favoriteMovies.length} favorite
-                    {favoriteMovies.length === 1 ? "" : "s"}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                    {likedShelf.length} like{likedShelf.length === 1 ? "" : "s"}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                    {watchlistMovies.length} watchlist
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                    {recentActivity.length} activit
-                    {recentActivity.length === 1 ? "y" : "ies"}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                    {totalSavedMovies} saved
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                    {reviewedCount} review{reviewedCount === 1 ? "" : "s"}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                    {customBookmarksWithMovies.length} list
-                    {customBookmarksWithMovies.length === 1 ? "" : "s"}
-                  </span>
-                  {isPremium ? (
-                    <span className="rounded-full border border-primaryM-500/40 bg-primaryM-500/10 px-3 py-1 text-primaryM-400">
-                      Premium
-                    </span>
-                  ) : null}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-black/20 px-2 py-2">
+                <div className="hide-scrollbar flex flex-nowrap items-stretch overflow-x-auto">
+                  {profileStats.map((stat, index) => (
+                    <Link
+                      key={stat.label}
+                      href={stat.href}
+                      className={`min-w-[86px] px-2 py-2 transition hover:bg-white/[0.06] ${
+                        index !== 0 ? "border-l border-white/10" : ""
+                      }`}
+                    >
+                      <p className="text-2xl font-semibold leading-none text-white sm:text-xl">
+                        {stat.value}
+                      </p>
+                      <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-gray-400">
+                        {stat.label}
+                      </p>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
-
-            <div className="rounded-2xl border border-white/10 bg-black/20 px-2 py-2">
-              <div className="hide-scrollbar flex flex-nowrap items-stretch overflow-x-auto">
-                {profileStats.map((stat, index) => (
-                  <Link
-                    key={stat.label}
-                    href={stat.href}
-                    className={`min-w-[86px] px-2 py-2 transition hover:bg-white/[0.06] ${
-                      index !== 0 ? "border-l border-white/10" : ""
-                    }`}
-                  >
-                    <p className="text-2xl font-semibold leading-none text-white sm:text-xl">
-                      {stat.value}
-                    </p>
-                    <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-gray-400">
-                      {stat.label}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 flex items-center justify-center gap-2">
-            {isOwner && username ? (
-              <EditProfileDialog
-                currentUsername={username}
-                currentBio={profileUser.bio ?? ""}
-                currentImage={profileUser.image ?? ""}
-              />
-            ) : null}
-            <Button
-              asChild
-              className="bg-primaryM-500 text-black hover:bg-primaryM-600"
-            >
-              <Link href="/explore">Explore Movies</Link>
-            </Button>
-          </div>
-        </section>
-
-        <UserStatisticsSection username={username ?? usernameParam} />
-
-        <Separator className="bg-white/10" />
-
-        <div className="space-y-8">
-          <ProfilePosterGrid
-            title="Favorite Movies"
-            description="Your pinned movies, surfaced from your favorites list."
-            icon={Heart}
-            sectionType="favorites"
-            items={favoriteMovies}
-            mediaMap={mediaMap}
-            maxItems={6}
-            emptyTitle="No favorites yet"
-            emptyDescription={
-              isOwner
-                ? "Create or rename a list to Favorites and your pinned titles will appear here."
-                : "This user has no favorite movies yet."
-            }
-            canEdit={isOwner}
-          />
-
-          <ProfilePosterGrid
-            title="Movies I Like"
-            description="The titles you have saved across your lists, shown as a bigger shelf."
-            icon={ThumbsUp}
-            sectionType="likes"
-            items={likedShelf}
-            mediaMap={mediaMap}
-            maxItems={12}
-            emptyTitle="No liked movies yet"
-            emptyDescription={
-              isOwner
-                ? "Add titles to any list and they will show up here."
-                : "This user has no liked movies yet."
-            }
-            canEdit={isOwner}
-          />
-
-          <ProfilePosterGrid
-            title="Watchlist"
-            description="Movies and shows you still want to get to."
-            icon={Bookmark}
-            sectionType="watchlist"
-            items={watchlistMovies}
-            mediaMap={mediaMap}
-            maxItems={8}
-            emptyTitle="No watchlist yet"
-            emptyDescription={
-              isOwner
-                ? "Use the Watchlist button on any title to start filling this shelf."
-                : "This user has no watchlist yet."
-            }
-            canEdit={isOwner}
-          />
-
-          <section
-            id="reviews"
-            className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)] md:p-5 sm:p-4"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-gray-400">
-                  <Clock3 className="h-4 w-4 text-primaryM-500" />
-                  <span>Recent Activity</span>
-                </div>
-                <p className="mt-2 max-w-2xl text-sm text-gray-300">
-                  What you watched most recently, with star ratings and watch
-                  type.
-                </p>
-              </div>
-              <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-gray-300">
-                {recentActivity.length} item
-                {recentActivity.length === 1 ? "" : "s"}
-              </div>
-            </div>
-
-            {recentActivity.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-gray-300">
-                {isOwner
-                  ? "Log a movie or TV show to start building your activity feed."
-                  : "This user has no recent activity yet."}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
-                {recentActivity.map((item) => (
-                  <ActivityRow
-                    key={item.id}
-                    item={item}
-                    media={mediaMap.get(item.showId) ?? null}
-                    profileUsername={username ?? usernameParam}
-                  />
-                ))}
-              </div>
-            )}
           </section>
 
-          <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)] md:p-5 sm:p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-gray-400">
-                  <MessageSquareQuote className="h-4 w-4 text-primaryM-500" />
-                  <span>Recent Reviews</span>
-                </div>
-                <p className="mt-2 max-w-2xl text-sm text-gray-300">
-                  Your latest rated or written reviews appear here.
-                </p>
-              </div>
-              <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-gray-300">
-                {recentReviews.length} item
-                {recentReviews.length === 1 ? "" : "s"}
-              </div>
-            </div>
+          <UserStatisticsSection username={username ?? usernameParam} />
 
-            {recentReviews.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-gray-300">
-                {isOwner
-                  ? "Rate or review a title to see it surface here."
-                  : "This user has no reviews yet."}
+          <Separator className="bg-white/10" />
+
+          <div className="space-y-8">
+            <ProfilePosterGrid
+              title="Favorite Movies"
+              description="Your pinned movies, surfaced from your favorites list."
+              icon={Heart}
+              sectionType="favorites"
+              items={favoriteMovies}
+              mediaMap={mediaMap}
+              maxItems={6}
+              emptyTitle="No favorites yet"
+              emptyDescription={
+                isOwner
+                  ? "Create or rename a list to Favorites and your pinned titles will appear here."
+                  : "This user has no favorite movies yet."
+              }
+              canEdit={isOwner}
+            />
+
+            <ProfilePosterGrid
+              title="Movies I Like"
+              description="The titles you have saved across your lists, shown as a bigger shelf."
+              icon={ThumbsUp}
+              sectionType="likes"
+              items={likedShelf}
+              mediaMap={mediaMap}
+              maxItems={12}
+              emptyTitle="No liked movies yet"
+              emptyDescription={
+                isOwner
+                  ? "Add titles to any list and they will show up here."
+                  : "This user has no liked movies yet."
+              }
+              canEdit={isOwner}
+            />
+
+            <ProfilePosterGrid
+              title="Watchlist"
+              description="Movies and shows you still want to get to."
+              icon={Bookmark}
+              sectionType="watchlist"
+              items={watchlistMovies}
+              mediaMap={mediaMap}
+              maxItems={8}
+              emptyTitle="No watchlist yet"
+              emptyDescription={
+                isOwner
+                  ? "Use the Watchlist button on any title to start filling this shelf."
+                  : "This user has no watchlist yet."
+              }
+              canEdit={isOwner}
+            />
+
+            <section
+              id="reviews"
+              className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)] md:p-5 sm:p-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-gray-400">
+                    <Clock3 className="h-4 w-4 text-primaryM-500" />
+                    <span>Recent Activity</span>
+                  </div>
+                  <p className="mt-2 max-w-2xl text-sm text-gray-300">
+                    What you watched most recently, with star ratings and watch
+                    type.
+                  </p>
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-gray-300">
+                  {recentActivity.length} item
+                  {recentActivity.length === 1 ? "" : "s"}
+                </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
-                {recentReviews.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex h-full w-full flex-col gap-3"
-                  >
-                    <ReviewRow
+
+              {recentActivity.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-gray-300">
+                  {isOwner
+                    ? "Log a movie or TV show to start building your activity feed."
+                    : "This user has no recent activity yet."}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
+                  {recentActivity.map((item) => (
+                    <ActivityRow
+                      key={item.id}
                       item={item}
                       media={mediaMap.get(item.showId) ?? null}
-                      likesCount={engagementMap.get(item.id)?.likesCount ?? 0}
-                      replies={(engagementMap.get(item.id)?.replies ?? []).map(
-                        (reply) => ({
+                      profileUsername={username ?? usernameParam}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)] md:p-5 sm:p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-gray-400">
+                    <MessageSquareQuote className="h-4 w-4 text-primaryM-500" />
+                    <span>Recent Reviews</span>
+                  </div>
+                  <p className="mt-2 max-w-2xl text-sm text-gray-300">
+                    Your latest rated or written reviews appear here.
+                  </p>
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-gray-300">
+                  {recentReviews.length} item
+                  {recentReviews.length === 1 ? "" : "s"}
+                </div>
+              </div>
+
+              {recentReviews.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-gray-300">
+                  {isOwner
+                    ? "Rate or review a title to see it surface here."
+                    : "This user has no reviews yet."}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
+                  {recentReviews.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex h-full w-full flex-col gap-3"
+                    >
+                      <ReviewRow
+                        item={item}
+                        media={mediaMap.get(item.showId) ?? null}
+                        likesCount={engagementMap.get(item.id)?.likesCount ?? 0}
+                        replies={(
+                          engagementMap.get(item.id)?.replies ?? []
+                        ).map((reply) => ({
                           id: reply.id,
                           content: reply.content,
                           username: reply.username,
-                        }),
-                      )}
-                      profileUsername={username ?? usernameParam}
-                    />
+                        }))}
+                        profileUsername={username ?? usernameParam}
+                      />
 
-                    {viewer?.id ? (
-                      <div className="flex flex-wrap gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-3">
-                        <ReviewLikeButton
-                          reviewId={item.id}
-                          initialLiked={
-                            engagementMap.get(item.id)?.viewerLiked ?? false
-                          }
-                          mediaTitle={
-                            mediaMap.get(item.showId)?.title ?? "Title"
-                          }
-                          posterPath={
-                            mediaMap.get(item.showId)?.posterPath ?? null
-                          }
-                        />
+                      {viewer?.id ? (
+                        <div className="flex flex-wrap gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                          <ReviewLikeButton
+                            reviewId={item.id}
+                            initialLiked={
+                              engagementMap.get(item.id)?.viewerLiked ?? false
+                            }
+                            mediaTitle={
+                              mediaMap.get(item.showId)?.title ?? "Title"
+                            }
+                            posterPath={
+                              mediaMap.get(item.showId)?.posterPath ?? null
+                            }
+                          />
 
-                        <ReplyForm
-                          reviewId={item.id}
-                          mediaTitle={
-                            mediaMap.get(item.showId)?.title ?? "Title"
-                          }
-                          posterPath={
-                            mediaMap.get(item.showId)?.posterPath ?? null
-                          }
-                          onSubmit={replyReviewAction}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)] md:p-5 sm:p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-gray-400">
-                  <List className="h-4 w-4 text-primaryM-500" />
-                  <span>Your Lists</span>
-                </div>
-                <p className="mt-2 max-w-2xl text-sm text-gray-300">
-                  All of your custom lists in one place.
-                </p>
-              </div>
-              {isOwner ? (
-                <Button
-                  asChild
-                  variant="outline"
-                  className="border-white/15 bg-white/5 text-white hover:bg-white/10"
-                >
-                  <Link href="/bookmarks">Open full lists</Link>
-                </Button>
-              ) : null}
-            </div>
-
-            {customBookmarksWithMovies.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-gray-300">
-                {isOwner
-                  ? "You do not have any lists yet."
-                  : "This user has no lists yet."}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
-                {customBookmarksWithMovies.map(({ list, movies, role }) => (
-                  <Link
-                    key={list.id}
-                    href={`/list/${list.id}`}
-                    className="block h-full min-h-[150px] w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-primaryM-500/40 hover:bg-white/[0.05]"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h3 className="line-clamp-1 text-lg font-semibold text-white">
-                          {list.bookmarkName}
-                        </h3>
-                        <span
-                          className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.16em] ${
-                            role === "owner"
-                              ? "border-primaryM-500/40 bg-primaryM-500/12 text-primaryM-300"
-                              : "border-sky-400/35 bg-sky-500/12 text-sky-300"
-                          }`}
-                        >
-                          {role === "owner" ? "Owner" : "Collaborator"}
-                        </span>
-                        <p className="mt-1 line-clamp-3 break-words text-sm text-gray-300">
-                          {list.description}
-                        </p>
-                      </div>
-                      <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-gray-300">
-                        {movies.length} item{movies.length === 1 ? "" : "s"}
-                      </div>
+                          <ReplyForm
+                            reviewId={item.id}
+                            mediaTitle={
+                              mediaMap.get(item.showId)?.title ?? "Title"
+                            }
+                            posterPath={
+                              mediaMap.get(item.showId)?.posterPath ?? null
+                            }
+                            onSubmit={replyReviewAction}
+                          />
+                        </div>
+                      ) : null}
                     </div>
-                  </Link>
-                ))}
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)] md:p-5 sm:p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-gray-400">
+                    <List className="h-4 w-4 text-primaryM-500" />
+                    <span>Your Lists</span>
+                  </div>
+                  <p className="mt-2 max-w-2xl text-sm text-gray-300">
+                    All of your custom lists in one place.
+                  </p>
+                </div>
+                {isOwner ? (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="border-white/15 bg-white/5 text-white hover:bg-white/10"
+                  >
+                    <Link href="/bookmarks">Open full lists</Link>
+                  </Button>
+                ) : null}
               </div>
-            )}
-          </section>
+
+              {customBookmarksWithMovies.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-gray-300">
+                  {isOwner
+                    ? "You do not have any lists yet."
+                    : "This user has no lists yet."}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
+                  {customBookmarksWithMovies.map(({ list, movies, role }) => (
+                    <Link
+                      key={list.id}
+                      href={`/list/${list.id}`}
+                      className="block h-full min-h-[150px] w-full rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-primaryM-500/40 hover:bg-white/[0.05]"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="line-clamp-1 text-lg font-semibold text-white">
+                            {list.bookmarkName}
+                          </h3>
+                          <span
+                            className={`mt-2 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.16em] ${
+                              role === "owner"
+                                ? "bg-primaryM-500/12 border-primaryM-500/40 text-primaryM-300"
+                                : "bg-sky-500/12 border-sky-400/35 text-sky-300"
+                            }`}
+                          >
+                            {role === "owner" ? "Owner" : "Collaborator"}
+                          </span>
+                          <p className="mt-1 line-clamp-3 break-words text-sm text-gray-300">
+                            {list.description}
+                          </p>
+                        </div>
+                        <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-gray-300">
+                          {movies.length} item{movies.length === 1 ? "" : "s"}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       </div>
     </div>

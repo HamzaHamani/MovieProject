@@ -23,12 +23,14 @@ export async function POST(request: NextRequest) {
       username?: string;
       bio?: string | null;
       image?: string | null;
+      backdropPath?: string | null;
     };
 
     const result = await updateMyProfile({
       username: body?.username,
       bio: body?.bio ?? null,
       image: body?.image ?? null,
+      backdropPath: body?.backdropPath ?? null,
     });
 
     if (!result.ok) {

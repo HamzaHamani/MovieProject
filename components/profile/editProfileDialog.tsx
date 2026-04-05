@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CloudUpload, Pencil } from "lucide-react";
+import { CloudUpload, ImagePlus, Pencil, Search } from "lucide-react";
 import {
   showErrorNotification,
   showSuccessNotification,
@@ -30,11 +30,30 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UploadDropzone } from "@/lib/uploadthing";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import LazyBlurImage from "@/components/ui/lazyBlurImage";
 
 type Props = {
   currentUsername: string;
   currentBio?: string | null;
   currentImage?: string | null;
+  currentBackdropPath?: string | null;
+};
+
+type BackdropSearchResult = {
+  id: string;
+  mediaType: "movie" | "tv";
+  title: string;
+  posterPath: string | null;
+  backdropPath: string | null;
+  year: string;
+};
+
+type BackdropImage = {
+  file_path: string;
+  width: number;
+  height: number;
+  aspect_ratio: number;
+  vote_average: number;
 };
 
 function getInitials(name: string) {
@@ -50,6 +69,7 @@ export default function EditProfileDialog({
   currentUsername,
   currentBio,
   currentImage,
+  currentBackdropPath,
 }: Props) {
   const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -61,6 +81,100 @@ export default function EditProfileDialog({
   const [username, setUsername] = useState(currentUsername);
   const [bio, setBio] = useState(currentBio ?? "");
   const [imageUrl, setImageUrl] = useState(currentImage ?? "");
+  const [backdropPath, setBackdropPath] = useState(currentBackdropPath ?? "");
+  const [backdropQuery, setBackdropQuery] = useState("");
+  const [backdropResults, setBackdropResults] = useState<
+    BackdropSearchResult[]
+  >([]);
+  const [isBackdropSearching, setIsBackdropSearching] = useState(false);
+  const [isBackdropPickerOpen, setIsBackdropPickerOpen] = useState(false);
+  const [selectedBackdropMovie, setSelectedBackdropMovie] =
+    useState<BackdropSearchResult | null>(null);
+  const [movieBackdrops, setMovieBackdrops] = useState<BackdropImage[]>([]);
+  const [isLoadingMovieBackdrops, setIsLoadingMovieBackdrops] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const trimmed = backdropQuery.trim();
+    if (selectedBackdropMovie) {
+      return;
+    }
+
+    if (trimmed.length < 2) {
+      setBackdropResults([]);
+      setIsBackdropSearching(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        setIsBackdropSearching(true);
+        const response = await fetch(
+          `/api/search/tmdb?q=${encodeURIComponent(trimmed)}`,
+          {
+            signal: controller.signal,
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Search failed");
+        }
+
+        const json = (await response.json()) as BackdropSearchResult[];
+        setBackdropResults(Array.isArray(json) ? json : []);
+      } catch {
+        if (!controller.signal.aborted) {
+          showErrorNotification("Search Error", "Could not search right now");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsBackdropSearching(false);
+        }
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [backdropQuery, open, selectedBackdropMovie]);
+
+  const handleSelectBackdropMovie = async (movie: BackdropSearchResult) => {
+    setSelectedBackdropMovie(movie);
+    setIsLoadingMovieBackdrops(true);
+
+    try {
+      const response = await fetch(
+        `/api/search/images?id=${movie.id}&type=${movie.mediaType}`,
+        {
+          cache: "no-store",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Could not fetch backdrops for this title");
+      }
+
+      const json = (await response.json()) as BackdropImage[];
+      setMovieBackdrops(Array.isArray(json) ? json : []);
+    } catch {
+      showErrorNotification("Search Error", "Could not load backdrops right now");
+      setMovieBackdrops([]);
+    } finally {
+      setIsLoadingMovieBackdrops(false);
+    }
+  };
+
+  const handleBackToBackdropSearch = () => {
+    setSelectedBackdropMovie(null);
+    setMovieBackdrops([]);
+    setIsLoadingMovieBackdrops(false);
+  };
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
@@ -81,6 +195,7 @@ export default function EditProfileDialog({
           username,
           bio,
           image: imageUrl || null,
+          backdropPath: backdropPath || null,
         }),
       });
 
@@ -218,6 +333,221 @@ export default function EditProfileDialog({
         <p className="text-right text-xs text-gray-500">{bio.length}/240</p>
       </div>
 
+      <div className="space-y-3 rounded-2xl border border-white/10 bg-black/40 p-4 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.9)]">
+        <button
+          type="button"
+          onClick={() => {
+            setIsBackdropPickerOpen((current) => {
+              const next = !current;
+              if (!next) {
+                setSelectedBackdropMovie(null);
+                setMovieBackdrops([]);
+                setIsLoadingMovieBackdrops(false);
+              }
+              return next;
+            });
+          }}
+          className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:border-primaryM-500/50 hover:bg-white/[0.05]"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primaryM-500/20 bg-primaryM-500/10 text-primaryM-400">
+              <ImagePlus className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-100">
+                Profile backdrop
+              </p>
+              <p className="text-xs text-gray-400">
+                Click to search TMDb and choose a backdrop image.
+              </p>
+            </div>
+          </div>
+
+          <span className="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-xs text-gray-300">
+            {backdropPath ? "Selected" : "Choose"}
+          </span>
+        </button>
+
+        {isBackdropPickerOpen ? (
+          <div className="space-y-3 rounded-2xl border border-white/10 bg-black/25 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
+                {selectedBackdropMovie
+                  ? "Step 2: select backdrop"
+                  : "Step 1: search title"}
+              </p>
+              <div className="flex items-center gap-2">
+                {selectedBackdropMovie ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleBackToBackdropSearch}
+                    className="h-8 px-3 text-xs text-gray-300 hover:bg-white/10 hover:text-white"
+                  >
+                    Back
+                  </Button>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setBackdropPath("")}
+                  className="h-8 px-3 text-xs text-gray-300 hover:bg-white/10 hover:text-white"
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+
+            {!selectedBackdropMovie ? (
+              <Input
+                value={backdropQuery}
+                onChange={(event) => setBackdropQuery(event.target.value)}
+                placeholder="Search a movie or show..."
+                className="border-white/15 bg-black/30 text-white placeholder:text-gray-500"
+              />
+            ) : (
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                <p className="text-sm font-medium text-white">
+                  {selectedBackdropMovie.title}
+                </p>
+                <p className="mt-1 text-xs text-gray-400">
+                  Select a backdrop from available images
+                </p>
+              </div>
+            )}
+
+            {backdropPath ? (
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                <div className="relative aspect-[16/8]">
+                  <LazyBlurImage
+                    src={`https://image.tmdb.org/t/p/original${backdropPath}`}
+                    alt="Selected profile backdrop"
+                    className="h-full w-full object-cover"
+                    placeholderClassName="bg-zinc-800/70"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-3">
+                    <p className="text-sm font-medium text-white">
+                      Selected backdrop
+                    </p>
+                    <p className="text-xs text-gray-300">
+                      This image will appear behind your profile header.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-4 text-sm text-gray-300">
+                No backdrop selected yet.
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
+                  {selectedBackdropMovie ? "Available backdrops" : "Search results"}
+                </p>
+                {!selectedBackdropMovie && isBackdropSearching ? (
+                  <p className="text-xs text-gray-400">Searching...</p>
+                ) : selectedBackdropMovie && isLoadingMovieBackdrops ? (
+                  <p className="text-xs text-gray-400">Loading backdrops...</p>
+                ) : null}
+              </div>
+
+              {!selectedBackdropMovie ? (
+                backdropResults.length > 0 ? (
+                  <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                    {backdropResults.map((item) => (
+                      <button
+                        key={`${item.mediaType}-${item.id}`}
+                        type="button"
+                        onClick={() => handleSelectBackdropMovie(item)}
+                        className="group flex w-full items-center gap-3 rounded-xl border border-white/10 p-3 text-left transition hover:border-primaryM-500/50 hover:bg-white/[0.03]"
+                      >
+                        {item.posterPath ? (
+                          <div className="relative h-20 w-14 flex-shrink-0 overflow-hidden rounded-lg border border-white/10">
+                            <LazyBlurImage
+                              src={`https://image.tmdb.org/t/p/w185${item.posterPath}`}
+                              alt={item.title}
+                              width={120}
+                              height={180}
+                              className="h-full w-full object-cover"
+                              placeholderClassName="bg-zinc-800/70"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-20 w-14 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-[10px] text-gray-500">
+                            No image
+                          </div>
+                        )}
+
+                        <div className="min-w-0">
+                          <p className="line-clamp-1 text-sm font-medium text-white">
+                            {item.title}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-400">
+                            {item.year} • {item.mediaType === "tv" ? "TV" : "Movie"}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : backdropQuery.trim().length >= 2 && !isBackdropSearching ? (
+                  <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-4 text-sm text-gray-300">
+                    No titles found. Try a different search.
+                  </div>
+                ) : null
+              ) : isLoadingMovieBackdrops ? (
+                <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-4 text-sm text-gray-300">
+                  Loading backdrops...
+                </div>
+              ) : movieBackdrops.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {movieBackdrops.map((item, idx) => {
+                    const isSelected = item.file_path === backdropPath;
+
+                    return (
+                      <button
+                        key={`${item.file_path}-${idx}`}
+                        type="button"
+                        onClick={() => setBackdropPath(item.file_path)}
+                        className={`group relative overflow-hidden rounded-2xl border text-left transition hover:border-primaryM-500/50 ${
+                          isSelected
+                            ? "border-primaryM-500/70 ring-1 ring-primaryM-500/40"
+                            : "border-white/10"
+                        }`}
+                      >
+                        <div className="relative aspect-[16/9] bg-black/40">
+                          <LazyBlurImage
+                            src={`https://image.tmdb.org/t/p/w780${item.file_path}`}
+                            alt={`${selectedBackdropMovie.title} backdrop ${idx + 1}`}
+                            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                            placeholderClassName="bg-zinc-800/70"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                          <div className="absolute inset-x-0 bottom-0 p-3">
+                            <p className="line-clamp-1 text-sm font-medium text-white">
+                              {selectedBackdropMovie.title}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-300">
+                              Backdrop {idx + 1}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-4 text-sm text-gray-300">
+                  No backdrops available for this title.
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
+
       <div className="flex justify-end gap-2 pt-1">
         <Button
           type="button"
@@ -258,7 +588,7 @@ export default function EditProfileDialog({
           <DialogHeader className="pb-1">
             <DialogTitle className="text-white">Edit profile</DialogTitle>
             <DialogDescription className="text-gray-300">
-              Update your username, bio, and profile picture.
+              Update your username, bio, profile picture, and backdrop.
             </DialogDescription>
           </DialogHeader>
 
@@ -275,7 +605,7 @@ export default function EditProfileDialog({
         <DrawerHeader className="px-0 pb-2 pt-2 text-left">
           <DrawerTitle className="text-white">Edit profile</DrawerTitle>
           <DrawerDescription className="text-gray-300">
-            Update your username, bio, and profile picture.
+            Update your username, bio, profile picture, and backdrop.
           </DrawerDescription>
         </DrawerHeader>
 

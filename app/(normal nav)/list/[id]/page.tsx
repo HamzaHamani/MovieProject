@@ -230,7 +230,9 @@ export default async function Page({
                           alt={ownerProfile.username}
                         />
                         <AvatarFallback className="bg-white/[0.08] text-xs text-white">
-                          {getInitials(ownerProfile.name ?? ownerProfile.username)}
+                          {getInitials(
+                            ownerProfile.name ?? ownerProfile.username,
+                          )}
                         </AvatarFallback>
                       </Avatar>
 

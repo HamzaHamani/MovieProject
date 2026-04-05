@@ -52,6 +52,8 @@ export async function GET(request: NextRequest) {
           title,
           posterPath:
             typeof item.poster_path === "string" ? item.poster_path : null,
+          backdropPath:
+            typeof item.backdrop_path === "string" ? item.backdrop_path : null,
           year: date.slice(0, 4) || "----",
         };
       });
