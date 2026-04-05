@@ -163,7 +163,10 @@ export default function EditProfileDialog({
       const json = (await response.json()) as BackdropImage[];
       setMovieBackdrops(Array.isArray(json) ? json : []);
     } catch {
-      showErrorNotification("Search Error", "Could not load backdrops right now");
+      showErrorNotification(
+        "Search Error",
+        "Could not load backdrops right now",
+      );
       setMovieBackdrops([]);
     } finally {
       setIsLoadingMovieBackdrops(false);
@@ -445,7 +448,9 @@ export default function EditProfileDialog({
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
-                  {selectedBackdropMovie ? "Available backdrops" : "Search results"}
+                  {selectedBackdropMovie
+                    ? "Available backdrops"
+                    : "Search results"}
                 </p>
                 {!selectedBackdropMovie && isBackdropSearching ? (
                   <p className="text-xs text-gray-400">Searching...</p>
@@ -456,7 +461,7 @@ export default function EditProfileDialog({
 
               {!selectedBackdropMovie ? (
                 backdropResults.length > 0 ? (
-                  <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                  <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
                     {backdropResults.map((item) => (
                       <button
                         key={`${item.mediaType}-${item.id}`}
@@ -486,7 +491,8 @@ export default function EditProfileDialog({
                             {item.title}
                           </p>
                           <p className="mt-1 text-xs text-gray-400">
-                            {item.year} • {item.mediaType === "tv" ? "TV" : "Movie"}
+                            {item.year} •{" "}
+                            {item.mediaType === "tv" ? "TV" : "Movie"}
                           </p>
                         </div>
                       </button>

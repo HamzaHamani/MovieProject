@@ -10,19 +10,19 @@ export async function GET(request: NextRequest) {
     if (!id || !type) {
       return NextResponse.json(
         { error: "Missing id or type parameter" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (type !== "movie" && type !== "tv") {
       return NextResponse.json(
         { error: "Type must be 'movie' or 'tv'" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const res = await axios.get(
-      `https://api.themoviedb.org/3/${type}/${id}/images?api_key=${process.env.TMDB_API_KEY}`
+      `https://api.themoviedb.org/3/${type}/${id}/images?api_key=${process.env.TMDB_API_KEY}`,
     );
 
     const data = res.data;
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching images:", error);
     return NextResponse.json(
       { error: "Failed to fetch images" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

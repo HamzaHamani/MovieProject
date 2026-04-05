@@ -8,14 +8,8 @@ import {
   showSuccessNotification,
   showErrorNotification,
 } from "@/components/notificationSystem";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-} from "@/components/ui/drawer";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
@@ -53,13 +47,14 @@ export default function ProfileBackdropPicker({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<BackdropSearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  // Two-step state: first select movie, then select backdrop
-  const [selectedMovie, setSelectedMovie] = useState<BackdropSearchResult | null>(
-    null
+  const [searchResults, setSearchResults] = useState<BackdropSearchResult[]>(
+    [],
   );
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Two-step state: first select movie, then select backdrop
+  const [selectedMovie, setSelectedMovie] =
+    useState<BackdropSearchResult | null>(null);
   const [movieBackdrops, setMovieBackdrops] = useState<BackdropImage[]>([]);
   const [isLoadingBackdrops, setIsLoadingBackdrops] = useState(false);
   const [selectedBackdrop, setSelectedBackdrop] = useState(currentBackdropPath);
@@ -81,7 +76,7 @@ export default function ProfileBackdropPicker({
           `/api/search/tmdb?q=${encodeURIComponent(searchQuery)}`,
           {
             cache: "no-store",
-          }
+          },
         );
         const data = (await response.json()) as BackdropSearchResult[];
         setSearchResults(Array.isArray(data) ? data : []);
@@ -102,7 +97,7 @@ export default function ProfileBackdropPicker({
     setIsLoadingBackdrops(true);
     try {
       const response = await fetch(
-        `/api/search/images?id=${movie.id}&type=${movie.mediaType}`
+        `/api/search/images?id=${movie.id}&type=${movie.mediaType}`,
       );
       const backdrops = (await response.json()) as BackdropImage[];
       setMovieBackdrops(backdrops);
@@ -198,7 +193,7 @@ export default function ProfileBackdropPicker({
           </button>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-gray-500 mb-3">
+          <p className="mb-3 text-xs uppercase tracking-[0.24em] text-gray-500">
             Step 1: Search for a movie or TV show
           </p>
           <div className="relative">
@@ -224,12 +219,12 @@ export default function ProfileBackdropPicker({
             <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
               Search results
             </p>
-            <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+            <div className="max-h-96 space-y-2 overflow-y-auto pr-2">
               {searchResults.map((result, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSelectMovie(result)}
-                  className="group flex gap-3 rounded-xl border border-white/10 p-3 text-left transition hover:border-primaryM-500/50 hover:bg-white/5 w-full"
+                  className="group flex w-full gap-3 rounded-xl border border-white/10 p-3 text-left transition hover:border-primaryM-500/50 hover:bg-white/5"
                 >
                   {result.posterPath ? (
                     <div className="relative h-24 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-white/10">
@@ -251,7 +246,8 @@ export default function ProfileBackdropPicker({
                       {result.title}
                     </p>
                     <p className="mt-1 text-xs text-gray-400">
-                      {result.year} • {result.mediaType === "tv" ? "TV" : "Movie"}
+                      {result.year} •{" "}
+                      {result.mediaType === "tv" ? "TV" : "Movie"}
                     </p>
                   </div>
                 </button>
@@ -282,7 +278,9 @@ export default function ProfileBackdropPicker({
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
-              <h3 className="font-semibold text-white">{selectedMovie.title}</h3>
+              <h3 className="font-semibold text-white">
+                {selectedMovie.title}
+              </h3>
               <p className="mt-1 text-sm text-gray-400">
                 Select a backdrop from available images
               </p>
