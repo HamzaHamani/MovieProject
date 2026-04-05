@@ -1,11 +1,8 @@
 import { bookmarksSchema } from "@/types";
 import React from "react";
 import { z } from "zod";
-import { Button } from "../ui/button";
-import { AddMovie } from "@/lib/actions";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import SmallLoadingIndicator from "./smallLoadingIndicator";
+import { AddMovie, RemoveMovie } from "@/lib/actions";
+import { showProfileMovieToast } from "@/components/profile/profileToasts";
 import { Separator } from "../ui/separator";
 import { Check } from "lucide-react";
 
@@ -15,9 +12,7 @@ type Props = {
   movieId: any;
   itemTitle: string;
   itemPosterPath: string | null;
-  setSelectedLists: React.Dispatch<React.SetStateAction<(string | number)[]>>;
   showForm: any;
-  selectedLists: (string | number)[];
   MoiveListsData: any;
 };
 
@@ -26,120 +21,109 @@ export default function CheckBoxes({
   itemTitle,
   itemPosterPath,
   data,
-  setSelectedLists,
   showForm,
-  selectedLists,
   MoiveListsData,
 }: Props) {
-  const [loading, setLoading] = React.useState(false);
-  const queryClient = useQueryClient();
-  const handleSelect = (userId: string | number) => {
-    setSelectedLists((prev) => {
-      if (prev.includes(userId)) {
-        return prev.filter((id) => id !== userId);
-      }
-      return [...prev, userId];
-    });
-  };
-  async function handleSubmit(e: any) {
-    console.log("submit");
-    e.preventDefault();
-    // HANDLING ADDING MOVIES TO LIST FOR ONE INSERT
-    if (selectedLists.length == 1) {
-      try {
-        setLoading(true);
-        const selectedList = data.find((item) => item.id === selectedLists[0]);
-        const selectedListName = selectedList?.bookmarkName ?? "your list";
-
-        const res = await AddMovie({
-          bookmarkId: selectedLists[0] as string,
-          review: "",
-          movieId: movieId,
-        });
-        if (res?.already) {
-          toast.custom(
-            () => (
-              <div className="flex w-[330px] items-center gap-3 rounded-xl border border-white/20 bg-[#f2f2f2] p-2 text-black shadow-lg">
-                <div className="h-12 w-12 overflow-hidden rounded-md bg-black/10">
-                  {itemPosterPath ? (
-                    <img
-                      src={`https://image.tmdb.org/t/p/w185/${itemPosterPath}`}
-                      alt={itemTitle}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] text-black/60">
-                      No image
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{itemTitle}</p>
-                  <p className="truncate text-xs text-black/75">
-                    Already in '{selectedListName}'
-                  </p>
-                </div>
-              </div>
-            ),
-            { position: "bottom-left", duration: 3500 },
-          );
-          return;
-        } else if (!res?.already) {
-          queryClient.invalidateQueries({
-            queryKey: ["movieLists", "bookmarks"],
-          });
-          toast.custom(
-            () => (
-              <div className="flex w-[330px] items-center gap-3 rounded-xl border border-white/20 bg-[#f2f2f2] p-2 text-black shadow-lg">
-                <div className="h-12 w-12 overflow-hidden rounded-md bg-black/10">
-                  {itemPosterPath ? (
-                    <img
-                      src={`https://image.tmdb.org/t/p/w185/${itemPosterPath}`}
-                      alt={itemTitle}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] text-black/60">
-                      No image
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold">{itemTitle}</p>
-                  <p className="truncate text-xs text-black/75">
-                    Added to '{selectedListName}'
-                  </p>
-                </div>
-              </div>
-            ),
-            { position: "bottom-left", duration: 3500 },
-          );
-        }
-      } catch (e) {
-        toast.error("we couldnt add it to your list");
-      } finally {
-        setLoading(false);
-      }
-      // HANDLING ADDING MOVIES TO LIST FOR MULTIPLE INSERT
-    } else {
-      console.log("we cant");
-    }
-  }
   const bookmarkIds = MoiveListsData?.map((item: any) => item.bookmarkId) || [];
+  const [selectedLists, setSelectedLists] =
+    React.useState<(string | number)[]>(bookmarkIds);
+  const [loadingIds, setLoadingIds] = React.useState<Record<string, boolean>>(
+    {},
+  );
+
+  React.useEffect(() => {
+    setSelectedLists(bookmarkIds);
+  }, [movieId, JSON.stringify(bookmarkIds)]);
+
+  const handleSelect = async (listId: string | number) => {
+    const listKey = String(listId);
+
+    if (loadingIds[listKey]) return;
+
+    const isSelected = selectedLists.includes(listId);
+    const nextSelected = isSelected
+      ? selectedLists.filter((id) => id !== listId)
+      : [...selectedLists, listId];
+
+    setSelectedLists(nextSelected);
+    setLoadingIds((prev) => ({ ...prev, [listKey]: true }));
+
+    try {
+      const selectedList = data.find((item) => item.id === listId);
+      const selectedListName = selectedList?.bookmarkName ?? "your list";
+
+      if (isSelected) {
+        const res = await RemoveMovie({
+          bookmarkId: listKey,
+          movieId,
+        });
+
+        if (!res?.removed) {
+          setSelectedLists((prev) => [...prev, listId]);
+          return;
+        }
+
+        showProfileMovieToast({
+          title: itemTitle,
+          message: `Removed from ${selectedListName}`,
+          posterPath: itemPosterPath,
+        });
+      } else {
+        const res = await AddMovie({
+          bookmarkId: listKey,
+          review: "",
+          movieId,
+        });
+
+        if (res?.already) {
+          showProfileMovieToast({
+            title: itemTitle,
+            message: `Already in ${selectedListName}`,
+            posterPath: itemPosterPath,
+          });
+        } else {
+          showProfileMovieToast({
+            title: itemTitle,
+            message: `Added to ${selectedListName}`,
+            posterPath: itemPosterPath,
+          });
+        }
+      }
+
+      // keep the DB-backed list cache fresh for the current title and bookmark overview
+      // without requiring a manual submit action.
+      if (!isSelected) {
+        // removal path already handled above
+      }
+    } catch (e) {
+      setSelectedLists((prev) =>
+        isSelected ? [...prev, listId] : prev.filter((id) => id !== listId),
+      );
+      showProfileMovieToast({
+        title: "Error",
+        message: "Couldn't update your list",
+        posterPath: null,
+      });
+    } finally {
+      setLoadingIds((prev) => {
+        const next = { ...prev };
+        delete next[listKey];
+        return next;
+      });
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <div className="hide-scrollbar max-h-[320px] space-y-2 overflow-y-auto pr-1">
         {data.map((item, num) => (
           <div className="group" key={item.id}>
             <label
               htmlFor={`Option${num}`}
               className={`mb-2 flex w-full cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
-                bookmarkIds.includes(item.id)
+                selectedLists.includes(item.id)
                   ? "border-primaryM-500/50 bg-primaryM-500/10"
-                  : selectedLists.includes(item.id)
-                    ? "border-primaryM-500/60 bg-primaryM-500/10"
-                    : "border-white/10 bg-white/[0.02] hover:bg-white/[0.06]"
+                  : "border-white/10 bg-white/[0.02] hover:bg-white/[0.06]"
               }`}
             >
               <div className="mt-0.5 flex items-center">
@@ -147,13 +131,11 @@ export default function CheckBoxes({
                   type="checkbox"
                   className="peer sr-only"
                   id={`Option${num}`}
-                  checked={bookmarkIds.includes(item.id)}
-                  disabled={bookmarkIds.includes(item.id)}
-                  onChange={() => handleSelect(item.id)}
+                  checked={selectedLists.includes(item.id)}
+                  onChange={() => void handleSelect(item.id)}
                 />
                 <span
                   className={`inline-flex h-5 w-5 items-center justify-center rounded-md border ${
-                    bookmarkIds.includes(item.id) ||
                     selectedLists.includes(item.id)
                       ? "border-primaryM-500 bg-primaryM-500 text-black"
                       : "border-white/30 bg-transparent text-transparent"
@@ -167,30 +149,18 @@ export default function CheckBoxes({
                 <strong className="font-medium text-gray-100">
                   {item.bookmarkName}
                 </strong>
-
-                <p className="mt-1 break-words text-sm text-gray-400">
-                  {item.description}
-                </p>
-                {bookmarkIds.includes(item.id) && (
-                  <p className="mt-2 text-xs font-medium text-primaryM-500">
-                    Already added
-                  </p>
-                )}
+                {selectedLists.includes(item.id) &&
+                  bookmarkIds.includes(item.id) && (
+                    <p className="mt-2 text-xs font-medium text-primaryM-500">
+                      Already added
+                    </p>
+                  )}
               </div>
             </label>
             <Separator className="my-4 bg-gray-300/50" />
           </div>
         ))}
       </div>
-      {!showForm && data?.length !== 0 && (
-        <Button
-          type="submit"
-          disabled={selectedLists.length === 0}
-          className={`mt-4 flex w-full items-center justify-center bg-primaryM-500 text-black hover:bg-primaryM-600 ${loading ? "cursor-not-allowed" : ""} `}
-        >
-          {loading ? <SmallLoadingIndicator /> : "Add To Selected List"}
-        </Button>
-      )}
-    </form>
+    </div>
   );
 }

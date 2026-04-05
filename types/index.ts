@@ -5,7 +5,8 @@ export type Bookmark = {};
 export const usersSchema = z.object({
   id: z.string(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.string().email().nullable().optional(),
+  username: z.string().min(3).max(24).optional().nullable(),
   emailVerified: z.date().optional(),
   image: z.string().optional(),
   premium: z.boolean().default(false).optional(),

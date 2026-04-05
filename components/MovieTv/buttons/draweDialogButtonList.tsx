@@ -138,9 +138,6 @@ export function ProfileForm({
   });
   // React.ComponentProps<"form">
   const [showForm, setShowForm] = React.useState(false);
-  const [selectedLists, setSelectedLists] = React.useState<(string | number)[]>(
-    [],
-  );
   const { data, error, isLoading } = useQuery({
     queryKey: ["bookmarks", userId],
     queryFn: () => getBookmarks(userId as string),
@@ -189,9 +186,7 @@ export function ProfileForm({
               itemTitle={itemTitle}
               itemPosterPath={itemPosterPath}
               data={bookmarksData}
-              setSelectedLists={setSelectedLists}
               showForm={showForm}
-              selectedLists={selectedLists}
             />
           )
         ) : null}

@@ -32,9 +32,16 @@ type Props = {
   typeM?: "movie" | "tv";
   userId?: string;
   initialLog?: TExistingLog | null;
+  buttonLabel?: string;
 };
 
-export default function LogTheMT({ show, typeM, userId, initialLog }: Props) {
+export default function LogTheMT({
+  show,
+  typeM,
+  userId,
+  initialLog,
+  buttonLabel,
+}: Props) {
   const [showCard, setShowCard] = useState(false);
   const [currentLog, setCurrentLog] = useState<TExistingLog | null>(
     initialLog ?? null,
@@ -77,11 +84,18 @@ export default function LogTheMT({ show, typeM, userId, initialLog }: Props) {
     loginRequiredContent
   ) : (
     <ModeleLog
+      key={currentLog?.id ?? show.id}
       typeM={typeM}
       show={show}
       setShowCard={setShowCard}
       initialLog={currentLog}
-      onSaved={(savedLog) => setCurrentLog(savedLog)}
+      onSaved={(savedLog) =>
+        setCurrentLog((previous) => ({
+          id: previous?.id ?? `temp-${show.id}`,
+          ...previous,
+          ...savedLog,
+        }))
+      }
     />
   );
 
@@ -93,9 +107,11 @@ export default function LogTheMT({ show, typeM, userId, initialLog }: Props) {
             <span className="xsmd:text-xs">
               <CirclePlus />
             </span>
-            {currentLog
-              ? `${typeM === "movie" ? "Movie" : "TV Show"} Already Logged`
-              : `Log The ${typeM === "movie" ? "Movie" : "Tv Show"}`}
+            {buttonLabel
+              ? buttonLabel
+              : currentLog
+                ? `${typeM === "movie" ? "Movie" : "TV Show"} Already Logged`
+                : `Log The ${typeM === "movie" ? "Movie" : "Tv Show"}`}
           </Button>
         </DialogTrigger>
 
@@ -145,9 +161,11 @@ export default function LogTheMT({ show, typeM, userId, initialLog }: Props) {
           <span className="xsmd:text-xs">
             <CirclePlus />
           </span>
-          {currentLog
-            ? `${typeM === "movie" ? "Movie" : "TV Show"} Already Logged`
-            : `Log The ${typeM === "movie" ? "Movie" : "Tv Show"}`}
+          {buttonLabel
+            ? buttonLabel
+            : currentLog
+              ? `${typeM === "movie" ? "Movie" : "TV Show"} Already Logged`
+              : `Log The ${typeM === "movie" ? "Movie" : "Tv Show"}`}
         </Button>
       </DrawerTrigger>
       <DrawerContent className="h-[92vh] max-h-[92vh] overflow-y-auto border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.12),transparent_45%),theme(colors.backgroundM)] px-4 pb-5 text-textMain">

@@ -8,7 +8,7 @@ import {
 } from "react-icons/si";
 import { Button } from "./ui/button";
 import { handleSignin } from "@/lib/actions";
-import { toast } from "sonner";
+import { showErrorNotification } from "@/components/notificationSystem";
 
 type Props = {
   provider: "github" | "google" | "twitter" | "facebook" | "reddit";
@@ -17,12 +17,9 @@ type Props = {
 export default function ButtonSignIn({ provider }: Props) {
   async function handle() {
     try {
-      toast.loading("Redirecting to Sign in...");
       await handleSignin(provider);
-      toast.dismiss();
     } catch (e) {
-      toast.dismiss();
-      toast.error("Failed to sign in");
+      showErrorNotification("Authentication", "Failed to sign in");
     }
   }
 

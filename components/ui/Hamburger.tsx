@@ -22,7 +22,7 @@ export default async function Hamburger() {
       <SheetTrigger asChild>
         <Button
           variant="default"
-          className="bg-transparent hover:bg-transparent active:bg-transparent hidden md:flex "
+          className="hidden bg-transparent hover:bg-transparent active:bg-transparent md:flex"
         >
           <div className="space-y-1">
             <div className="h-0.5 w-8 bg-current s:scale-y-75" />
@@ -55,7 +55,7 @@ export default async function Hamburger() {
               <Link href="/explore">
                 <li className="flex items-center gap-2">
                   <span className="">
-                    <CircleDot className="text-sm w-3" />
+                    <CircleDot className="w-3 text-sm" />
                   </span>
                   Explore
                 </li>
@@ -66,7 +66,7 @@ export default async function Hamburger() {
                 <li className="flex items-center gap-2">
                   {" "}
                   <span className="">
-                    <CircleDot className="text-sm w-3" />
+                    <CircleDot className="w-3 text-sm" />
                   </span>
                   Upcoming
                 </li>
@@ -76,7 +76,7 @@ export default async function Hamburger() {
               <Link href={"/bookmarks"}>
                 <li className="flex items-center gap-2">
                   <span className="">
-                    <CircleDot className="text-sm w-3" />
+                    <CircleDot className="w-3 text-sm" />
                   </span>
                   BookMarks
                 </li>
@@ -86,7 +86,7 @@ export default async function Hamburger() {
               <Link href={"/search"}>
                 <li className="flex items-center gap-2">
                   <span className="">
-                    <CircleDot className="text-sm w-3" />
+                    <CircleDot className="w-3 text-sm" />
                   </span>
                   Search
                 </li>
@@ -96,7 +96,7 @@ export default async function Hamburger() {
               <Link href={"/profile"}>
                 <li className="flex items-center gap-2">
                   <span className="">
-                    <CircleDot className="text-sm w-3" />
+                    <CircleDot className="w-3 text-sm" />
                   </span>
                   Profile
                 </li>
@@ -110,7 +110,7 @@ export default async function Hamburger() {
               <form action={handleLogout}>
                 <Button
                   type="submit"
-                  className="bg-primaryM-500 text-backgroundM active:bg-primaryM-800 w-full hover:bg-primaryM-400"
+                  className="w-full bg-primaryM-500 text-backgroundM hover:bg-primaryM-400 active:bg-primaryM-800"
                 >
                   Log Out
                 </Button>
@@ -119,7 +119,7 @@ export default async function Hamburger() {
               <Link href="/sign-in">
                 <Button
                   type="submit"
-                  className="bg-primaryM-500 text-backgroundM active:bg-primaryM-800 w-full hover:bg-primaryM-400  "
+                  className="w-full bg-primaryM-500 text-backgroundM hover:bg-primaryM-400 active:bg-primaryM-800"
                 >
                   Get Started
                 </Button>

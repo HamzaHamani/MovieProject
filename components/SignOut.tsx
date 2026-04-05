@@ -1,27 +1,27 @@
 "use client";
 import { handleLogout } from "@/lib/actions";
 import { LogOut } from "lucide-react";
-import { toast } from "sonner";
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from "@/components/notificationSystem";
 
 export default function SignOutButton() {
-  const handleLogoutPromise = () =>
-    new Promise(async (resolve, reject) => {
-      try {
-        await handleLogout();
-        resolve({ name: "Sonner" });
-      } catch (error) {
-        reject(error);
-      }
-    });
-
   async function handle(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    toast.promise(handleLogoutPromise(), {
-      loading: "Logging out..",
-      success: () => `Logged out successfully!`,
-      error: "Failed to sign out",
-    });
+    try {
+      await handleLogout();
+      showSuccessNotification(
+        "Signed Out",
+        "You have been logged out successfully",
+      );
+    } catch (error) {
+      showErrorNotification(
+        "Logout Failed",
+        "Could not sign out. Please try again",
+      );
+    }
   }
 
   return (

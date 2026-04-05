@@ -2,7 +2,11 @@
 import { Bookmark } from "lucide-react";
 import { Button } from "../../ui/button";
 import { AddMovie, CreateBookmark, getBookmarks, getUser } from "@/lib/actions";
-import { toast } from "sonner";
+import {
+  showErrorNotification,
+  showSuccessNotification,
+  showInfoNotification,
+} from "@/components/notificationSystem";
 
 type Props = {
   shwoId: string | number;
@@ -14,7 +18,10 @@ export default function WatchListButton({ shwoId }: Props) {
     const id: string = user?.id as string;
 
     if (!user) {
-      toast.error("Please login to add to watchlist");
+      showErrorNotification(
+        "Authentication",
+        "Please login to add to watchlist",
+      );
       return;
     }
     try {
@@ -35,7 +42,7 @@ export default function WatchListButton({ shwoId }: Props) {
           review: "",
         };
         await AddMovie(movieData);
-        toast.success("Added to watchlist");
+        showSuccessNotification("Added", "Added to watchlist");
         return;
       }
 
@@ -54,14 +61,14 @@ export default function WatchListButton({ shwoId }: Props) {
       const response = await AddMovie(movieData);
 
       if (response?.already) {
-        toast.info("Already in watchlist");
+        showInfoNotification("Already Added", "Already in watchlist");
         return;
       } else if (!response?.already) {
-        toast.success("Added to watchlist");
+        showSuccessNotification("Added", "Added to watchlist");
       }
     } catch (e) {
       console.error(e);
-      toast.error("Error adding to watchlist");
+      showErrorNotification("Error", "Error adding to watchlist");
     }
   }
 

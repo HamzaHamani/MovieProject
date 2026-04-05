@@ -12,7 +12,8 @@ import { TspecifiedMovie } from "@/types/api";
 import { TspecifiedTv } from "@/types/apiTv";
 import { Button } from "../ui/button";
 import { sendLoggedMovieTv } from "@/lib/actions";
-import { toast } from "sonner";
+import { showProfileMovieToast } from "@/components/profile/profileToasts";
+import { showErrorNotification } from "@/components/notificationSystem";
 
 type Props = {
   typeM: "movie" | "tv" | undefined;
@@ -58,13 +59,22 @@ export default function ModeleLog({
   });
 
   useEffect(() => {
-    if (!initialLog) return;
+    if (initialLog) {
+      setDate(
+        initialLog.watchedAt ? new Date(initialLog.watchedAt) : undefined,
+      );
+      setReview(initialLog.review ?? "");
+      setRating(initialLog.rating ?? 0);
+      setWatchTime(initialLog.watchType ?? "first");
+    } else {
+      setDate(undefined);
+      setReview("");
+      setRating(0);
+      setWatchTime("first");
+    }
 
-    setDate(initialLog.watchedAt ? new Date(initialLog.watchedAt) : undefined);
-    setReview(initialLog.review ?? "");
-    setRating(initialLog.rating ?? 0);
-    setWatchTime(initialLog.watchType ?? "first");
-  }, [initialLog]);
+    setHoveredStar(0);
+  }, [initialLog, show.id]);
 
   const getRatingFromPointer = (
     e: React.MouseEvent<HTMLButtonElement>,
@@ -102,30 +112,11 @@ export default function ModeleLog({
       const posterPath = (show as any)?.poster_path ?? null;
 
       if (res.already) {
-        toast.custom(
-          () => (
-            <div className="flex w-[330px] items-center gap-3 rounded-xl border border-white/15 bg-backgroundM p-2.5 text-textMain shadow-lg">
-              <div className="h-12 w-12 overflow-hidden rounded-md bg-white/10">
-                {posterPath ? (
-                  <img
-                    src={`https://image.tmdb.org/t/p/w185/${posterPath}`}
-                    alt={title}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-[10px] text-white/60">
-                    No image
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{title}</p>
-                <p className="text-xs text-gray-300">Movie log updated</p>
-              </div>
-            </div>
-          ),
-          { position: "bottom-left", duration: 3500 },
-        );
+        showProfileMovieToast({
+          title,
+          message: "Movie log updated",
+          posterPath,
+        });
         onSaved?.({
           rating,
           review,
@@ -136,30 +127,11 @@ export default function ModeleLog({
         return;
       }
 
-      toast.custom(
-        () => (
-          <div className="flex w-[330px] items-center gap-3 rounded-xl border border-white/15 bg-backgroundM p-2.5 text-textMain shadow-lg">
-            <div className="h-12 w-12 overflow-hidden rounded-md bg-white/10">
-              {posterPath ? (
-                <img
-                  src={`https://image.tmdb.org/t/p/w185/${posterPath}`}
-                  alt={title}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-[10px] text-white/60">
-                  No image
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{title}</p>
-              <p className="text-xs text-gray-300">Movie added to your log</p>
-            </div>
-          </div>
-        ),
-        { position: "bottom-left", duration: 3500 },
-      );
+      showProfileMovieToast({
+        title,
+        message: "Movie added to your log",
+        posterPath,
+      });
 
       onSaved?.({
         rating,
@@ -169,7 +141,10 @@ export default function ModeleLog({
       });
       setShowCard(false);
     } catch {
-      toast.error("Could not log this item. Please try again.");
+      showErrorNotification(
+        "Error",
+        "Could not log this item. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -177,7 +152,13 @@ export default function ModeleLog({
 
   const showTitle =
     typeM === "movie" ? (show as any).title : (show as any).name;
-  const activeStarCount = hoveredStar || rating;
+  const displayRating = hoveredStar || rating;
+
+  const getStarMode = (value: number) => {
+    if (displayRating >= value) return "full" as const;
+    if (displayRating >= value - 0.5) return "half" as const;
+    return "empty" as const;
+  };
 
   return (
     <form className="space-y-6 pb-28" onSubmit={handleSubmit}>
@@ -199,16 +180,12 @@ export default function ModeleLog({
               Rating
             </label>
             <div
-              className="mt-2 flex w-full items-center justify-between gap-2"
+              className="mt-2 flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2"
               onMouseLeave={() => setHoveredStar(0)}
             >
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 {[1, 2, 3, 4, 5].map((value) => {
-                  const displayRating = hoveredStar || rating;
-                  const fillPercent = Math.max(
-                    0,
-                    Math.min(1, displayRating - (value - 1)),
-                  );
+                  const starMode = getStarMode(value);
 
                   return (
                     <button
@@ -220,23 +197,25 @@ export default function ModeleLog({
                       onFocus={() => setHoveredStar(value)}
                       onClick={(e) => setRating(getRatingFromPointer(e, value))}
                       aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
-                      className="rounded-md p-1 transition hover:bg-white/10"
+                      className="rounded-md p-0.5 transition hover:bg-white/5"
                     >
-                      <div className="relative h-7 w-7">
-                        <Star className="h-7 w-7 text-white/25" />
-                        <div
-                          className="absolute inset-0 overflow-hidden"
-                          style={{ width: `${fillPercent * 100}%` }}
-                        >
-                          <Star className="h-7 w-7 fill-primaryM-500 text-primaryM-500" />
-                        </div>
+                      <div className="relative h-6 w-6">
+                        <Star className="h-6 w-6 fill-transparent text-white/20" />
+                        {starMode === "full" && (
+                          <Star className="absolute inset-0 h-6 w-6 fill-primaryM-500 text-primaryM-500" />
+                        )}
+                        {starMode === "half" && (
+                          <div className="absolute inset-0 overflow-hidden [clip-path:inset(0_50%_0_0)]">
+                            <Star className="h-6 w-6 fill-primaryM-500 text-primaryM-500" />
+                          </div>
+                        )}
                       </div>
                     </button>
                   );
                 })}
               </div>
-              <span className="w-20 text-right text-sm text-gray-300">
-                {rating ? `${rating.toFixed(1)}/5` : "Tap a star"}
+              <span className="w-20 text-right text-sm font-medium text-gray-300">
+                {rating ? `${rating.toFixed(1)}/5` : "No rating"}
               </span>
             </div>
             {errors.rating && (

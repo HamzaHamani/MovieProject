@@ -1,0 +1,1 @@
+ALTER TABLE "logged_movies" ALTER COLUMN "rating" SET DATA TYPE real;

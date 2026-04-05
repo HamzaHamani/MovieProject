@@ -1,6 +1,5 @@
 import ButtonSignIn from "@/components/ButtonSignIn";
 import DivSignin from "@/components/divSignin";
-import Toast from "@/components/toast";
 import { getUser, handleSignin } from "@/lib/actions";
 import { Github, Mail, Film, Play, Camera } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
 
 export default async function Page({
   searchParams,
@@ -23,18 +21,6 @@ export default async function Page({
 }) {
   const user = await getUser();
   if (user) redirect("/explore");
-  async function handle(provider: "github" | "google") {
-    try {
-      toast.loading("Redirecting to Sign in...");
-      // await delay(5000);
-      await handleSignin(provider);
-      toast.dismiss();
-    } catch (e) {
-      toast.dismiss();
-      toast.error("Failed to sign in");
-    } finally {
-    }
-  }
   return (
     <div className="grid min-h-screen w-full grid-cols-2 bg-[#111111] text-white xl:grid-cols-1">
       {/* Left Side (Form + Visuals) */}

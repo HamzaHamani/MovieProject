@@ -3,9 +3,11 @@ import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import Facebook from "next-auth/providers/facebook";
 import { db } from "./db";
+import { users } from "./db/schema";
 import Google from "next-auth/providers/google";
 import Reddit from "next-auth/providers/reddit";
 import Twitter from "next-auth/providers/twitter";
+import { eq } from "drizzle-orm";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -33,6 +35,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db),
   pages: {
     signIn: "/sign-in",
+  },
+  callbacks: {
+    async session({ session, user }) {
+      const userMeta = await db
+        .select({ username: users.username, premium: users.premium })
+        .from(users)
+        .where(eq(users.id, user.id))
+        .limit(1);
+
+      const dbUser = userMeta[0];
+
+      if (session.user) {
+        session.user.id = user.id;
+        session.user.username = dbUser?.username ?? null;
+        session.user.premium = dbUser?.premium ?? false;
+      }
+
+      return session;
+    },
   },
 });
 

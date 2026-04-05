@@ -1,9 +1,18 @@
 "use server";
 
 import { auth, signIn } from "@/auth";
-import { bookmarks, bookmarksMovies, loggedMovies } from "@/db/schema";
+import {
+  bookmarks,
+  bookmarksMovies,
+  loggedMovies,
+  reviewLikes,
+  reviewReplies,
+  listLikes,
+  userFollows,
+  users,
+} from "@/db/schema";
 import { db } from "@/db";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, ne } from "drizzle-orm";
 import { signOut } from "@/auth";
 import {
   bookmarksMoviesSchema,
@@ -30,6 +39,44 @@ export const getUser = cache(async () => {
 
   return user;
 });
+
+export async function getCurrentUserDbProfile() {
+  const user = await getUser();
+
+  if (!user?.id) return null;
+
+  const rows = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      premium: users.premium,
+    })
+    .from(users)
+    .where(eq(users.id, user.id))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
+export async function getUserDbProfileByUsername(usernameInput: string) {
+  const username = normalizeUsername(usernameInput);
+
+  const rows = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      premium: users.premium,
+      name: users.name,
+      email: users.email,
+      image: users.image,
+    })
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
 export async function getSession() {
   const session = await auth();
   return session;
@@ -44,12 +91,455 @@ type provider = "github" | "google" | "twitter" | "facebook" | "reddit";
 export async function handleSignin(provider: provider) {
   await signIn(provider);
 }
+
+function normalizeUsername(input: string) {
+  return input.trim().toLowerCase();
+}
+
+const SYSTEM_LIKES_KEYWORDS = ["likes", "like", "liked", "love", "loved"];
+const SYSTEM_WATCHLIST_KEYWORDS = [
+  "watchlist",
+  "watch later",
+  "to watch",
+  "queue",
+];
+
+function normalizeListName(input: string) {
+  return input.trim().toLowerCase();
+}
+
+function matchesAnyListKeyword(value: string, keywords: string[]) {
+  const normalized = normalizeListName(value);
+  return keywords.some((keyword) => normalized.includes(keyword));
+}
+
+function isSystemListName(name: string) {
+  return (
+    matchesAnyListKeyword(name, SYSTEM_LIKES_KEYWORDS) ||
+    matchesAnyListKeyword(name, SYSTEM_WATCHLIST_KEYWORDS)
+  );
+}
+
+async function ensureDefaultSystemListsForUser(userId: string) {
+  const current = await db
+    .select()
+    .from(bookmarks)
+    .where(eq(bookmarks.userId, userId));
+
+  const hasLikes = current.some((list) =>
+    matchesAnyListKeyword(list.bookmarkName, SYSTEM_LIKES_KEYWORDS),
+  );
+  const hasWatchlist = current.some((list) =>
+    matchesAnyListKeyword(list.bookmarkName, SYSTEM_WATCHLIST_KEYWORDS),
+  );
+
+  const creates: Promise<unknown>[] = [];
+
+  if (!hasLikes) {
+    creates.push(
+      db.insert(bookmarks).values({
+        bookmarkName: "likes",
+        description: "Movies and shows you like",
+        userId,
+      }),
+    );
+  }
+
+  if (!hasWatchlist) {
+    creates.push(
+      db.insert(bookmarks).values({
+        bookmarkName: "watchlist",
+        description: "Movies and Tv shows you want to watch",
+        userId,
+      }),
+    );
+  }
+
+  if (creates.length > 0) {
+    await Promise.all(creates);
+  }
+}
+
+function isValidUsername(username: string) {
+  return /^[a-z0-9_]{3,24}$/.test(username);
+}
+
+export async function isUsernameAvailable(
+  usernameInput: string,
+  excludeUserId?: string,
+) {
+  const username = normalizeUsername(usernameInput);
+
+  if (!isValidUsername(username)) {
+    return { available: false as const, reason: "invalid" as const };
+  }
+
+  const rows = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(
+      excludeUserId
+        ? and(eq(users.username, username), ne(users.id, excludeUserId))
+        : eq(users.username, username),
+    )
+    .limit(1);
+
+  return {
+    available: rows.length === 0,
+    reason: rows.length === 0 ? null : ("taken" as const),
+  };
+}
+
+export async function completeUsernameSetup(usernameInput: string) {
+  const user = await getUser();
+
+  if (!user?.id) {
+    throw new Error("User not authenticated");
+  }
+
+  const username = normalizeUsername(usernameInput);
+  const validity = await isUsernameAvailable(username, user.id);
+
+  if (!validity.available) {
+    return {
+      ok: false as const,
+      error:
+        validity.reason === "invalid"
+          ? "Username must be 3-24 chars and use only lowercase letters, numbers, or underscores."
+          : "That username is already taken.",
+    };
+  }
+
+  await db.update(users).set({ username }).where(eq(users.id, user.id));
+
+  return { ok: true as const, username };
+}
+
+export async function followUserByUsername(targetUsernameInput: string) {
+  const user = await getUser();
+  if (!user?.id) throw new Error("User not authenticated");
+
+  const targetUsername = normalizeUsername(targetUsernameInput);
+  const target = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.username, targetUsername))
+    .limit(1);
+
+  const targetUser = target[0];
+  if (!targetUser) return { ok: false as const, reason: "not-found" as const };
+  if (targetUser.id === user.id)
+    return { ok: false as const, reason: "self" as const };
+
+  await db
+    .insert(userFollows)
+    .values({ followerId: user.id, followingId: targetUser.id })
+    .onConflictDoNothing();
+
+  return { ok: true as const };
+}
+
+export async function unfollowUserByUsername(targetUsernameInput: string) {
+  const user = await getUser();
+  if (!user?.id) throw new Error("User not authenticated");
+
+  const targetUsername = normalizeUsername(targetUsernameInput);
+  const target = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.username, targetUsername))
+    .limit(1);
+
+  const targetUser = target[0];
+  if (!targetUser) return { ok: false as const, reason: "not-found" as const };
+
+  await db
+    .delete(userFollows)
+    .where(
+      and(
+        eq(userFollows.followerId, user.id),
+        eq(userFollows.followingId, targetUser.id),
+      ),
+    );
+
+  return { ok: true as const };
+}
+
+export async function getUserSocialStats(profileUserId: string) {
+  const viewer = await getUser();
+
+  const [followers, following] = await Promise.all([
+    db
+      .select({ followerId: userFollows.followerId })
+      .from(userFollows)
+      .where(eq(userFollows.followingId, profileUserId)),
+    db
+      .select({ followingId: userFollows.followingId })
+      .from(userFollows)
+      .where(eq(userFollows.followerId, profileUserId)),
+  ]);
+
+  const viewerId = viewer?.id;
+  const followerIds = new Set(followers.map((row) => row.followerId));
+  const followingIds = new Set(following.map((row) => row.followingId));
+  const friendsCount = [...followerIds].filter((id) =>
+    followingIds.has(id),
+  ).length;
+
+  const isFollowing =
+    typeof viewerId === "string"
+      ? followers.some((row) => row.followerId === viewerId)
+      : false;
+
+  const followsViewer =
+    typeof viewerId === "string"
+      ? following.some((row) => row.followingId === viewerId)
+      : false;
+
+  return {
+    followersCount: followers.length,
+    followingCount: following.length,
+    friendsCount,
+    isFollowing,
+    followsViewer,
+    isFriend: isFollowing && followsViewer,
+  };
+}
+
+export async function getUserConnections(
+  profileUserId: string,
+  kind: "followers" | "following" | "friends",
+) {
+  const [followers, following] = await Promise.all([
+    db
+      .select({ followerId: userFollows.followerId })
+      .from(userFollows)
+      .where(eq(userFollows.followingId, profileUserId)),
+    db
+      .select({ followingId: userFollows.followingId })
+      .from(userFollows)
+      .where(eq(userFollows.followerId, profileUserId)),
+  ]);
+
+  const followerIds = followers.map((row) => row.followerId);
+  const followingIds = following.map((row) => row.followingId);
+  const followingSet = new Set(followingIds);
+
+  const targetIds =
+    kind === "followers"
+      ? followerIds
+      : kind === "following"
+        ? followingIds
+        : followerIds.filter((id) => followingSet.has(id));
+
+  if (targetIds.length === 0) return [];
+
+  const connectionUsers = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      username: users.username,
+      image: users.image,
+      email: users.email,
+    })
+    .from(users)
+    .where(inArray(users.id, targetIds));
+
+  return connectionUsers;
+}
+
+export async function toggleReviewLike(reviewId: string) {
+  const user = await getUser();
+  if (!user?.id) throw new Error("User not authenticated");
+
+  const existing = await db
+    .select({ id: reviewLikes.id })
+    .from(reviewLikes)
+    .where(
+      and(eq(reviewLikes.userId, user.id), eq(reviewLikes.reviewId, reviewId)),
+    )
+    .limit(1);
+
+  if (existing[0]) {
+    await db.delete(reviewLikes).where(eq(reviewLikes.id, existing[0].id));
+    return { liked: false as const };
+  }
+
+  await db.insert(reviewLikes).values({
+    userId: user.id,
+    reviewId,
+  });
+
+  return { liked: true as const };
+}
+
+export async function addReviewReply(reviewId: string, content: string) {
+  const user = await getUser();
+  if (!user?.id) throw new Error("User not authenticated");
+
+  const normalizedContent = content.trim();
+  if (normalizedContent.length < 1 || normalizedContent.length > 500) {
+    return {
+      ok: false as const,
+      error: "Reply must be between 1 and 500 characters.",
+    };
+  }
+
+  const inserted = await db
+    .insert(reviewReplies)
+    .values({
+      userId: user.id,
+      reviewId,
+      content: normalizedContent,
+    })
+    .returning({ id: reviewReplies.id, createdAt: reviewReplies.createdAt });
+
+  return { ok: true as const, reply: inserted[0] };
+}
+
+export async function getReviewEngagement(reviewId: string) {
+  const viewer = await getUser();
+  const [likes, replies] = await Promise.all([
+    db
+      .select({ id: reviewLikes.id, userId: reviewLikes.userId })
+      .from(reviewLikes)
+      .where(eq(reviewLikes.reviewId, reviewId)),
+    db
+      .select({
+        id: reviewReplies.id,
+        content: reviewReplies.content,
+        createdAt: reviewReplies.createdAt,
+        userId: reviewReplies.userId,
+        username: users.username,
+        image: users.image,
+      })
+      .from(reviewReplies)
+      .leftJoin(users, eq(users.id, reviewReplies.userId))
+      .where(eq(reviewReplies.reviewId, reviewId))
+      .orderBy(desc(reviewReplies.createdAt)),
+  ]);
+
+  return {
+    likesCount: likes.length,
+    viewerLiked: viewer?.id
+      ? likes.some((like) => like.userId === viewer.id)
+      : false,
+    replies,
+  };
+}
+
+export async function getBookmarkById(bookmarkId: string) {
+  const rows = await db
+    .select()
+    .from(bookmarks)
+    .where(eq(bookmarks.id, bookmarkId))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
+export async function updateBookmarkDetails(data: {
+  bookmarkId: string;
+  bookmarkName: string;
+  description: string;
+}) {
+  const user = await getUser();
+  if (!user?.id) throw new Error("User not authenticated");
+
+  const bookmark = await getBookmarkById(data.bookmarkId);
+  if (!bookmark) throw new Error("List not found");
+  if (bookmark.userId !== user.id) throw new Error("Not allowed");
+  if (isSystemListName(bookmark.bookmarkName)) {
+    throw new Error("System lists cannot be renamed or edited");
+  }
+
+  const bookmarkName = data.bookmarkName.trim();
+  const description = data.description.trim();
+
+  if (!bookmarkName) throw new Error("List name is required");
+  if (!description) throw new Error("List description is required");
+
+  await db
+    .update(bookmarks)
+    .set({ bookmarkName, description, updatedAt: new Date() })
+    .where(eq(bookmarks.id, data.bookmarkId));
+
+  return { ok: true as const };
+}
+
+export async function removeMovieFromBookmark(data: {
+  bookmarkId: string;
+  movieId: string | number;
+}) {
+  const user = await getUser();
+  if (!user?.id) throw new Error("User not authenticated");
+
+  const bookmark = await getBookmarkById(data.bookmarkId);
+  if (!bookmark) throw new Error("List not found");
+  if (bookmark.userId !== user.id) throw new Error("Not allowed");
+
+  return RemoveMovie(data);
+}
+
+export async function toggleListLike(bookmarkId: string) {
+  const user = await getUser();
+  if (!user?.id) throw new Error("User not authenticated");
+
+  const bookmark = await getBookmarkById(bookmarkId);
+  if (!bookmark) throw new Error("List not found");
+  if (isSystemListName(bookmark.bookmarkName)) {
+    throw new Error("System lists cannot be liked");
+  }
+
+  const existing = await db
+    .select({ id: listLikes.id })
+    .from(listLikes)
+    .where(
+      and(eq(listLikes.userId, user.id), eq(listLikes.bookmarkId, bookmarkId)),
+    )
+    .limit(1);
+
+  if (existing[0]) {
+    await db.delete(listLikes).where(eq(listLikes.id, existing[0].id));
+    return { liked: false as const };
+  }
+
+  await db.insert(listLikes).values({
+    userId: user.id,
+    bookmarkId,
+  });
+
+  return { liked: true as const };
+}
+
+export async function getListLikeStats(bookmarkId: string) {
+  const bookmark = await getBookmarkById(bookmarkId);
+  if (!bookmark) return { likesCount: 0, viewerLiked: false };
+  if (isSystemListName(bookmark.bookmarkName)) {
+    return { likesCount: 0, viewerLiked: false };
+  }
+
+  const viewer = await getUser();
+  const likes = await db
+    .select({ userId: listLikes.userId })
+    .from(listLikes)
+    .where(eq(listLikes.bookmarkId, bookmarkId));
+
+  return {
+    likesCount: likes.length,
+    viewerLiked: viewer?.id
+      ? likes.some((row) => row.userId === viewer.id)
+      : false,
+  };
+}
 //------------------------------------------------------------------------#uilities for fetching data from the database
 
 //   fetching only the bookmarks of the user
 
 type bookSchemaType = z.infer<typeof bookmarksSchema>;
 export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
+  await ensureDefaultSystemListsForUser(userId);
+
   const boks = await db
     .select()
     .from(bookmarks)
@@ -89,6 +579,71 @@ export async function getMovieLists(
   return bookmarkMovies;
 }
 
+export type TUserLoggedMovieEntry = {
+  id: string;
+  showId: string;
+  rating: number | null;
+  review: string;
+  watchedAt: Date;
+  createdAt: Date | null;
+  watchType: "first" | "rewatch";
+};
+
+export async function getLoggedMoviesForUser(
+  userId: string,
+): Promise<TUserLoggedMovieEntry[]> {
+  try {
+    const rows = await db
+      .select({
+        id: loggedMovies.id,
+        showId: loggedMovies.showId,
+        rating: loggedMovies.rating,
+        review: loggedMovies.review,
+        watchedAt: loggedMovies.watchedAt,
+        createdAt: loggedMovies.createdAt,
+        watchType: loggedMovies.watchType,
+      })
+      .from(loggedMovies)
+      .where(eq(loggedMovies.userId, userId))
+      .orderBy(desc(loggedMovies.createdAt));
+
+    return rows.map((row) => ({
+      id: row.id,
+      showId: row.showId,
+      rating: typeof row.rating === "number" ? row.rating : null,
+      review: row.review ?? "",
+      watchedAt: row.watchedAt,
+      createdAt: row.createdAt ?? null,
+      watchType: row.watchType === "rewatch" ? "rewatch" : "first",
+    }));
+  } catch (error) {
+    if (!isMissingWatchTypeColumn(error)) throw error;
+
+    const rows = await db
+      .select({
+        id: loggedMovies.id,
+        showId: loggedMovies.showId,
+        rating: loggedMovies.rating,
+        review: loggedMovies.review,
+        watchedAt: loggedMovies.watchedAt,
+        createdAt: loggedMovies.createdAt,
+      })
+      .from(loggedMovies)
+      .where(eq(loggedMovies.userId, userId))
+      .orderBy(desc(loggedMovies.createdAt));
+
+    return rows.map((row) => ({
+      id: row.id,
+      showId: row.showId,
+      rating: typeof row.rating === "number" ? row.rating : null,
+      review: row.review ?? "",
+      watchedAt: row.watchedAt,
+      createdAt: row.createdAt ?? null,
+      watchType: "first",
+    }));
+  }
+}
+
 //---------------------- handling adding movie
 
 export async function AddMovie(data: {
@@ -113,6 +668,85 @@ export async function AddMovie(data: {
     });
     return { already: false };
   }
+}
+
+export async function RemoveMovie(data: {
+  bookmarkId: string;
+  movieId: string | number;
+}) {
+  const existingMovie = await getMoviesBook(data.bookmarkId);
+  const match = existingMovie.find((movie) => movie.movieId == data.movieId);
+
+  if (!match) return { removed: false as const };
+
+  await db.delete(bookmarksMovies).where(eq(bookmarksMovies.id, match.id));
+
+  return { removed: true as const };
+}
+
+export async function addMovieToProfileSection(data: {
+  section: "favorites" | "likes" | "watchlist";
+  movieId: string | number;
+}) {
+  const user = await getUser();
+
+  if (!user?.id) {
+    throw new Error("User not authenticated");
+  }
+
+  const bookmarksForUser = await getBookmarks(user.id);
+
+  const sectionConfig = {
+    favorites: {
+      listName: "favorites",
+      description: "Your favorite movies and TV shows",
+      matcher: (value: string) =>
+        ["favorite", "favourite", "fav"].some((key) =>
+          value.toLowerCase().includes(key),
+        ),
+    },
+    likes: {
+      listName: "likes",
+      description: "Movies and shows you like",
+      matcher: (value: string) =>
+        ["like", "liked", "love", "loved"].some((key) =>
+          value.toLowerCase().includes(key),
+        ),
+    },
+    watchlist: {
+      listName: "watchlist",
+      description: "Movies and Tv shows you want to watch",
+      matcher: (value: string) =>
+        ["watchlist", "watch later", "to watch", "queue"].some((key) =>
+          value.toLowerCase().includes(key),
+        ),
+    },
+  }[data.section];
+
+  const existingList = bookmarksForUser.find((bookmark) =>
+    sectionConfig.matcher(bookmark.bookmarkName),
+  );
+
+  const targetListId = existingList
+    ? existingList.id
+    : (
+        await CreateBookmark({
+          bookmarkName: sectionConfig.listName,
+          userId: user.id,
+          description: sectionConfig.description,
+        })
+      ).id;
+
+  const response = await AddMovie({
+    bookmarkId: targetListId,
+    movieId: String(data.movieId),
+    review: "",
+  });
+
+  return {
+    listId: targetListId,
+    already: response?.already ?? false,
+  };
 }
 //---------------------------
 
@@ -824,7 +1458,6 @@ export async function sendLoggedMovieTv({
 
   const normalizedShowId = String(showId);
   const normalizedRating = Math.max(0, Math.min(5, rating));
-  const roundedRating = Math.round(normalizedRating);
 
   const existingLog = await db
     .select({ id: loggedMovies.id })
@@ -843,7 +1476,7 @@ export async function sendLoggedMovieTv({
       await db
         .update(loggedMovies)
         .set({
-          rating: roundedRating,
+          rating: normalizedRating,
           reviewTitle: String(normalizedRating),
           watchedAt: new Date(date),
           review,
@@ -856,7 +1489,7 @@ export async function sendLoggedMovieTv({
       await db
         .update(loggedMovies)
         .set({
-          rating: roundedRating,
+          rating: normalizedRating,
           reviewTitle: String(normalizedRating),
           watchedAt: new Date(date),
           review,
@@ -864,12 +1497,32 @@ export async function sendLoggedMovieTv({
         .where(eq(loggedMovies.id, existingLog[0].id));
     }
 
+    const userBookmarks = await getBookmarks(user.id);
+    const watchlistIds = userBookmarks
+      .filter((bookmark) =>
+        ["watchlist", "watch later", "to watch", "queue"].some((key) =>
+          bookmark.bookmarkName.toLowerCase().includes(key),
+        ),
+      )
+      .map((bookmark) => bookmark.id);
+
+    if (watchlistIds.length > 0) {
+      await db
+        .delete(bookmarksMovies)
+        .where(
+          and(
+            inArray(bookmarksMovies.bookmarkId, watchlistIds),
+            eq(bookmarksMovies.movieId, normalizedShowId),
+          ),
+        );
+    }
+
     return { already: true as const, updated: true as const };
   }
 
   try {
     await db.insert(loggedMovies).values({
-      rating: roundedRating,
+      rating: normalizedRating,
       reviewTitle: String(normalizedRating),
       watchedAt: new Date(date),
       review,
@@ -881,13 +1534,33 @@ export async function sendLoggedMovieTv({
     if (!isMissingWatchTypeColumn(error)) throw error;
 
     await db.insert(loggedMovies).values({
-      rating: roundedRating,
+      rating: normalizedRating,
       reviewTitle: String(normalizedRating),
       watchedAt: new Date(date),
       review,
       userId: user.id as string,
       showId: normalizedShowId,
     });
+  }
+
+  const userBookmarks = await getBookmarks(user.id);
+  const watchlistIds = userBookmarks
+    .filter((bookmark) =>
+      ["watchlist", "watch later", "to watch", "queue"].some((key) =>
+        bookmark.bookmarkName.toLowerCase().includes(key),
+      ),
+    )
+    .map((bookmark) => bookmark.id);
+
+  if (watchlistIds.length > 0) {
+    await db
+      .delete(bookmarksMovies)
+      .where(
+        and(
+          inArray(bookmarksMovies.bookmarkId, watchlistIds),
+          eq(bookmarksMovies.movieId, normalizedShowId),
+        ),
+      );
   }
 
   return { already: false as const, updated: false as const };

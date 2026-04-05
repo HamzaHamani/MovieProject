@@ -4,10 +4,13 @@ import { Button } from "../ui/button";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Input } from "../ui/input";
 import { CreateBookmark } from "@/lib/actions";
-import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import SmallLoadingIndicator from "../general/smallLoadingIndicator";
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from "@/components/notificationSystem";
 
 type Inputs = {
   name: string;
@@ -39,15 +42,23 @@ export default function CreateListForm({
       };
 
       await CreateBookmark(values);
-      toast.success("List created successfully");
+      showSuccessNotification("Success", "List created successfully");
       queryClient.invalidateQueries({ queryKey: ["bookmarks", userId] });
       setShowForm((value: any) => !value);
     } catch (e) {
       console.log(userId);
       console.log(e);
 
-      if (!userId) toast.error("You need to be logged in to create a list");
-      else toast.error("We econtered an error, please try again");
+      if (!userId)
+        showErrorNotification(
+          "Error",
+          "You need to be logged in to create a list",
+        );
+      else
+        showErrorNotification(
+          "Error",
+          "We encountered an error, please try again",
+        );
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,7 @@
 "use client";
 import { Share2 } from "lucide-react";
 import { Button } from "../../ui/button";
-import { toast } from "sonner";
+import { showSuccessNotification } from "@/components/notificationSystem";
 
 type Props = {
   typeSearch: "Movie" | "Tv";
@@ -15,7 +15,10 @@ export default function ShareButton({ typeSearch }: Props) {
     navigator.clipboard
       .writeText(currentUrl)
       .then(() => {
-        toast.success(`${typeSearch} Link Copied in your Clipboard`);
+        showSuccessNotification(
+          "Copied",
+          `${typeSearch} Link Copied in your Clipboard`,
+        );
       })
       .catch((err) => {
         console.error("Failed to copy URL: ", err);

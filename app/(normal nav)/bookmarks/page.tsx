@@ -12,6 +12,22 @@ import {
   getUser,
 } from "@/lib/actions";
 
+const systemLikesKeywords = ["likes", "like", "liked", "love", "loved"];
+const systemWatchlistKeywords = [
+  "watchlist",
+  "watch later",
+  "to watch",
+  "queue",
+];
+
+function isSystemListName(name: string) {
+  const normalized = name.trim().toLowerCase();
+  return (
+    systemLikesKeywords.some((key) => normalized.includes(key)) ||
+    systemWatchlistKeywords.some((key) => normalized.includes(key))
+  );
+}
+
 export const metadata: Metadata = {
   title: "Bookmarks",
 };
@@ -26,7 +42,9 @@ type TResolvedSavedItem = {
   href: string;
 };
 
-async function resolveSavedItem(movieId: string): Promise<TResolvedSavedItem | null> {
+async function resolveSavedItem(
+  movieId: string,
+): Promise<TResolvedSavedItem | null> {
   try {
     const movie = await getSpecifiedMovie(movieId);
     return {
@@ -88,12 +106,20 @@ export default async function Saved() {
     }),
   );
 
-  const totalSaved = listsWithMovies.reduce(
+  const customListsWithMovies = listsWithMovies.filter(
+    ({ list }) => !isSystemListName(list.bookmarkName),
+  );
+
+  const totalSaved = customListsWithMovies.reduce(
     (acc, item) => acc + item.movies.length,
     0,
   );
   const uniqueMovieIds = Array.from(
-    new Set(listsWithMovies.flatMap((item) => item.movies.map((movie) => movie.movieId))),
+    new Set(
+      customListsWithMovies.flatMap((item) =>
+        item.movies.map((movie) => movie.movieId),
+      ),
+    ),
   );
 
   const resolvedEntries = await Promise.all(
@@ -122,21 +148,36 @@ export default async function Saved() {
 
         <div className="mt-5 grid grid-cols-3 gap-3 lg:grid-cols-2 sm:grid-cols-1">
           <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-400">Total Lists</p>
-            <p className="mt-2 text-2xl font-semibold text-white">{lists.length}</p>
+            <p className="text-xs uppercase tracking-wide text-gray-400">
+              Total Lists
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {customListsWithMovies.length}
+            </p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-400">Saved Items</p>
-            <p className="mt-2 text-2xl font-semibold text-white">{totalSaved}</p>
+            <p className="text-xs uppercase tracking-wide text-gray-400">
+              Saved Items
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {totalSaved}
+            </p>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-            <p className="text-xs uppercase tracking-wide text-gray-400">Unique Titles</p>
-            <p className="mt-2 text-2xl font-semibold text-white">{uniqueMovieIds.length}</p>
+            <p className="text-xs uppercase tracking-wide text-gray-400">
+              Unique Titles
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-white">
+              {uniqueMovieIds.length}
+            </p>
           </div>
         </div>
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <Button asChild className="bg-primaryM-500 text-black hover:bg-primaryM-600">
+          <Button
+            asChild
+            className="bg-primaryM-500 text-black hover:bg-primaryM-600"
+          >
             <Link href="/explore">Discover More</Link>
           </Button>
           <Button
@@ -151,14 +192,14 @@ export default async function Saved() {
 
       <Separator className="bg-white/10" />
 
-      {lists.length === 0 && (
+      {customListsWithMovies.length === 0 && (
         <section className="rounded-2xl border border-dashed border-white/20 bg-white/[0.02] p-8 text-center lg:p-6 sm:p-5">
           <h2 className="text-2xl font-semibold text-white lg:text-xl">
             No lists yet
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-sm text-gray-300">
-            Start from any movie or TV detail page and use the Add List button to
-            create your first list.
+            Start from any movie or TV detail page and use the Add List button
+            to create your first list.
           </p>
           <Button
             asChild
@@ -169,17 +210,22 @@ export default async function Saved() {
         </section>
       )}
 
-      {listsWithMovies.map(({ list, movies }) => (
+      {customListsWithMovies.map(({ list, movies }) => (
         <section
           key={list.id}
           className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 md:p-4 sm:p-3"
         >
           <div className="flex items-end justify-between gap-2 sm:flex-col sm:items-start">
             <div className="min-w-0">
-              <h2 className="truncate text-2xl font-semibold text-white lg:text-xl sm:text-lg">
+              <Link
+                href={`/list/${list.id}`}
+                className="inline-block truncate text-2xl font-semibold text-white transition hover:text-primaryM-500 lg:text-xl sm:text-lg"
+              >
                 {list.bookmarkName}
-              </h2>
-              <p className="break-words text-sm text-gray-300">{list.description}</p>
+              </Link>
+              <p className="break-words text-sm text-gray-300">
+                {list.description}
+              </p>
             </div>
             <p className="text-sm text-gray-400">
               {movies.length} item{movies.length === 1 ? "" : "s"}

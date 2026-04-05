@@ -1,9 +1,25 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-type Props = {};
+import { getCurrentUserDbProfile, getUser } from "@/lib/actions";
+
 export const metadata: Metadata = {
-  title: "Explore",
+  title: "Profile",
 };
-export default function page({}: Props) {
-  return <div>page</div>;
+
+export default async function Page() {
+  const user = await getUser();
+
+  if (!user?.id) {
+    redirect("/sign-in");
+  }
+
+  const profile = await getCurrentUserDbProfile();
+  const username = profile?.username?.trim();
+
+  if (!username) {
+    redirect("/username");
+  }
+
+  redirect(`/profile/${username}`);
 }
