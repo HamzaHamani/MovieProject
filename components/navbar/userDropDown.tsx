@@ -22,7 +22,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { usersSchema } from "@/types/index";
 import { z } from "zod";
-import SignOutButton from "../SignOut";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from "@/components/notificationSystem";
 
 type userSchema = z.infer<typeof usersSchema>;
 
@@ -30,10 +35,38 @@ type Props = { user: userSchema };
 
 export function UserDropDown({ user }: Props) {
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
   const profileHref = user.username ? `/profile/${user.username}` : "/profile";
   const reviewsHref = user.username
     ? `/profile/${user.username}#reviews`
     : "/profile";
+
+  const handleSignOut = async () => {
+    try {
+      const result = await signOut({
+        redirect: false,
+        callbackUrl: "/sign-in",
+      });
+
+      showSuccessNotification(
+        "Signed Out",
+        "You have been logged out successfully",
+      );
+
+      if (result?.url) {
+        window.location.href = result.url;
+        return;
+      }
+
+      router.push("/sign-in");
+      router.refresh();
+    } catch (error) {
+      showErrorNotification(
+        "Logout Failed",
+        "Could not sign out. Please try again",
+      );
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -133,9 +166,12 @@ export function UserDropDown({ user }: Props) {
 
         <div className="px-2 pb-2">
           <div className="rounded-xl border border-red-500/15 bg-red-500/5 p-1.5">
-            <DropdownMenuItem className="rounded-lg px-3 py-2.5 text-sm text-red-300 outline-none transition hover:bg-red-500/10 hover:text-red-200 focus:bg-red-500/10">
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="rounded-lg px-3 py-2.5 text-sm text-red-300 outline-none transition hover:bg-red-500/10 hover:text-red-200 focus:bg-red-500/10 cursor-pointer"
+            >
               <LogOut className="mr-2 h-4 w-4" />
-              <SignOutButton />
+              <span>Sign out</span>
             </DropdownMenuItem>
           </div>
         </div>

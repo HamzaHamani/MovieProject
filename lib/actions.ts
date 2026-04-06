@@ -41,10 +41,12 @@ cache;
 // USED CACHE TO PERFORM APP, CHECK WEB CODY DEV VIDEO https://youtu.be/8vJ3JC9O2Eo
 
 export const getUser = cache(async () => {
-  const session = await auth();
-  const user = session?.user;
-
-  return user;
+  try {
+    const session = await auth();
+    return session?.user ?? null;
+  } catch {
+    return null;
+  }
 });
 
 export async function getCurrentUserDbProfile() {

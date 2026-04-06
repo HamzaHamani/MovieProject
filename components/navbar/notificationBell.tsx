@@ -53,7 +53,7 @@ export default function NotificationBell() {
     loadData();
 
     // Near real-time polling without websockets.
-    const interval = setInterval(loadData, 10000);
+    const interval = setInterval(loadData, 30000);
 
     const refreshOnFocus = () => {
       void loadData();

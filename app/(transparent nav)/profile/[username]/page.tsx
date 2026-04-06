@@ -46,6 +46,8 @@ export const metadata: Metadata = {
   title: "Profile",
 };
 
+export const dynamic = "force-dynamic";
+
 type BookmarkRow = Awaited<ReturnType<typeof getBookmarks>>[number];
 type BookmarkMovieRow = Awaited<ReturnType<typeof getMoviesBook>>[number];
 type LoggedMovieRow = Awaited<
@@ -634,19 +636,19 @@ export default async function Page({
   return (
     <div className="relative min-h-screen text-textMain">
       {profileBackdropUrl ? (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-screen overflow-hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[700px] overflow-hidden xmd:h-[400px] sm:h-[370px]">
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-[0.28]"
+            className="absolute inset-0 bg-cover bg-center opacity-[0.8]"
             style={{
               backgroundImage: `url(${profileBackdropUrl})`,
             }}
           />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(13,12,15,0.02),rgba(13,12,15,0.45)_45%,#0d0c0f_88%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(13,12,15,0.02),rgba(13,12,15,0.35)_45%,#0d0c0f_88%)]" />
           <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#0d0c0f] via-[#0d0c0f]/70 to-transparent" />
         </div>
       ) : null}
 
-      <div className="container relative z-10 pb-12 pt-40 lg:pt-20 sm:pt-16">
+      <div className="container relative z-10 pb-12 pt-96 lg:pt-64 sm:pt-48">
         <div className="space-y-8">
           <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[rgba(13,12,15,0.88)] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:p-5 sm:p-4">
             <div className="grid grid-cols-[minmax(0,1fr)_560px] items-start gap-6 xl:grid-cols-[minmax(0,1fr)_500px] xmd:grid-cols-1">
