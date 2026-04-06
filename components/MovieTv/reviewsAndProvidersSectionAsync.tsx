@@ -19,7 +19,7 @@ export default async function ReviewsAndProvidersSectionAsync({
   return (
     <section className="grid grid-cols-12 gap-6 lg:grid-cols-1">
       <div className="col-span-8 lg:col-span-1">
-        <ReviewsSection items={reviews} />
+        <ReviewsSection items={reviews} mediaId={id} mediaType={typeM} />
       </div>
       <div className="col-span-4 lg:col-span-1">
         <WatchProvidersSection providers={providers} />
