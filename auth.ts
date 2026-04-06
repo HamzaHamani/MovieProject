@@ -9,50 +9,61 @@ import Google from "next-auth/providers/google";
 import Reddit from "next-auth/providers/reddit";
 import Twitter from "next-auth/providers/twitter";
 import { eq } from "drizzle-orm";
+import { getOptionalEnvVariable } from "@/lib/env";
 
 const providers = [];
 
-if (process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET) {
+const githubId = getOptionalEnvVariable("AUTH_GITHUB_ID");
+const githubSecret = getOptionalEnvVariable("AUTH_GITHUB_SECRET");
+if (githubId && githubSecret) {
   providers.push(
     GitHub({
-      clientId: process.env.AUTH_GITHUB_ID,
-      clientSecret: process.env.AUTH_GITHUB_SECRET,
+      clientId: githubId,
+      clientSecret: githubSecret,
     }),
   );
 }
 
-if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
+const googleId = getOptionalEnvVariable("AUTH_GOOGLE_ID");
+const googleSecret = getOptionalEnvVariable("AUTH_GOOGLE_SECRET");
+if (googleId && googleSecret) {
   providers.push(
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: googleId,
+      clientSecret: googleSecret,
     }),
   );
 }
 
-if (process.env.AUTH_TWITTER_ID && process.env.AUTH_TWITTER_SECRET) {
+const twitterId = getOptionalEnvVariable("AUTH_TWITTER_ID");
+const twitterSecret = getOptionalEnvVariable("AUTH_TWITTER_SECRET");
+if (twitterId && twitterSecret) {
   providers.push(
     Twitter({
-      clientId: process.env.AUTH_TWITTER_ID,
-      clientSecret: process.env.AUTH_TWITTER_SECRET,
+      clientId: twitterId,
+      clientSecret: twitterSecret,
     }),
   );
 }
 
-if (process.env.AUTH_FACEBOOK_ID && process.env.AUTH_FACEBOOK_SECRET) {
+const facebookId = getOptionalEnvVariable("AUTH_FACEBOOK_ID");
+const facebookSecret = getOptionalEnvVariable("AUTH_FACEBOOK_SECRET");
+if (facebookId && facebookSecret) {
   providers.push(
     Facebook({
-      clientId: process.env.AUTH_FACEBOOK_ID,
-      clientSecret: process.env.AUTH_FACEBOOK_SECRET,
+      clientId: facebookId,
+      clientSecret: facebookSecret,
     }),
   );
 }
 
-if (process.env.AUTH_REDDIT_ID && process.env.AUTH_REDDIT_SECRET) {
+const redditId = getOptionalEnvVariable("AUTH_REDDIT_ID");
+const redditSecret = getOptionalEnvVariable("AUTH_REDDIT_SECRET");
+if (redditId && redditSecret) {
   providers.push(
     Reddit({
-      clientId: process.env.AUTH_REDDIT_ID,
-      clientSecret: process.env.AUTH_REDDIT_SECRET,
+      clientId: redditId,
+      clientSecret: redditSecret,
     }),
   );
 }
@@ -74,8 +85,8 @@ if (providers.length === 0) {
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers,
   secret:
-    process.env.AUTH_SECRET ??
-    process.env.NEXTAUTH_SECRET ??
+    getOptionalEnvVariable("AUTH_SECRET") ??
+    getOptionalEnvVariable("NEXTAUTH_SECRET") ??
     "replace-this-with-auth-secret-in-env",
   trustHost: true,
   adapter: DrizzleAdapter(db),
