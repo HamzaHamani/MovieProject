@@ -258,10 +258,9 @@ export default async function Saved() {
 
   const editableMap = new Map<string, boolean>(
     await Promise.all(
-      allCustomListIds.map(async (listId) => [
-        listId,
-        await canUserEditBookmark(listId),
-      ]),
+      allCustomListIds.map(async (listId) =>
+        [listId, await canUserEditBookmark(listId)] as const,
+      ),
     ),
   );
 
