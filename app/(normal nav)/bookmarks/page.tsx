@@ -153,9 +153,17 @@ export default async function Saved() {
     getLikedBookmarksForCurrentUser(),
   ]);
 
+  const normalizedCollaborativeLists = collaborativeLists.map((list) => ({
+    ...list,
+    description: list.description ?? "",
+    image: list.image ?? null,
+    createdAt: list.createdAt ?? new Date(0),
+    updatedAt: list.updatedAt ?? list.createdAt ?? new Date(0),
+  }));
+
   const lists = [...ownedLists];
   const existingIds = new Set(ownedLists.map((list) => list.id));
-  collaborativeLists.forEach((list) => {
+  normalizedCollaborativeLists.forEach((list) => {
     if (!existingIds.has(list.id)) {
       lists.push(list);
     }
@@ -163,7 +171,7 @@ export default async function Saved() {
 
   const listRole = new Map<string, "owner" | "collaborator">();
   ownedLists.forEach((list) => listRole.set(list.id, "owner"));
-  collaborativeLists.forEach((list) => {
+  normalizedCollaborativeLists.forEach((list) => {
     if (!listRole.has(list.id)) {
       listRole.set(list.id, "collaborator");
     }
