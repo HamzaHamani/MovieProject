@@ -156,7 +156,7 @@ export default async function Saved() {
   const normalizedCollaborativeLists = collaborativeLists.map((list) => ({
     ...list,
     description: list.description ?? "",
-    image: list.image ?? null,
+    image: list.image ?? undefined,
     createdAt: list.createdAt ?? new Date(0),
     updatedAt: list.updatedAt ?? list.createdAt ?? new Date(0),
   }));
