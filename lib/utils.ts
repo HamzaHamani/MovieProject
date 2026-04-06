@@ -53,5 +53,5 @@ export function decodeStoredMediaId(storedId: string) {
     return { id: value.slice("tv:".length), mediaType: "tv" as const };
   }
 
-  return { id: value, mediaType: null as const };
+  return { id: value, mediaType: null };
 }

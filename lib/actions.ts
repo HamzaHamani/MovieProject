@@ -2291,7 +2291,7 @@ export async function getUserStatistics(username: string) {
 
   const genreCounts = new Map<string, number>();
   enrichedEntries.forEach((item) => {
-    item?.genres.forEach((genre) => {
+    item?.genres.forEach((genre: string) => {
       genreCounts.set(genre, (genreCounts.get(genre) ?? 0) + 1);
     });
   });
