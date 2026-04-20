@@ -18,7 +18,8 @@ export default function ReviewsSection({ items, mediaId, mediaType }: Props) {
       (review) =>
         review.source === "you" ||
         review.source === "friend" ||
-        review.source === "following",
+        review.source === "following" ||
+        review.source === "community",
     );
 
     const critic = items.filter(
@@ -93,8 +94,7 @@ export default function ReviewsSection({ items, mediaId, mediaType }: Props) {
         </div>
       ) : category === "social" && !hasSocial ? (
         <div className="rounded-xl border border-white/10 bg-[#101018] p-4 text-sm text-gray-300">
-          No social reviews yet. Follow friends and write your own review to see
-          this section fill up.
+          No community reviews yet. Be the first to write one.
         </div>
       ) : category === "critic" && !hasCritic ? (
         <div className="rounded-xl border border-white/10 bg-[#101018] p-4 text-sm text-gray-300">
@@ -128,6 +128,11 @@ export default function ReviewsSection({ items, mediaId, mediaType }: Props) {
                     {category === "social" && review.source === "following" && (
                       <span className="shrink-0 rounded-full border border-sky-400/50 bg-sky-500/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-sky-200">
                         Following
+                      </span>
+                    )}
+                    {category === "social" && review.source === "community" && (
+                      <span className="shrink-0 rounded-full border border-violet-400/50 bg-violet-500/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-violet-200">
+                        Member
                       </span>
                     )}
                   </div>

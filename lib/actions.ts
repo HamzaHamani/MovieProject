@@ -54,60 +54,136 @@ export async function getCurrentUserDbProfile() {
 
   if (!user?.id) return null;
 
-  const rows = await db
-    .select({
-      id: users.id,
-      username: users.username,
-      name: users.name,
-      email: users.email,
-      image: users.image,
-      bio: users.bio,
-      backdropPath: users.backdropPath,
-      premium: users.premium,
-    })
-    .from(users)
-    .where(eq(users.id, user.id))
-    .limit(1);
+  try {
+    const rows = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+        bio: users.bio,
+        backdropPath: users.backdropPath,
+        premium: users.premium,
+      })
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1);
 
-  return rows[0] ?? null;
+    return rows[0] ?? null;
+  } catch (error) {
+    if (!isMissingUserProfileColumns(error)) throw error;
+
+    const rows = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+      })
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1);
+
+    const profile = rows[0];
+    if (!profile) return null;
+
+    return {
+      ...profile,
+      bio: null,
+      backdropPath: null,
+      premium: false,
+    };
+  }
 }
 
 export async function getUserDbProfileByUsername(usernameInput: string) {
   const username = normalizeUsername(usernameInput);
 
-  const rows = await db
-    .select({
-      id: users.id,
-      username: users.username,
-      premium: users.premium,
-      name: users.name,
-      email: users.email,
-      image: users.image,
-      bio: users.bio,
-      backdropPath: users.backdropPath,
-    })
-    .from(users)
-    .where(eq(users.username, username))
-    .limit(1);
+  try {
+    const rows = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        premium: users.premium,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+        bio: users.bio,
+        backdropPath: users.backdropPath,
+      })
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
 
-  return rows[0] ?? null;
+    return rows[0] ?? null;
+  } catch (error) {
+    if (!isMissingUserProfileColumns(error)) throw error;
+
+    const rows = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+      })
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
+
+    const profile = rows[0];
+    if (!profile) return null;
+
+    return {
+      ...profile,
+      premium: false,
+      bio: null,
+      backdropPath: null,
+    };
+  }
 }
 
 export async function getUserDbProfileById(userId: string) {
-  const rows = await db
-    .select({
-      id: users.id,
-      username: users.username,
-      name: users.name,
-      image: users.image,
-      bio: users.bio,
-      backdropPath: users.backdropPath,
-    })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
+  try {
+    const rows = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        name: users.name,
+        image: users.image,
+        bio: users.bio,
+        backdropPath: users.backdropPath,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
 
-  return rows[0] ?? null;
+    return rows[0] ?? null;
+  } catch (error) {
+    if (!isMissingUserProfileColumns(error)) throw error;
+
+    const rows = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        name: users.name,
+        image: users.image,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    const profile = rows[0];
+    if (!profile) return null;
+
+    return {
+      ...profile,
+      bio: null,
+      backdropPath: null,
+    };
+  }
 }
 
 export async function getSession() {
@@ -1098,7 +1174,7 @@ export type TReviewItem = {
   authorUserId?: string | null;
   content: string;
   created_at: string;
-  source?: "you" | "friend" | "following" | "tmdb";
+  source?: "you" | "friend" | "following" | "community" | "tmdb";
   author_details?: {
     avatar_path?: string | null;
     rating?: number | null;
@@ -1252,127 +1328,119 @@ export async function getReviewsByType(
 
 async function getSocialReviewsByType(id: string): Promise<TReviewItem[]> {
   const viewer = await getUser();
+  const rawRows = await db
+    .select({
+      reviewId: loggedMovies.id,
+      userId: loggedMovies.userId,
+      review: loggedMovies.review,
+      rating: loggedMovies.rating,
+      watchedAt: loggedMovies.watchedAt,
+      createdAt: loggedMovies.createdAt,
+      username: users.username,
+      name: users.name,
+      image: users.image,
+    })
+    .from(loggedMovies)
+    .leftJoin(users, eq(users.id, loggedMovies.userId))
+    .where(eq(loggedMovies.showId, id))
+    .orderBy(desc(loggedMovies.createdAt));
 
-  let localPrioritized: TReviewItem[] = [];
+  const normalizedRows = rawRows
+    .map((row) => ({
+      ...row,
+      review: (row.review ?? "").trim(),
+      createdAtDate: row.createdAt ?? row.watchedAt,
+    }))
+    .filter((row) => row.review.length > 0 || row.rating !== null);
 
-  if (viewer?.id) {
+  // Keep one review per person (their most recent one for this title).
+  const byUser = new Map<string, (typeof normalizedRows)[number]>();
+  normalizedRows.forEach((row) => {
+    if (!byUser.has(row.userId)) {
+      byUser.set(row.userId, row);
+    }
+  });
+
+  if (byUser.size === 0) return [];
+
+  const viewerId = viewer?.id ?? null;
+  let friendSet = new Set<string>();
+  let followingSet = new Set<string>();
+
+  if (viewerId) {
     const [followingRows, followerRows] = await Promise.all([
       db
         .select({ followingId: userFollows.followingId })
         .from(userFollows)
-        .where(eq(userFollows.followerId, viewer.id)),
+        .where(eq(userFollows.followerId, viewerId)),
       db
         .select({ followerId: userFollows.followerId })
         .from(userFollows)
-        .where(eq(userFollows.followingId, viewer.id)),
+        .where(eq(userFollows.followingId, viewerId)),
     ]);
 
     const followingIds = followingRows.map((row) => row.followingId);
     const followerSet = new Set(followerRows.map((row) => row.followerId));
     const friendIds = followingIds.filter((userId) => followerSet.has(userId));
-    const friendSet = new Set(friendIds);
-    const followingOnlyIds = followingIds.filter(
-      (userId) => !friendSet.has(userId),
-    );
 
-    const targetIds = Array.from(
-      new Set([viewer.id, ...friendIds, ...followingOnlyIds]),
-    );
-
-    if (targetIds.length > 0) {
-      const rawRows = await db
-        .select({
-          reviewId: loggedMovies.id,
-          userId: loggedMovies.userId,
-          review: loggedMovies.review,
-          rating: loggedMovies.rating,
-          watchedAt: loggedMovies.watchedAt,
-          createdAt: loggedMovies.createdAt,
-          username: users.username,
-          name: users.name,
-          image: users.image,
-        })
-        .from(loggedMovies)
-        .leftJoin(users, eq(users.id, loggedMovies.userId))
-        .where(
-          and(
-            eq(loggedMovies.showId, id),
-            inArray(loggedMovies.userId, targetIds),
-          ),
-        )
-        .orderBy(desc(loggedMovies.createdAt));
-
-      const normalizedRows = rawRows
-        .map((row) => ({
-          ...row,
-          review: (row.review ?? "").trim(),
-          createdAtDate: row.createdAt ?? row.watchedAt,
-        }))
-        .filter((row) => row.review.length > 0 || row.rating !== null);
-
-      // Keep one review per person (their most recent one for this title).
-      const byUser = new Map<string, (typeof normalizedRows)[number]>();
-      normalizedRows.forEach((row) => {
-        if (!byUser.has(row.userId)) {
-          byUser.set(row.userId, row);
-        }
-      });
-
-      const viewerReviews: TReviewItem[] = [];
-      const friendReviews: TReviewItem[] = [];
-      const followingReviews: TReviewItem[] = [];
-
-      byUser.forEach((row) => {
-        const ratingOutOfTen =
-          typeof row.rating === "number"
-            ? Number((row.rating * 2).toFixed(1))
-            : null;
-
-        const base: TReviewItem = {
-          id: `local-${row.reviewId}`,
-          author: row.name || row.username || "User",
-          authorUsername: row.username ?? null,
-          authorUserId: row.userId,
-          content: row.review,
-          created_at: row.createdAtDate.toISOString(),
-          author_details: {
-            avatar_path: row.image,
-            rating: ratingOutOfTen,
-          },
-        };
-
-        if (row.userId === viewer.id) {
-          viewerReviews.push({ ...base, source: "you" });
-          return;
-        }
-
-        if (friendSet.has(row.userId)) {
-          friendReviews.push({ ...base, source: "friend" });
-          return;
-        }
-
-        if (followingOnlyIds.includes(row.userId)) {
-          followingReviews.push({ ...base, source: "following" });
-        }
-      });
-
-      const sortNewestFirst = (left: TReviewItem, right: TReviewItem) =>
-        new Date(right.created_at).getTime() -
-        new Date(left.created_at).getTime();
-
-      viewerReviews.sort(sortNewestFirst);
-      friendReviews.sort(sortNewestFirst);
-      followingReviews.sort(sortNewestFirst);
-
-      localPrioritized = [
-        ...viewerReviews,
-        ...friendReviews,
-        ...followingReviews,
-      ];
-    }
+    friendSet = new Set(friendIds);
+    followingSet = new Set(followingIds.filter((userId) => !friendSet.has(userId)));
   }
 
-  return localPrioritized;
+  const viewerReviews: TReviewItem[] = [];
+  const friendReviews: TReviewItem[] = [];
+  const followingReviews: TReviewItem[] = [];
+  const communityReviews: TReviewItem[] = [];
+
+  byUser.forEach((row) => {
+    const ratingOutOfTen =
+      typeof row.rating === "number" ? Number((row.rating * 2).toFixed(1)) : null;
+
+    const base: TReviewItem = {
+      id: `local-${row.reviewId}`,
+      author: row.name || row.username || "User",
+      authorUsername: row.username ?? null,
+      authorUserId: row.userId,
+      content: row.review,
+      created_at: row.createdAtDate.toISOString(),
+      author_details: {
+        avatar_path: row.image,
+        rating: ratingOutOfTen,
+      },
+    };
+
+    if (viewerId && row.userId === viewerId) {
+      viewerReviews.push({ ...base, source: "you" });
+      return;
+    }
+
+    if (viewerId && friendSet.has(row.userId)) {
+      friendReviews.push({ ...base, source: "friend" });
+      return;
+    }
+
+    if (viewerId && followingSet.has(row.userId)) {
+      followingReviews.push({ ...base, source: "following" });
+      return;
+    }
+
+    communityReviews.push({ ...base, source: "community" });
+  });
+
+  const sortNewestFirst = (left: TReviewItem, right: TReviewItem) =>
+    new Date(right.created_at).getTime() - new Date(left.created_at).getTime();
+
+  viewerReviews.sort(sortNewestFirst);
+  friendReviews.sort(sortNewestFirst);
+  followingReviews.sort(sortNewestFirst);
+  communityReviews.sort(sortNewestFirst);
+
+  return [
+    ...viewerReviews,
+    ...friendReviews,
+    ...followingReviews,
+    ...communityReviews,
+  ];
 }
 
 export type TWatchedByItem = {
@@ -1895,6 +1963,19 @@ function isMissingWatchTypeColumn(error: unknown): boolean {
 
   const message = dbError?.message ?? "";
   return message.includes("watchType") || message.includes("watchtype");
+}
+
+function isMissingUserProfileColumns(error: unknown): boolean {
+  const dbError = error as { code?: string; message?: string };
+  if (dbError?.code !== "42703") return false;
+
+  const message = (dbError?.message ?? "").toLowerCase();
+  return (
+    message.includes("bio") ||
+    message.includes("premium") ||
+    message.includes("backdrop_path") ||
+    message.includes("backdroppath")
+  );
 }
 
 export async function getLoggedMovieTv(

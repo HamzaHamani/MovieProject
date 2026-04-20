@@ -95,16 +95,49 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async session({ session, user }) {
-      const userMeta = await db
-        .select({
-          username: users.username,
-          premium: users.premium,
-          image: users.image,
-          bio: users.bio,
-        })
-        .from(users)
-        .where(eq(users.id, user.id))
-        .limit(1);
+      let userMeta: Array<{
+        username: string | null;
+        premium: boolean | null;
+        image: string | null;
+        bio: string | null;
+      }>;
+
+      try {
+        userMeta = await db
+          .select({
+            username: users.username,
+            premium: users.premium,
+            image: users.image,
+            bio: users.bio,
+          })
+          .from(users)
+          .where(eq(users.id, user.id))
+          .limit(1);
+      } catch (error) {
+        const dbError = error as { code?: string; message?: string };
+        const isMissingColumn =
+          dbError?.code === "42703" &&
+          ["premium", "bio"].some((column) =>
+            (dbError?.message ?? "").toLowerCase().includes(column),
+          );
+
+        if (!isMissingColumn) throw error;
+
+        const fallbackMeta = await db
+          .select({
+            username: users.username,
+            image: users.image,
+          })
+          .from(users)
+          .where(eq(users.id, user.id))
+          .limit(1);
+
+        userMeta = fallbackMeta.map((item) => ({
+          ...item,
+          premium: false,
+          bio: null,
+        }));
+      }
 
       const dbUser = userMeta[0];
 
