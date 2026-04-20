@@ -1384,7 +1384,9 @@ async function getSocialReviewsByType(id: string): Promise<TReviewItem[]> {
     const friendIds = followingIds.filter((userId) => followerSet.has(userId));
 
     friendSet = new Set(friendIds);
-    followingSet = new Set(followingIds.filter((userId) => !friendSet.has(userId)));
+    followingSet = new Set(
+      followingIds.filter((userId) => !friendSet.has(userId)),
+    );
   }
 
   const viewerReviews: TReviewItem[] = [];
@@ -1394,7 +1396,9 @@ async function getSocialReviewsByType(id: string): Promise<TReviewItem[]> {
 
   byUser.forEach((row) => {
     const ratingOutOfTen =
-      typeof row.rating === "number" ? Number((row.rating * 2).toFixed(1)) : null;
+      typeof row.rating === "number"
+        ? Number((row.rating * 2).toFixed(1))
+        : null;
 
     const base: TReviewItem = {
       id: `local-${row.reviewId}`,
