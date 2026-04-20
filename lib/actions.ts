@@ -524,44 +524,57 @@ export async function unfollowUserByUsername(targetUsernameInput: string) {
 }
 
 export async function getUserSocialStats(profileUserId: string) {
-  const viewer = await getUser();
+  try {
+    const viewer = await getUser();
 
-  const [followers, following] = await Promise.all([
-    db
-      .select({ followerId: userFollows.followerId })
-      .from(userFollows)
-      .where(eq(userFollows.followingId, profileUserId)),
-    db
-      .select({ followingId: userFollows.followingId })
-      .from(userFollows)
-      .where(eq(userFollows.followerId, profileUserId)),
-  ]);
+    const [followers, following] = await Promise.all([
+      db
+        .select({ followerId: userFollows.followerId })
+        .from(userFollows)
+        .where(eq(userFollows.followingId, profileUserId)),
+      db
+        .select({ followingId: userFollows.followingId })
+        .from(userFollows)
+        .where(eq(userFollows.followerId, profileUserId)),
+    ]);
 
-  const viewerId = viewer?.id;
-  const followerIds = new Set(followers.map((row) => row.followerId));
-  const followingIds = new Set(following.map((row) => row.followingId));
-  const friendsCount = [...followerIds].filter((id) =>
-    followingIds.has(id),
-  ).length;
+    const viewerId = viewer?.id;
+    const followerIds = new Set(followers.map((row) => row.followerId));
+    const followingIds = new Set(following.map((row) => row.followingId));
+    const friendsCount = [...followerIds].filter((id) =>
+      followingIds.has(id),
+    ).length;
 
-  const isFollowing =
-    typeof viewerId === "string"
-      ? followers.some((row) => row.followerId === viewerId)
-      : false;
+    const isFollowing =
+      typeof viewerId === "string"
+        ? followers.some((row) => row.followerId === viewerId)
+        : false;
 
-  const followsViewer =
-    typeof viewerId === "string"
-      ? following.some((row) => row.followingId === viewerId)
-      : false;
+    const followsViewer =
+      typeof viewerId === "string"
+        ? following.some((row) => row.followingId === viewerId)
+        : false;
 
-  return {
-    followersCount: followers.length,
-    followingCount: following.length,
-    friendsCount,
-    isFollowing,
-    followsViewer,
-    isFriend: isFollowing && followsViewer,
-  };
+    return {
+      followersCount: followers.length,
+      followingCount: following.length,
+      friendsCount,
+      isFollowing,
+      followsViewer,
+      isFriend: isFollowing && followsViewer,
+    };
+  } catch (error) {
+    if (!isSchemaDriftError(error)) throw error;
+
+    return {
+      followersCount: 0,
+      followingCount: 0,
+      friendsCount: 0,
+      isFollowing: false,
+      followsViewer: false,
+      isFriend: false,
+    };
+  }
 }
 
 export async function getUserConnections(
@@ -690,34 +703,43 @@ export async function addReviewReply(reviewId: string, content: string) {
 }
 
 export async function getReviewEngagement(reviewId: string) {
-  const viewer = await getUser();
-  const [likes, replies] = await Promise.all([
-    db
-      .select({ id: reviewLikes.id, userId: reviewLikes.userId })
-      .from(reviewLikes)
-      .where(eq(reviewLikes.reviewId, reviewId)),
-    db
-      .select({
-        id: reviewReplies.id,
-        content: reviewReplies.content,
-        createdAt: reviewReplies.createdAt,
-        userId: reviewReplies.userId,
-        username: users.username,
-        image: users.image,
-      })
-      .from(reviewReplies)
-      .leftJoin(users, eq(users.id, reviewReplies.userId))
-      .where(eq(reviewReplies.reviewId, reviewId))
-      .orderBy(desc(reviewReplies.createdAt)),
-  ]);
+  try {
+    const viewer = await getUser();
+    const [likes, replies] = await Promise.all([
+      db
+        .select({ id: reviewLikes.id, userId: reviewLikes.userId })
+        .from(reviewLikes)
+        .where(eq(reviewLikes.reviewId, reviewId)),
+      db
+        .select({
+          id: reviewReplies.id,
+          content: reviewReplies.content,
+          createdAt: reviewReplies.createdAt,
+          userId: reviewReplies.userId,
+          username: users.username,
+          image: users.image,
+        })
+        .from(reviewReplies)
+        .leftJoin(users, eq(users.id, reviewReplies.userId))
+        .where(eq(reviewReplies.reviewId, reviewId))
+        .orderBy(desc(reviewReplies.createdAt)),
+    ]);
 
-  return {
-    likesCount: likes.length,
-    viewerLiked: viewer?.id
-      ? likes.some((like) => like.userId === viewer.id)
-      : false,
-    replies,
-  };
+    return {
+      likesCount: likes.length,
+      viewerLiked: viewer?.id
+        ? likes.some((like) => like.userId === viewer.id)
+        : false,
+      replies,
+    };
+  } catch (error) {
+    if (!isSchemaDriftError(error)) throw error;
+    return {
+      likesCount: 0,
+      viewerLiked: false,
+      replies: [],
+    };
+  }
 }
 
 export async function getBookmarkById(bookmarkId: string) {
@@ -832,8 +854,17 @@ export async function getListLikeStats(bookmarkId: string) {
 
 type bookSchemaType = z.infer<typeof bookmarksSchema>;
 export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
-  await ensureDefaultSystemListsForUser(userId);
-  await cleanupSystemListCollaborations();
+  try {
+    await ensureDefaultSystemListsForUser(userId);
+  } catch (error) {
+    if (!isSchemaDriftError(error)) throw error;
+  }
+
+  try {
+    await cleanupSystemListCollaborations();
+  } catch (error) {
+    if (!isSchemaDriftError(error)) throw error;
+  }
 
   const boks = await db
     .select()
@@ -1967,6 +1998,14 @@ function isMissingWatchTypeColumn(error: unknown): boolean {
 
   const message = dbError?.message ?? "";
   return message.includes("watchType") || message.includes("watchtype");
+}
+
+function isSchemaDriftError(error: unknown): boolean {
+  const dbError = error as { code?: string; message?: string };
+  if (!dbError?.code) return false;
+
+  // 42703: undefined_column, 42P01: undefined_table
+  return dbError.code === "42703" || dbError.code === "42P01";
 }
 
 function isMissingUserProfileColumns(error: unknown): boolean {

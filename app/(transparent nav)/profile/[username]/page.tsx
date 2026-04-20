@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { format } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import {
@@ -492,10 +491,17 @@ export default async function Page({
 
   const [ownedBookmarks, collaborativeBookmarks, loggedMovies, socialStats] =
     await Promise.all([
-      getBookmarks(profileUser.id),
+      getBookmarks(profileUser.id).catch(() => []),
       isOwner ? getCollaborativeBookmarksForCurrentUser() : Promise.resolve([]),
-      getLoggedMoviesForUser(profileUser.id),
-      getUserSocialStats(profileUser.id),
+      getLoggedMoviesForUser(profileUser.id).catch(() => []),
+      getUserSocialStats(profileUser.id).catch(() => ({
+        followersCount: 0,
+        followingCount: 0,
+        friendsCount: 0,
+        isFollowing: false,
+        followsViewer: false,
+        isFriend: false,
+      })),
     ]);
 
   const normalizedCollaborativeBookmarks: BookmarkRow[] =
@@ -530,7 +536,7 @@ export default async function Page({
   const bookmarksWithMovies = await Promise.all(
     orderedBookmarks.map(async (list) => ({
       list,
-      movies: await getMoviesBook(list.id),
+      movies: await getMoviesBook(list.id).catch(() => []),
     })),
   );
 
@@ -609,7 +615,11 @@ export default async function Page({
   const reviewEngagement = await Promise.all(
     recentReviews.map(async (review) => ({
       reviewId: review.id,
-      engagement: await getReviewEngagement(review.id),
+      engagement: await getReviewEngagement(review.id).catch(() => ({
+        likesCount: 0,
+        viewerLiked: false,
+        replies: [],
+      })),
     })),
   );
 
