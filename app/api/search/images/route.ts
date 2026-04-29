@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Use secure TMDB fetch
-    const data = await tmdbFetch<{ backdrops: any[] }>(\n      `/${type}/${id}/images`,
+    const data = await tmdbFetch<{ backdrops: any[] }>(
+      `/${type}/${id}/images`,
       {},
       `API: getImages(${type}, ${id})`
     );
