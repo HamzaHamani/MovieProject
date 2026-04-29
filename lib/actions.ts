@@ -1702,6 +1702,11 @@ export async function getWatchProvidersByType(
     rent: normalizeProviders("rent"),
     buy: normalizeProviders("buy"),
   };
+  } catch (error) {
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch watch providers");
+  }
 }
 
 export async function getImagesByType(
@@ -1899,6 +1904,11 @@ export async function getPersonCombinedCredits(
     : [];
 
   return { cast, crew };
+  } catch (error) {
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch person combined credits");
+  }
 }
 
 export async function getPersonImages(id: string): Promise<TPersonImageItem[]> {
@@ -1908,21 +1918,26 @@ export async function getPersonImages(id: string): Promise<TPersonImageItem[]> {
       {},
       `getPersonImages(${id})`
     );
+
     const profiles: Array<Record<string, unknown>> = Array.isArray(data?.profiles)
       ? data.profiles
       : [];
 
     return profiles
       .filter((item: Record<string, unknown>) => item?.file_path)
-    .map((item: Record<string, unknown>) => ({
-      file_path: String(item.file_path),
-      width: Number(item.width ?? 0),
-      height: Number(item.height ?? 0),
-      vote_average: Number(item.vote_average ?? 0),
-    }))
-    .slice(0, 12);
+      .map((item: Record<string, unknown>) => ({
+        file_path: String(item.file_path),
+        width: Number(item.width ?? 0),
+        height: Number(item.height ?? 0),
+        vote_average: Number(item.vote_average ?? 0),
+      }))
+      .slice(0, 12);
+  } catch (error) {
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch person images");
+  }
 }
-
 export type ExploreMovieListItem = {
   id: number;
   poster_path: string | null;

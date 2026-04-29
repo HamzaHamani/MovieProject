@@ -14,7 +14,7 @@ const LIST_ENDPOINTS: EndpointMap = {
   "on-the-air": "tv/airing_today",
 };
 
-async function tmdbList(endpoint: string, page = 1) {
+async function tmdbList<T = any>(endpoint: string, page = 1): Promise<T> {
   // Parse endpoint for any existing query params
   const hasQuery = endpoint.includes("?");
   const params: Record<string, any> = { language: "en-US", page };
@@ -28,7 +28,7 @@ async function tmdbList(endpoint: string, page = 1) {
     endpoint = path;
   }
 
-  return tmdbFetch(`/${endpoint}`, params, `API: TMDB List (${endpoint})`);
+  return tmdbFetch<T>(`/${endpoint}`, params, `API: TMDB List (${endpoint})`);
 }
 
 export async function GET(request: NextRequest) {
