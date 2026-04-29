@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const data = await tmdbFetch<{ backdrops: any[] }>(
       `/${type}/${id}/images`,
       {},
-      `API: getImages(${type}, ${id})`
+      `API: getImages(${type}, ${id})`,
     );
 
     const backdrops = Array.isArray(data?.backdrops) ? data.backdrops : [];
