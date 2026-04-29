@@ -34,6 +34,7 @@ import {
   encodeStoredMediaId,
   decodeStoredMediaId,
 } from "@/lib/utils";
+import { tmdbFetch, TMDBApiError } from "@/lib/tmdb-api";
 
 //------------------------------------------------------------------------#uilities for handlingath
 cache;
@@ -1131,22 +1132,28 @@ export async function CreateBookmark(data: {
 
 //---- utilites for specified movie
 export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
-
-  return data;
+  try {
+    return await tmdbFetch<TspecifiedMovie>(
+      `/movie/${id}`,
+      {},
+      `getSpecifiedMovie(${id})`
+    );
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch movie");
+  }
 }
 
 // utilite for specified tv show
 export async function getSpecifiedTV(id: string): Promise<TspecifiedTv> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
-
-  return data;
+  try {
+    return await tmdbFetch<TspecifiedTv>(
+      `/tv/${id}`,
+      {},
+      `getSpecifiedTV(${id})`
+    );
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch TV show");
+  }
 }
 
 //---general utilites for fetching data from the api
@@ -1155,22 +1162,30 @@ export async function getSpecifiedTVMovieVideos(
   id: string,
   typeM: "movie" | "tv",
 ): Promise<TvideoApiSchema> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/${typeM}/${id}/videos?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data: TvideoApiSchema = await res.data;
-  return data;
+  try {
+    return await tmdbFetch<TvideoApiSchema>(
+      `/${typeM}/${id}/videos`,
+      { language: "en-US" },
+      `getSpecifiedTVMovieVideos(${id}, ${typeM})`
+    );
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch videos");
+  }
 }
 
 export async function getCreditsTVMovie(
   id: string,
   typeM: "movie" | "tv",
 ): Promise<TCreditsSchema> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/${typeM}/${id}/credits?api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
-  return data;
+  try {
+    return await tmdbFetch<TCreditsSchema>(
+      `/${typeM}/${id}/credits`,
+      {},
+      `getCreditsTVMovie(${id}, ${typeM})`
+    );
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch credits");
+  }
 }
 
 // utilite for search page
@@ -1180,11 +1195,20 @@ type values = {
   page: number;
 };
 export async function getSearchMovie(values: values): Promise<TsearchMovie> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/search/multi?query=${values.query}&include_adult=true&language=en-US&page=${values.page}&api_key=${process.env.TMDB_API_KEY}&include_adult=true`,
-  );
-  const data: TsearchMovie = await res.data;
-  return data;
+  try {
+    return await tmdbFetch<TsearchMovie>(
+      `/search/multi`,
+      {
+        query: values.query,
+        include_adult: true,
+        language: "en-US",
+        page: values.page,
+      },
+      `getSearchMovie(query: ${values.query})`
+    );
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to search movies");
+  }
 }
 
 export type TSimilarItem = {
@@ -1323,10 +1347,11 @@ export async function getSimilarByType(
   typeM: "movie" | "tv",
 ): Promise<TSimilarItem[]> {
   try {
-    const res = await axios.get(
-      `https://api.themoviedb.org/3/${typeM}/${id}/similar?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
+    const data = await tmdbFetch<{ results: TSimilarItem[] }>(
+      `/${typeM}/${id}/similar`,
+      { language: "en-US", page: 1 },
+      `getSimilarByType(${id}, ${typeM})`
     );
-    const data = await res.data;
     return data?.results ?? [];
   } catch {
     return [];
@@ -1341,10 +1366,11 @@ export async function getReviewsByType(
 
   let tmdbReviews: TReviewItem[] = [];
   try {
-    const res = await axios.get(
-      `https://api.themoviedb.org/3/${typeM}/${id}/reviews?language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
+    const data = await tmdbFetch<{ results: TReviewItem[] }>(
+      `/${typeM}/${id}/reviews`,
+      { language: "en-US", page: 1 },
+      `getReviewsByType(${id}, ${typeM})`
     );
-    const data = await res.data;
     const results = Array.isArray(data?.results) ? data.results : [];
     tmdbReviews = results.map((item: TReviewItem) => ({
       ...item,
@@ -1590,10 +1616,11 @@ export async function getCategorizedReviewsByType(params: {
 
   for (let currentPage = 1; currentPage <= page; currentPage += 1) {
     try {
-      const res = await axios.get(
-        `https://api.themoviedb.org/3/${params.typeM}/${params.id}/reviews?language=en-US&page=${currentPage}&api_key=${process.env.TMDB_API_KEY}`,
+      const data = await tmdbFetch<{ results: TReviewItem[]; total_pages: number }>(
+        `/${params.typeM}/${params.id}/reviews`,
+        { language: "en-US", page: currentPage },
+        `getCategorizedReviewsByType(${params.id}, page ${currentPage})`
       );
-      const data = await res.data;
       const results = Array.isArray(data?.results) ? data.results : [];
       const mapped = results.map((item: TReviewItem) => ({
         ...item,
@@ -1625,22 +1652,24 @@ export async function getWatchProvidersByType(
   id: string,
   typeM: "movie" | "tv",
 ): Promise<TWatchProvidersData> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/${typeM}/${id}/watch/providers?api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
+  try {
+    const data = await tmdbFetch<{ results: Record<string, unknown> }>(
+      `/${typeM}/${id}/watch/providers`,
+      {},
+      `getWatchProvidersByType(${id}, ${typeM})`
+    );
 
-  const countryMap: Record<string, unknown> =
-    data?.results && typeof data.results === "object"
-      ? (data.results as Record<string, unknown>)
-      : {};
+    const countryMap: Record<string, unknown> =
+      data?.results && typeof data.results === "object"
+        ? (data.results as Record<string, unknown>)
+        : {};
 
-  const usProviders = countryMap.US;
-  const fallbackProviders = Object.values(countryMap).find(
-    (value) => typeof value === "object" && value !== null,
-  );
+    const usProviders = countryMap.US;
+    const fallbackProviders = Object.values(countryMap).find(
+      (value) => typeof value === "object" && value !== null,
+    );
 
-  const selected =
+    const selected =
     (usProviders as Record<string, unknown> | undefined) ??
     (fallbackProviders as Record<string, unknown> | undefined) ??
     {};
@@ -1679,42 +1708,52 @@ export async function getImagesByType(
   id: string,
   typeM: "movie" | "tv",
 ): Promise<TImageItem[]> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/${typeM}/${id}/images?api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
-  const backdrops = Array.isArray(data?.backdrops) ? data.backdrops : [];
-  const posters = Array.isArray(data?.posters) ? data.posters : [];
+  try {
+    const data = await tmdbFetch<{ backdrops: TImageItem[]; posters: TImageItem[] }>(
+      `/${typeM}/${id}/images`,
+      {},
+      `getImagesByType(${id}, ${typeM})`
+    );
+    const backdrops = Array.isArray(data?.backdrops) ? data.backdrops : [];
+    const posters = Array.isArray(data?.posters) ? data.posters : [];
 
-  return [...backdrops, ...posters]
-    .filter((item) => item?.file_path)
-    .slice(0, 24);
+    return [...backdrops, ...posters]
+      .filter((item) => item?.file_path)
+      .slice(0, 24);
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch images");
+  }
 }
 
 export async function getTVSeasonDetails(
   tvId: string,
   seasonNumber: number,
 ): Promise<TTvSeasonDetails> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/tv/${tvId}/season/${seasonNumber}?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
+  try {
+    const data = await tmdbFetch<any>(
+      `/tv/${tvId}/season/${seasonNumber}`,
+      { language: "en-US" },
+      `getTVSeasonDetails(${tvId}, season ${seasonNumber})`
+    );
 
-  return {
-    id: data.id,
-    name: data.name,
-    season_number: data.season_number,
-    episodes: Array.isArray(data.episodes)
-      ? data.episodes.map((episode: any) => ({
-          id: episode.id,
-          name: episode.name,
-          episode_number: episode.episode_number,
-          still_path: episode.still_path ?? null,
-          air_date: episode.air_date ?? null,
-          runtime: episode.runtime ?? null,
-        }))
-      : [],
-  };
+    return {
+      id: data.id,
+      name: data.name,
+      season_number: data.season_number,
+      episodes: Array.isArray(data.episodes)
+        ? data.episodes.map((episode: any) => ({
+            id: episode.id,
+            name: episode.name,
+            episode_number: episode.episode_number,
+            still_path: episode.still_path ?? null,
+            air_date: episode.air_date ?? null,
+            runtime: episode.runtime ?? null,
+          }))
+        : [],
+    };
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch TV season details");
+  }
 }
 
 export async function getTVEpisodeDetails(
@@ -1722,85 +1761,97 @@ export async function getTVEpisodeDetails(
   seasonNumber: number,
   episodeNumber: number,
 ): Promise<TTvEpisodeDetails> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
+  try {
+    const data = await tmdbFetch<any>(
+      `/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`,
+      { language: "en-US" },
+      `getTVEpisodeDetails(${tvId}, season ${seasonNumber}, episode ${episodeNumber})`
+    );
 
-  return {
-    id: data.id,
-    name: data.name,
-    overview: data.overview ?? "",
-    episode_number: data.episode_number ?? 0,
-    season_number: data.season_number ?? seasonNumber,
-    still_path: data.still_path ?? null,
-    air_date: data.air_date ?? null,
-    runtime: data.runtime ?? null,
-    vote_average: data.vote_average ?? 0,
-    vote_count: data.vote_count ?? 0,
-    crew: Array.isArray(data.crew)
-      ? data.crew.map((person: unknown) => {
-          const p = person as Record<string, unknown>;
-          return {
-            id: Number(p.id ?? 0),
-            name: String(p.name ?? "Unknown"),
-            profile_path:
-              typeof p.profile_path === "string" ? p.profile_path : null,
-            job: typeof p.job === "string" ? p.job : undefined,
-            department:
-              typeof p.department === "string" ? p.department : undefined,
-          };
-        })
-      : [],
-    guest_stars: Array.isArray(data.guest_stars)
-      ? data.guest_stars.map((person: unknown) => {
-          const p = person as Record<string, unknown>;
-          return {
-            id: Number(p.id ?? 0),
-            name: String(p.name ?? "Unknown"),
-            profile_path:
-              typeof p.profile_path === "string" ? p.profile_path : null,
-            character:
-              typeof p.character === "string" ? p.character : undefined,
-          };
-        })
-      : [],
-  };
+    return {
+      id: data.id,
+      name: data.name,
+      overview: data.overview ?? "",
+      episode_number: data.episode_number ?? 0,
+      season_number: data.season_number ?? seasonNumber,
+      still_path: data.still_path ?? null,
+      air_date: data.air_date ?? null,
+      runtime: data.runtime ?? null,
+      vote_average: data.vote_average ?? 0,
+      vote_count: data.vote_count ?? 0,
+      crew: Array.isArray(data.crew)
+        ? data.crew.map((person: unknown) => {
+            const p = person as Record<string, unknown>;
+            return {
+              id: Number(p.id ?? 0),
+              name: String(p.name ?? "Unknown"),
+              profile_path:
+                typeof p.profile_path === "string" ? p.profile_path : null,
+              job: typeof p.job === "string" ? p.job : undefined,
+              department:
+                typeof p.department === "string" ? p.department : undefined,
+            };
+          })
+        : [],
+      guest_stars: Array.isArray(data.guest_stars)
+        ? data.guest_stars.map((person: unknown) => {
+            const p = person as Record<string, unknown>;
+            return {
+              id: Number(p.id ?? 0),
+              name: String(p.name ?? "Unknown"),
+              profile_path:
+                typeof p.profile_path === "string" ? p.profile_path : null,
+              character:
+                typeof p.character === "string" ? p.character : undefined,
+            };
+          })
+        : [],
+    };
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch TV episode details");
+  }
 }
 
 export async function getPersonDetails(id: string): Promise<TPersonDetails> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/person/${id}?api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
+  try {
+    const data = await tmdbFetch<any>(
+      `/person/${id}`,
+      {},
+      `getPersonDetails(${id})`
+    );
 
-  return {
-    adult: Boolean(data?.adult),
-    also_known_as: Array.isArray(data?.also_known_as) ? data.also_known_as : [],
-    biography: data?.biography ?? "",
-    birthday: data?.birthday ?? null,
-    deathday: data?.deathday ?? null,
-    gender: data?.gender ?? 0,
-    homepage: data?.homepage ?? null,
-    id: data?.id ?? 0,
-    imdb_id: data?.imdb_id ?? null,
-    known_for_department: data?.known_for_department ?? "Unknown",
-    name: data?.name ?? "Unknown",
-    place_of_birth: data?.place_of_birth ?? null,
-    popularity: data?.popularity ?? 0,
-    profile_path: data?.profile_path ?? null,
-  };
+    return {
+      adult: Boolean(data?.adult),
+      also_known_as: Array.isArray(data?.also_known_as) ? data.also_known_as : [],
+      biography: data?.biography ?? "",
+      birthday: data?.birthday ?? null,
+      deathday: data?.deathday ?? null,
+      gender: data?.gender ?? 0,
+      homepage: data?.homepage ?? null,
+      id: data?.id ?? 0,
+      imdb_id: data?.imdb_id ?? null,
+      known_for_department: data?.known_for_department ?? "Unknown",
+      name: data?.name ?? "Unknown",
+      place_of_birth: data?.place_of_birth ?? null,
+      popularity: data?.popularity ?? 0,
+      profile_path: data?.profile_path ?? null,
+    };
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch person details");
+  }
 }
 
 export async function getPersonCombinedCredits(
   id: string,
 ): Promise<TPersonCombinedCredits> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/person/${id}/combined_credits?api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
+  try {
+    const data = await tmdbFetch<any>(
+      `/person/${id}/combined_credits`,
+      {},
+      `getPersonCombinedCredits(${id})`
+    );
 
-  const normalizeCreditItem = (item: Record<string, unknown>) => {
+    const normalizeCreditItem = (item: Record<string, unknown>) => {
     const mediaType = item?.media_type === "tv" ? "tv" : "movie";
 
     return {
@@ -1851,16 +1902,18 @@ export async function getPersonCombinedCredits(
 }
 
 export async function getPersonImages(id: string): Promise<TPersonImageItem[]> {
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/person/${id}/images?api_key=${process.env.TMDB_API_KEY}`,
-  );
-  const data = await res.data;
-  const profiles: Array<Record<string, unknown>> = Array.isArray(data?.profiles)
-    ? data.profiles
-    : [];
+  try {
+    const data = await tmdbFetch<{ profiles: TPersonImageItem[] }>(
+      `/person/${id}/images`,
+      {},
+      `getPersonImages(${id})`
+    );
+    const profiles: Array<Record<string, unknown>> = Array.isArray(data?.profiles)
+      ? data.profiles
+      : [];
 
-  return profiles
-    .filter((item: Record<string, unknown>) => item?.file_path)
+    return profiles
+      .filter((item: Record<string, unknown>) => item?.file_path)
     .map((item: Record<string, unknown>) => ({
       file_path: String(item.file_path),
       width: Number(item.width ?? 0),
@@ -1912,14 +1965,30 @@ type ExploreListResponse<T> = {
 };
 
 async function getExploreList<T>(endpoint: string): Promise<T[]> {
-  const hasQuery = endpoint.includes("?");
-  const connector = hasQuery ? "&" : "?";
-  const res = await axios.get(
-    `https://api.themoviedb.org/3/${endpoint}${connector}language=en-US&page=1&api_key=${process.env.TMDB_API_KEY}`,
-  );
+  try {
+    const hasQuery = endpoint.includes("?");
+    const params: Record<string, any> = { language: "en-US", page: 1 };
+    
+    // If endpoint has query params, parse them
+    if (hasQuery) {
+      const [path, queryString] = endpoint.split("?");
+      const searchParams = new URLSearchParams(queryString);
+      searchParams.forEach((value, key) => {
+        params[key] = value;
+      });
+      endpoint = path;
+    }
 
-  const data: ExploreListResponse<T> = await res.data;
-  return data.results ?? [];
+    const data = await tmdbFetch<{ results: T[] }>(
+      `/${endpoint}`,
+      params,
+      `getExploreList(${endpoint})`
+    );
+
+    return data.results ?? [];
+  } catch (error) {
+    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch explore list");
+  }
 }
 
 export async function getExploreTrendingList(): Promise<ExploreTrendingItem[]> {
@@ -1961,12 +2030,12 @@ export async function getExploreMediaDetails(
   id: number,
 ): Promise<ExploreMediaDetails | null> {
   try {
-    const res = await axios.get(
-      `https://api.themoviedb.org/3/${mediaType}/${id}?language=en-US&api_key=${process.env.TMDB_API_KEY}`,
+    return await tmdbFetch<ExploreMediaDetails>(
+      `/${mediaType}/${id}`,
+      { language: "en-US" },
+      `getExploreMediaDetails(${mediaType}, ${id})`
     );
-    const data: ExploreMediaDetails = await res.data;
-    return data;
-  } catch {
+  } catch (error) {
     return null;
   }
 }

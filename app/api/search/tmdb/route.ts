@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { tmdbFetch, TMDBApiError } from "@/lib/tmdb-api";
+import { createSafeErrorResponse } from "@/lib/api-error-handler";
 
 export async function GET(request: NextRequest) {
-  const apiKey = process.env.TMDB_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "TMDB key missing" }, { status: 500 });
-  }
-
   const { searchParams } = new URL(request.url);
   const query = (searchParams.get("q") ?? "").trim();
 
@@ -14,19 +11,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1&api_key=${apiKey}`,
-      { cache: "no-store" },
+    const data = await tmdbFetch<{ results: any[] }>(
+      "/search/multi",
+      {
+        query,
+        include_adult: false,
+        language: "en-US",
+        page: 1,
+      },
+      "API: Search TMDB"
     );
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "TMDB request failed" },
-        { status: 502 },
-      );
-    }
-
-    const data = await response.json();
 
     const normalized = (data?.results ?? [])
       .filter(
@@ -59,7 +53,18 @@ export async function GET(request: NextRequest) {
       });
 
     return NextResponse.json(normalized);
-  } catch {
-    return NextResponse.json({ error: "TMDB request failed" }, { status: 502 });
+  } catch (error) {
+    if (error instanceof TMDBApiError) {
+      return createSafeErrorResponse(error, {
+        context: "Search TMDB",
+        statusCode: 502,
+        userMessage: error.message,
+      });
+    }
+    return createSafeErrorResponse(error, {
+      context: "Search TMDB",
+      statusCode: 502,
+      userMessage: "TMDB request failed",
+    });
   }
 }

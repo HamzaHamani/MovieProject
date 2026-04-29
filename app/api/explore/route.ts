@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { tmdbFetch, TMDBApiError } from "@/lib/tmdb-api";
+import { createSafeErrorResponse } from "@/lib/api-error-handler";
 
 type EndpointMap = Record<string, string>;
 
@@ -13,23 +15,24 @@ const LIST_ENDPOINTS: EndpointMap = {
 };
 
 async function tmdbList(endpoint: string, page = 1) {
-  const apiKey = process.env.TMDB_API_KEY;
-  if (!apiKey) {
-    throw new Error("TMDB key missing");
-  }
-
+  // Parse endpoint for any existing query params
   const hasQuery = endpoint.includes("?");
-  const connector = hasQuery ? "&" : "?";
-  const response = await fetch(
-    `https://api.themoviedb.org/3/${endpoint}${connector}language=en-US&page=${page}&api_key=${apiKey}`,
-    { next: { revalidate: 1800 } },
-  );
+  const params: Record<string, any> = { language: "en-US", page };
 
-  if (!response.ok) {
-    throw new Error("TMDB request failed");
+  if (hasQuery) {
+    const [path, queryString] = endpoint.split("?");
+    const searchParams = new URLSearchParams(queryString);
+    searchParams.forEach((value, key) => {
+      params[key] = value;
+    });
+    endpoint = path;
   }
 
-  return response.json();
+  return tmdbFetch(
+    `/${endpoint}`,
+    params,
+    `API: TMDB List (${endpoint})`
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -89,7 +92,18 @@ export async function GET(request: NextRequest) {
       page: appPage,
       hasMore: appPage < totalPages && results.length > 0,
     });
-  } catch {
-    return NextResponse.json({ error: "TMDB request failed" }, { status: 502 });
+  } catch (error) {
+    if (error instanceof TMDBApiError) {
+      return createSafeErrorResponse(error, {
+        context: "Explore",
+        statusCode: 502,
+        userMessage: error.message,
+      });
+    }
+    return createSafeErrorResponse(error, {
+      context: "Explore",
+      statusCode: 502,
+      userMessage: "TMDB request failed",
+    });
   }
 }

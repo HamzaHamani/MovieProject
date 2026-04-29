@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import axios from "axios";
+import { tmdbFetch, TMDBApiError } from "@/lib/tmdb-api";
+import { createSafeErrorResponse } from "@/lib/api-error-handler";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get("id");
-    const type = searchParams.get("type");
+    const type = searchParams.get("type") as "movie" | "tv" | null;
 
+    // Validation
     if (!id || !type) {
       return NextResponse.json(
         { error: "Missing id or type parameter" },
@@ -21,11 +23,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const res = await axios.get(
-      `https://api.themoviedb.org/3/${type}/${id}/images?api_key=${process.env.TMDB_API_KEY}`,
+    // Use secure TMDB fetch
+    const data = await tmdbFetch<{ backdrops: any[] }>(\n      `/${type}/${id}/images`,
+      {},
+      `API: getImages(${type}, ${id})`
     );
 
-    const data = res.data;
     const backdrops = Array.isArray(data?.backdrops) ? data.backdrops : [];
 
     const formattedBackdrops = backdrops
@@ -41,10 +44,16 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(formattedBackdrops);
   } catch (error) {
-    console.error("Error fetching images:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch images" },
-      { status: 500 },
-    );
+    if (error instanceof TMDBApiError) {
+      return createSafeErrorResponse(error, {
+        context: "Search Images",
+        statusCode: 500,
+        userMessage: error.message,
+      });
+    }
+    return createSafeErrorResponse(error, {
+      context: "Search Images",
+      userMessage: "Failed to fetch images",
+    });
   }
 }
