@@ -1136,10 +1136,12 @@ export async function getSpecifiedMovie(id: string): Promise<TspecifiedMovie> {
     return await tmdbFetch<TspecifiedMovie>(
       `/movie/${id}`,
       {},
-      `getSpecifiedMovie(${id})`
+      `getSpecifiedMovie(${id})`,
     );
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch movie");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch movie");
   }
 }
 
@@ -1149,10 +1151,12 @@ export async function getSpecifiedTV(id: string): Promise<TspecifiedTv> {
     return await tmdbFetch<TspecifiedTv>(
       `/tv/${id}`,
       {},
-      `getSpecifiedTV(${id})`
+      `getSpecifiedTV(${id})`,
     );
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch TV show");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch TV show");
   }
 }
 
@@ -1166,10 +1170,12 @@ export async function getSpecifiedTVMovieVideos(
     return await tmdbFetch<TvideoApiSchema>(
       `/${typeM}/${id}/videos`,
       { language: "en-US" },
-      `getSpecifiedTVMovieVideos(${id}, ${typeM})`
+      `getSpecifiedTVMovieVideos(${id}, ${typeM})`,
     );
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch videos");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch videos");
   }
 }
 
@@ -1181,10 +1187,12 @@ export async function getCreditsTVMovie(
     return await tmdbFetch<TCreditsSchema>(
       `/${typeM}/${id}/credits`,
       {},
-      `getCreditsTVMovie(${id}, ${typeM})`
+      `getCreditsTVMovie(${id}, ${typeM})`,
     );
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch credits");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch credits");
   }
 }
 
@@ -1204,10 +1212,12 @@ export async function getSearchMovie(values: values): Promise<TsearchMovie> {
         language: "en-US",
         page: values.page,
       },
-      `getSearchMovie(query: ${values.query})`
+      `getSearchMovie(query: ${values.query})`,
     );
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to search movies");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to search movies");
   }
 }
 
@@ -1350,7 +1360,7 @@ export async function getSimilarByType(
     const data = await tmdbFetch<{ results: TSimilarItem[] }>(
       `/${typeM}/${id}/similar`,
       { language: "en-US", page: 1 },
-      `getSimilarByType(${id}, ${typeM})`
+      `getSimilarByType(${id}, ${typeM})`,
     );
     return data?.results ?? [];
   } catch {
@@ -1369,7 +1379,7 @@ export async function getReviewsByType(
     const data = await tmdbFetch<{ results: TReviewItem[] }>(
       `/${typeM}/${id}/reviews`,
       { language: "en-US", page: 1 },
-      `getReviewsByType(${id}, ${typeM})`
+      `getReviewsByType(${id}, ${typeM})`,
     );
     const results = Array.isArray(data?.results) ? data.results : [];
     tmdbReviews = results.map((item: TReviewItem) => ({
@@ -1616,10 +1626,13 @@ export async function getCategorizedReviewsByType(params: {
 
   for (let currentPage = 1; currentPage <= page; currentPage += 1) {
     try {
-      const data = await tmdbFetch<{ results: TReviewItem[]; total_pages: number }>(
+      const data = await tmdbFetch<{
+        results: TReviewItem[];
+        total_pages: number;
+      }>(
         `/${params.typeM}/${params.id}/reviews`,
         { language: "en-US", page: currentPage },
-        `getCategorizedReviewsByType(${params.id}, page ${currentPage})`
+        `getCategorizedReviewsByType(${params.id}, page ${currentPage})`,
       );
       const results = Array.isArray(data?.results) ? data.results : [];
       const mapped = results.map((item: TReviewItem) => ({
@@ -1656,7 +1669,7 @@ export async function getWatchProvidersByType(
     const data = await tmdbFetch<{ results: Record<string, unknown> }>(
       `/${typeM}/${id}/watch/providers`,
       {},
-      `getWatchProvidersByType(${id}, ${typeM})`
+      `getWatchProvidersByType(${id}, ${typeM})`,
     );
 
     const countryMap: Record<string, unknown> =
@@ -1670,38 +1683,40 @@ export async function getWatchProvidersByType(
     );
 
     const selected =
-    (usProviders as Record<string, unknown> | undefined) ??
-    (fallbackProviders as Record<string, unknown> | undefined) ??
-    {};
+      (usProviders as Record<string, unknown> | undefined) ??
+      (fallbackProviders as Record<string, unknown> | undefined) ??
+      {};
 
-  const normalizeProviders = (key: "flatrate" | "rent" | "buy") => {
-    const raw = selected[key];
-    if (!Array.isArray(raw)) return [] as TWatchProviderItem[];
+    const normalizeProviders = (key: "flatrate" | "rent" | "buy") => {
+      const raw = selected[key];
+      if (!Array.isArray(raw)) return [] as TWatchProviderItem[];
 
-    return raw
-      .map((item: unknown) => {
-        const provider = item as Record<string, unknown>;
-        return {
-          provider_id: Number(provider.provider_id ?? 0),
-          provider_name: String(provider.provider_name ?? "Unknown Provider"),
-          logo_path:
-            typeof provider.logo_path === "string" ? provider.logo_path : null,
-          display_priority: Number(provider.display_priority ?? 0),
-        };
-      })
-      .filter((provider: TWatchProviderItem) => provider.provider_id > 0)
-      .sort(
-        (a: TWatchProviderItem, b: TWatchProviderItem) =>
-          a.display_priority - b.display_priority,
-      );
-  };
+      return raw
+        .map((item: unknown) => {
+          const provider = item as Record<string, unknown>;
+          return {
+            provider_id: Number(provider.provider_id ?? 0),
+            provider_name: String(provider.provider_name ?? "Unknown Provider"),
+            logo_path:
+              typeof provider.logo_path === "string"
+                ? provider.logo_path
+                : null,
+            display_priority: Number(provider.display_priority ?? 0),
+          };
+        })
+        .filter((provider: TWatchProviderItem) => provider.provider_id > 0)
+        .sort(
+          (a: TWatchProviderItem, b: TWatchProviderItem) =>
+            a.display_priority - b.display_priority,
+        );
+    };
 
-  return {
-    link: typeof selected.link === "string" ? selected.link : null,
-    flatrate: normalizeProviders("flatrate"),
-    rent: normalizeProviders("rent"),
-    buy: normalizeProviders("buy"),
-  };
+    return {
+      link: typeof selected.link === "string" ? selected.link : null,
+      flatrate: normalizeProviders("flatrate"),
+      rent: normalizeProviders("rent"),
+      buy: normalizeProviders("buy"),
+    };
   } catch (error) {
     throw error instanceof TMDBApiError
       ? error
@@ -1714,11 +1729,10 @@ export async function getImagesByType(
   typeM: "movie" | "tv",
 ): Promise<TImageItem[]> {
   try {
-    const data = await tmdbFetch<{ backdrops: TImageItem[]; posters: TImageItem[] }>(
-      `/${typeM}/${id}/images`,
-      {},
-      `getImagesByType(${id}, ${typeM})`
-    );
+    const data = await tmdbFetch<{
+      backdrops: TImageItem[];
+      posters: TImageItem[];
+    }>(`/${typeM}/${id}/images`, {}, `getImagesByType(${id}, ${typeM})`);
     const backdrops = Array.isArray(data?.backdrops) ? data.backdrops : [];
     const posters = Array.isArray(data?.posters) ? data.posters : [];
 
@@ -1726,7 +1740,9 @@ export async function getImagesByType(
       .filter((item) => item?.file_path)
       .slice(0, 24);
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch images");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch images");
   }
 }
 
@@ -1738,7 +1754,7 @@ export async function getTVSeasonDetails(
     const data = await tmdbFetch<any>(
       `/tv/${tvId}/season/${seasonNumber}`,
       { language: "en-US" },
-      `getTVSeasonDetails(${tvId}, season ${seasonNumber})`
+      `getTVSeasonDetails(${tvId}, season ${seasonNumber})`,
     );
 
     return {
@@ -1757,7 +1773,9 @@ export async function getTVSeasonDetails(
         : [],
     };
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch TV season details");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch TV season details");
   }
 }
 
@@ -1770,7 +1788,7 @@ export async function getTVEpisodeDetails(
     const data = await tmdbFetch<any>(
       `/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`,
       { language: "en-US" },
-      `getTVEpisodeDetails(${tvId}, season ${seasonNumber}, episode ${episodeNumber})`
+      `getTVEpisodeDetails(${tvId}, season ${seasonNumber}, episode ${episodeNumber})`,
     );
 
     return {
@@ -1813,7 +1831,9 @@ export async function getTVEpisodeDetails(
         : [],
     };
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch TV episode details");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch TV episode details");
   }
 }
 
@@ -1822,12 +1842,14 @@ export async function getPersonDetails(id: string): Promise<TPersonDetails> {
     const data = await tmdbFetch<any>(
       `/person/${id}`,
       {},
-      `getPersonDetails(${id})`
+      `getPersonDetails(${id})`,
     );
 
     return {
       adult: Boolean(data?.adult),
-      also_known_as: Array.isArray(data?.also_known_as) ? data.also_known_as : [],
+      also_known_as: Array.isArray(data?.also_known_as)
+        ? data.also_known_as
+        : [],
       biography: data?.biography ?? "",
       birthday: data?.birthday ?? null,
       deathday: data?.deathday ?? null,
@@ -1842,7 +1864,9 @@ export async function getPersonDetails(id: string): Promise<TPersonDetails> {
       profile_path: data?.profile_path ?? null,
     };
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch person details");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch person details");
   }
 }
 
@@ -1853,57 +1877,59 @@ export async function getPersonCombinedCredits(
     const data = await tmdbFetch<any>(
       `/person/${id}/combined_credits`,
       {},
-      `getPersonCombinedCredits(${id})`
+      `getPersonCombinedCredits(${id})`,
     );
 
     const normalizeCreditItem = (item: Record<string, unknown>) => {
-    const mediaType = item?.media_type === "tv" ? "tv" : "movie";
+      const mediaType = item?.media_type === "tv" ? "tv" : "movie";
 
-    return {
-      id: Number(item?.id ?? 0),
-      media_type: mediaType,
-      genre_ids: Array.isArray(item?.genre_ids)
-        ? item.genre_ids
-            .map((genreId: unknown) => Number(genreId))
-            .filter((genreId: number) => Number.isFinite(genreId))
-        : [],
-      poster_path:
-        typeof item?.poster_path === "string" ? item.poster_path : null,
-      backdrop_path:
-        typeof item?.backdrop_path === "string" ? item.backdrop_path : null,
-      title: typeof item?.title === "string" ? item.title : undefined,
-      name: typeof item?.name === "string" ? item.name : undefined,
-      release_date:
-        typeof item?.release_date === "string" ? item.release_date : undefined,
-      first_air_date:
-        typeof item?.first_air_date === "string"
-          ? item.first_air_date
-          : undefined,
-      character:
-        typeof item?.character === "string" ? item.character : undefined,
-      job: typeof item?.job === "string" ? item.job : undefined,
-      vote_average: Number(item?.vote_average ?? 0),
-      popularity: Number(item?.popularity ?? 0),
-    } as TPersonCreditItem;
-  };
+      return {
+        id: Number(item?.id ?? 0),
+        media_type: mediaType,
+        genre_ids: Array.isArray(item?.genre_ids)
+          ? item.genre_ids
+              .map((genreId: unknown) => Number(genreId))
+              .filter((genreId: number) => Number.isFinite(genreId))
+          : [],
+        poster_path:
+          typeof item?.poster_path === "string" ? item.poster_path : null,
+        backdrop_path:
+          typeof item?.backdrop_path === "string" ? item.backdrop_path : null,
+        title: typeof item?.title === "string" ? item.title : undefined,
+        name: typeof item?.name === "string" ? item.name : undefined,
+        release_date:
+          typeof item?.release_date === "string"
+            ? item.release_date
+            : undefined,
+        first_air_date:
+          typeof item?.first_air_date === "string"
+            ? item.first_air_date
+            : undefined,
+        character:
+          typeof item?.character === "string" ? item.character : undefined,
+        job: typeof item?.job === "string" ? item.job : undefined,
+        vote_average: Number(item?.vote_average ?? 0),
+        popularity: Number(item?.popularity ?? 0),
+      } as TPersonCreditItem;
+    };
 
-  const cast = Array.isArray(data?.cast)
-    ? data.cast
-        .map((item: unknown) =>
-          normalizeCreditItem(item as Record<string, unknown>),
-        )
-        .filter((item: TPersonCreditItem) => item.id > 0)
-    : [];
+    const cast = Array.isArray(data?.cast)
+      ? data.cast
+          .map((item: unknown) =>
+            normalizeCreditItem(item as Record<string, unknown>),
+          )
+          .filter((item: TPersonCreditItem) => item.id > 0)
+      : [];
 
-  const crew = Array.isArray(data?.crew)
-    ? data.crew
-        .map((item: unknown) =>
-          normalizeCreditItem(item as Record<string, unknown>),
-        )
-        .filter((item: TPersonCreditItem) => item.id > 0)
-    : [];
+    const crew = Array.isArray(data?.crew)
+      ? data.crew
+          .map((item: unknown) =>
+            normalizeCreditItem(item as Record<string, unknown>),
+          )
+          .filter((item: TPersonCreditItem) => item.id > 0)
+      : [];
 
-  return { cast, crew };
+    return { cast, crew };
   } catch (error) {
     throw error instanceof TMDBApiError
       ? error
@@ -1916,10 +1942,12 @@ export async function getPersonImages(id: string): Promise<TPersonImageItem[]> {
     const data = await tmdbFetch<{ profiles: TPersonImageItem[] }>(
       `/person/${id}/images`,
       {},
-      `getPersonImages(${id})`
+      `getPersonImages(${id})`,
     );
 
-    const profiles: Array<Record<string, unknown>> = Array.isArray(data?.profiles)
+    const profiles: Array<Record<string, unknown>> = Array.isArray(
+      data?.profiles,
+    )
       ? data.profiles
       : [];
 
@@ -1983,7 +2011,7 @@ async function getExploreList<T>(endpoint: string): Promise<T[]> {
   try {
     const hasQuery = endpoint.includes("?");
     const params: Record<string, any> = { language: "en-US", page: 1 };
-    
+
     // If endpoint has query params, parse them
     if (hasQuery) {
       const [path, queryString] = endpoint.split("?");
@@ -1997,12 +2025,14 @@ async function getExploreList<T>(endpoint: string): Promise<T[]> {
     const data = await tmdbFetch<{ results: T[] }>(
       `/${endpoint}`,
       params,
-      `getExploreList(${endpoint})`
+      `getExploreList(${endpoint})`,
     );
 
     return data.results ?? [];
   } catch (error) {
-    throw error instanceof TMDBApiError ? error : new Error("Failed to fetch explore list");
+    throw error instanceof TMDBApiError
+      ? error
+      : new Error("Failed to fetch explore list");
   }
 }
 
@@ -2048,7 +2078,7 @@ export async function getExploreMediaDetails(
     return await tmdbFetch<ExploreMediaDetails>(
       `/${mediaType}/${id}`,
       { language: "en-US" },
-      `getExploreMediaDetails(${mediaType}, ${id})`
+      `getExploreMediaDetails(${mediaType}, ${id})`,
     );
   } catch (error) {
     return null;
