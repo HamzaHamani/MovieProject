@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const data = await tmdbFetch(
       `/${mediaType}/${id}`,
       { language: "en-US" },
-      `API: Explore details (${mediaType}, ${id})`
+      `API: Explore details (${mediaType}, ${id})`,
     );
 
     return NextResponse.json(data);

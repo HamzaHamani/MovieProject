@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         language: "en-US",
         page: 1,
       },
-      "API: Search TMDB"
+      "API: Search TMDB",
     );
 
     const normalized = (data?.results ?? [])

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const json = await tmdbFetch(
       "/movie/upcoming",
       { language: "en-US", page },
-      `API: Upcoming movies (page ${page})`
+      `API: Upcoming movies (page ${page})`,
     );
     return NextResponse.json(json);
   } catch (error) {

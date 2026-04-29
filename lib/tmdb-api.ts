@@ -31,7 +31,10 @@ export class TMDBApiError extends Error {
         message = `TMDB Error: ${data.status_message}`;
       } else if (originalError.message) {
         // Only use axio message if it doesn't contain URLs
-        if (!originalError.message.includes("http") && !originalError.message.includes("api_key")) {
+        if (
+          !originalError.message.includes("http") &&
+          !originalError.message.includes("api_key")
+        ) {
           message = originalError.message;
         }
       }
@@ -67,7 +70,7 @@ export async function tmdbFetch<T>(
   endpoint: string,
   params: Record<string, any> = {},
   context: string = "TMDB Request",
-  opts: TMDBRequestOptions = {}
+  opts: TMDBRequestOptions = {},
 ): Promise<T> {
   try {
     const apiKey = getEnvVariable("TMDB_API_KEY");
@@ -98,7 +101,7 @@ export async function tmdbPost<T>(
   endpoint: string,
   data: any = {},
   context: string = "TMDB POST Request",
-  opts: TMDBRequestOptions = {}
+  opts: TMDBRequestOptions = {},
 ): Promise<T> {
   try {
     const apiKey = getEnvVariable("TMDB_API_KEY");

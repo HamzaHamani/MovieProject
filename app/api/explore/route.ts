@@ -28,11 +28,7 @@ async function tmdbList(endpoint: string, page = 1) {
     endpoint = path;
   }
 
-  return tmdbFetch(
-    `/${endpoint}`,
-    params,
-    `API: TMDB List (${endpoint})`
-  );
+  return tmdbFetch(`/${endpoint}`, params, `API: TMDB List (${endpoint})`);
 }
 
 export async function GET(request: NextRequest) {

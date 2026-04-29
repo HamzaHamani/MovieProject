@@ -15,7 +15,7 @@ export interface APIErrorOptions {
  */
 export function createSafeErrorResponse(
   error: unknown,
-  options: APIErrorOptions = {}
+  options: APIErrorOptions = {},
 ) {
   const {
     context = "API Error",
@@ -36,7 +36,7 @@ export function createSafeErrorResponse(
         debug: error instanceof Error ? error.message : String(error),
       }),
     },
-    { status: statusCode }
+    { status: statusCode },
   );
 }
 
