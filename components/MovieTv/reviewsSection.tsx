@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { stopInternalLoad } from "@/components/ui/loadingBus";
 import Link from "next/link";
 import { TReviewItem } from "@/lib/actions";
 
@@ -11,6 +12,10 @@ type Props = {
 };
 
 export default function ReviewsSection({ items, mediaId, mediaType }: Props) {
+  useEffect(() => {
+    // notify that internal content has finished loading
+    stopInternalLoad();
+  }, []);
   const [category, setCategory] = useState<"social" | "critic">("social");
 
   const { socialReviews, criticReviews } = useMemo(() => {

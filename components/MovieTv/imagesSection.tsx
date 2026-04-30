@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { stopInternalLoad } from "@/components/ui/loadingBus";
 import { TImageItem } from "@/lib/actions";
 import LazyBlurImage from "../ui/lazyBlurImage";
 
@@ -9,6 +10,9 @@ type Props = {
 };
 
 export default function ImagesSection({ items }: Props) {
+  useEffect(() => {
+    stopInternalLoad();
+  }, []);
   const [visibleCount, setVisibleCount] = useState(6);
   const list = items.slice(0, visibleCount);
   const hasMore = items.length > visibleCount;

@@ -173,7 +173,7 @@ export default function ModeleLog({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 items-stretch gap-4 sm:grid-cols-1">
+      <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-1">
         <div className="h-full rounded-xl border border-white/10 bg-white/[0.03] p-4">
           <div className="space-y-4">
             <label className="mb-1 block text-sm font-medium text-white">
@@ -285,8 +285,9 @@ export default function ModeleLog({
 
         <div className="flex h-full w-full flex-col rounded-xl border border-white/10 bg-white/[0.03] p-4">
           <label className="mb-1 block text-sm font-medium text-white">
-            Review <span className="text-gray-400">(Optional)</span>
+            Review
           </label>
+          <div className="mb-2 text-sm text-gray-400">(Optional)</div>
           <Textarea
             placeholder="Share your thoughts..."
             value={review}

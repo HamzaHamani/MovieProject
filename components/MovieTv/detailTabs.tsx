@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { startInternalLoad } from "@/components/ui/loadingBus";
 
 type TabItem = {
   key: string;
@@ -59,6 +60,9 @@ export default function DetailTabs({ items, active, typeM, id }: Props) {
 
   const onSelectTab = (tabKey: string) => {
     if (tabKey === active) return;
+
+    // signal internal loading (used by top progress indicator)
+    startInternalLoad();
 
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", tabKey);

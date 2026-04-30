@@ -57,7 +57,7 @@ export function DrawerDialogButtonList({
             <span className="sss:hidden">Add List</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-h-[88svh] w-[min(700px,94vw)] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 text-textMain">
+        <DialogContent className="max-h-[88svh] w-[min(920px,96vw)] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-6 text-textMain">
           <DialogHeader className="border-b border-white/10 pb-4">
             <DialogTitle className="flex items-center gap-2 text-white">
               <ListPlus className="h-5 w-5 text-primaryM-500" /> Add to your
@@ -91,7 +91,7 @@ export function DrawerDialogButtonList({
           <span className="sss:hidden">Add List</span>
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[88svh] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 text-textMain">
+      <DrawerContent className="max-h-[88svh] w-full overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 text-textMain">
         <DrawerHeader className="px-0 pb-2 pt-2 text-left">
           <DrawerTitle className="flex items-center gap-2 text-white">
             <ListPlus className="h-5 w-5 text-primaryM-500" /> Add to your lists

@@ -1,6 +1,8 @@
 "use client";
 
 import { TWatchProvidersData } from "@/lib/actions";
+import { useEffect } from "react";
+import { stopInternalLoad } from "@/components/ui/loadingBus";
 import {
   Carousel,
   CarouselContent,
@@ -41,6 +43,9 @@ const categories: CategoryConfig[] = [
 ];
 
 export default function WatchProvidersSection({ providers }: Props) {
+  useEffect(() => {
+    stopInternalLoad();
+  }, []);
   const hasAnyProvider =
     providers.flatrate.length > 0 ||
     providers.rent.length > 0 ||

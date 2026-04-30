@@ -6,6 +6,8 @@ import ReactQueryProvider from "@/provider/reaxtQueryProvider";
 import { Toaster } from "sonner";
 import NextAuthProvider from "@/provider/nextAuthProvider";
 import { GeistMono } from "geist/font/mono";
+import TopLoaderClient from "@/components/ui/TopLoaderClient";
+import InternalTopProgress from "@/components/ui/InternalTopProgress";
 
 export const metadata: Metadata = {
   title: {
@@ -60,6 +62,8 @@ export default function RootLayout({
         <GlobalContextProvider>
           <NextAuthProvider>
             <ReactQueryProvider>
+              <TopLoaderClient />
+              <InternalTopProgress />
               <>{children}</>
               <Toaster richColors position="bottom-center" />
             </ReactQueryProvider>

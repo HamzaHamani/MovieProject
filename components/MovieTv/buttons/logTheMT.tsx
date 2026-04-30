@@ -135,7 +135,7 @@ export default function LogTheMT({
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="max-h-[88svh] w-[min(980px,94vw)] overflow-y-auto border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 pt-10 text-textMain">
+        <DialogContent className="max-h-[88svh] w-[min(1120px,96vw)] overflow-y-auto border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-6 pt-6 text-textMain xl:w-[min(1180px,96vw)] smd:w-[min(100vw-1rem,100vw)]">
           <DialogHeader className="sr-only">
             <DialogTitle>
               Log The {typeM === "movie" ? "Movie" : "TV Show"}
@@ -193,7 +193,7 @@ export default function LogTheMT({
           )}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[88svh] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 text-textMain">
+      <DrawerContent className="max-h-[88svh] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 pt-4 text-textMain">
         <DrawerHeader className="sr-only">
           <DrawerTitle>
             Log The {typeM === "movie" ? "Movie" : "TV Show"}

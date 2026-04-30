@@ -115,15 +115,15 @@ export default function CheckBoxes({
 
   return (
     <div>
-      <div className="hide-scrollbar max-h-[320px] space-y-2 overflow-y-auto pr-1">
+      <div className="hide-scrollbar max-h-[420px] space-y-3 overflow-y-auto pr-1">
         {data.map((item, num) => (
           <div className="group" key={item.id}>
             <label
               htmlFor={`Option${num}`}
-              className={`mb-2 flex w-full cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
+              className={`mb-2 flex w-full cursor-pointer items-start gap-4 rounded-2xl border p-4 transition-all ${
                 selectedLists.includes(item.id)
                   ? "border-primaryM-500/50 bg-primaryM-500/10"
-                  : "border-white/10 bg-white/[0.02] hover:bg-white/[0.06]"
+                  : "border-white/10 bg-white/[0.02] hover:bg-white/[0.04]"
               }`}
             >
               <div className="mt-0.5 flex items-center">
@@ -135,20 +135,27 @@ export default function CheckBoxes({
                   onChange={() => void handleSelect(item.id)}
                 />
                 <span
-                  className={`inline-flex h-5 w-5 items-center justify-center rounded-md border ${
+                  className={`inline-flex h-6 w-6 items-center justify-center rounded-md border ${
                     selectedLists.includes(item.id)
                       ? "border-primaryM-500 bg-primaryM-500 text-black"
                       : "border-white/30 bg-transparent text-transparent"
                   }`}
                 >
-                  <Check className="h-3.5 w-3.5" />
+                  <Check className="h-4 w-4" />
                 </span>
               </div>
 
               <div className="min-w-0 flex-1">
-                <strong className="font-medium text-gray-100">
-                  {item.bookmarkName}
-                </strong>
+                <div className="flex items-center justify-between gap-2">
+                  <strong className="truncate text-base font-semibold text-gray-100">
+                    {item.bookmarkName}
+                  </strong>
+                </div>
+                {item.description ? (
+                  <p className="mt-2 text-sm text-gray-400 line-clamp-2">
+                    {item.description}
+                  </p>
+                ) : null}
                 {selectedLists.includes(item.id) &&
                   bookmarkIds.includes(item.id) && (
                     <p className="mt-2 text-xs font-medium text-primaryM-500">
@@ -157,7 +164,7 @@ export default function CheckBoxes({
                   )}
               </div>
             </label>
-            <Separator className="my-4 bg-gray-300/50" />
+            <Separator className="my-3 bg-gray-300/20" />
           </div>
         ))}
       </div>
