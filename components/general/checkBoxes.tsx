@@ -152,7 +152,7 @@ export default function CheckBoxes({
                   </strong>
                 </div>
                 {item.description ? (
-                  <p className="mt-2 text-sm text-gray-400 line-clamp-2">
+                  <p className="mt-2 line-clamp-2 text-sm text-gray-400">
                     {item.description}
                   </p>
                 ) : null}

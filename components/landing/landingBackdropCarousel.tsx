@@ -54,10 +54,13 @@ async function fetchBackdropMovies(): Promise<TrendingMovie[]> {
 
     const movies: TrendingMovie[] = await response.json();
     const moviesWithBackdrops = movies.filter(
-      (m) => m.backdrop_path && (m.media_type === "movie" || m.media_type === "tv")
+      (m) =>
+        m.backdrop_path && (m.media_type === "movie" || m.media_type === "tv"),
     );
-    
-    return moviesWithBackdrops.length > 0 ? moviesWithBackdrops.slice(0, 8) : FALLBACK_MOVIES;
+
+    return moviesWithBackdrops.length > 0
+      ? moviesWithBackdrops.slice(0, 8)
+      : FALLBACK_MOVIES;
   } catch (error) {
     console.warn("Failed to fetch backdrop movies, using fallback:", error);
     return FALLBACK_MOVIES;

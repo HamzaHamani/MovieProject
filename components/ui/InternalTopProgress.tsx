@@ -33,8 +33,14 @@ export default function InternalTopProgress() {
     window.addEventListener("internal-loading-stop", onStop as EventListener);
 
     return () => {
-      window.removeEventListener("internal-loading-start", onStart as EventListener);
-      window.removeEventListener("internal-loading-stop", onStop as EventListener);
+      window.removeEventListener(
+        "internal-loading-start",
+        onStart as EventListener,
+      );
+      window.removeEventListener(
+        "internal-loading-stop",
+        onStop as EventListener,
+      );
       if (timer) clearInterval(timer);
     };
   }, []);
@@ -48,7 +54,10 @@ export default function InternalTopProgress() {
     >
       <div
         className="h-1 bg-primaryM-500 transition-all duration-200"
-        style={{ width: `${progress}%`, boxShadow: "0 0 12px rgba(234,179,8,0.6)" }}
+        style={{
+          width: `${progress}%`,
+          boxShadow: "0 0 12px rgba(234,179,8,0.6)",
+        }}
       />
     </div>
   );

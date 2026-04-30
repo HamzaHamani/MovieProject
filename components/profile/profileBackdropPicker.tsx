@@ -8,7 +8,12 @@ import {
   showSuccessNotification,
   showErrorNotification,
 } from "@/components/notificationSystem";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -411,9 +416,12 @@ export default function ProfileBackdropPicker({
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent className="max-w-2xl border-0 bg-transparent shadow-none backdrop-blur-0 [&>button]:hidden">
-            <DialogTitle className="sr-only">Change Profile Backdrop</DialogTitle>
+            <DialogTitle className="sr-only">
+              Change Profile Backdrop
+            </DialogTitle>
             <DialogDescription className="sr-only">
-              Select a movie or TV show and choose a backdrop to set as your profile background
+              Select a movie or TV show and choose a backdrop to set as your
+              profile background
             </DialogDescription>
             <div className="max-h-[70vh] overflow-y-auto">
               {contentProps.children}

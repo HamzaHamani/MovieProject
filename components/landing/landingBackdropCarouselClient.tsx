@@ -42,7 +42,7 @@ export default function LandingBackdropCarouselClient({
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Background Carousel */}
-      <div className="relative h-full w-full min-h-screen">
+      <div className="relative h-full min-h-screen w-full">
         {currentMovie?.backdrop_path && (
           <>
             <motion.div
@@ -55,7 +55,9 @@ export default function LandingBackdropCarouselClient({
             >
               <Image
                 src={`https://image.tmdb.org/t/p/original${currentMovie.backdrop_path}`}
-                alt={currentMovie.title || currentMovie.name || "Movie backdrop"}
+                alt={
+                  currentMovie.title || currentMovie.name || "Movie backdrop"
+                }
                 fill
                 className="object-cover"
                 priority
@@ -66,10 +68,10 @@ export default function LandingBackdropCarouselClient({
             {/* Multiple overlays for unique design */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/60" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-backgroundM" />
-            
+
             {/* Accent lines */}
             <div className="absolute inset-0">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primaryM-500 to-transparent opacity-40" />
+              <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-transparent via-primaryM-500 to-transparent opacity-40" />
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primaryM-500 to-transparent opacity-40" />
             </div>
           </>
@@ -103,7 +105,7 @@ export default function LandingBackdropCarouselClient({
           transition={{ duration: 0.5 }}
           className="absolute bottom-6 left-6 z-10 max-w-md rounded-lg border border-primaryM-500/20 bg-black/30 p-4 backdrop-blur-sm xmd:left-4 xmd:max-w-xs xmd:p-3 smd:bottom-4 smd:left-3 smd:max-w-[220px] smd:p-2"
         >
-          <h3 className="line-clamp-1 text-base font-medium tracking-tight text-white font-sans xmd:text-base smd:text-sm">
+          <h3 className="line-clamp-1 font-sans text-base font-medium tracking-tight text-white xmd:text-base smd:text-sm">
             {currentMovie.title || currentMovie.name}
           </h3>
         </motion.div>
