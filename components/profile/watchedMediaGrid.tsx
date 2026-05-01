@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useWatchedMedia, type WatchedMediaItem } from "@/hooks/useWatchedMedia";
+import {
+  useWatchedMedia,
+  type WatchedMediaItem,
+} from "@/hooks/useWatchedMedia";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import Link from "next/link";
 import { Star, Film, Tv, Play } from "lucide-react";
@@ -57,8 +60,10 @@ export function WatchedMediaGrid({
     });
   }, [watchedItems, filter]);
 
-  const movieCount = watchedItems?.filter((item) => item.mediaType === "movie").length ?? 0;
-  const tvCount = watchedItems?.filter((item) => item.mediaType === "tv").length ?? 0;
+  const movieCount =
+    watchedItems?.filter((item) => item.mediaType === "movie").length ?? 0;
+  const tvCount =
+    watchedItems?.filter((item) => item.mediaType === "tv").length ?? 0;
   const totalCount = watchedItems?.length ?? 0;
 
   if (isLoading) {
@@ -77,8 +82,8 @@ export function WatchedMediaGrid({
           onClick={() => setFilter("all")}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
             filter === "all"
-              ? "bg-primaryM-500/20 text-primaryM-400 border border-primaryM-500/40"
-              : "bg-white/[0.05] text-gray-300 border border-white/10 hover:bg-white/10"
+              ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
+              : "border border-white/10 bg-white/[0.05] text-gray-300 hover:bg-white/10"
           }`}
         >
           <span>All</span>
@@ -91,8 +96,8 @@ export function WatchedMediaGrid({
           onClick={() => setFilter("movie")}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
             filter === "movie"
-              ? "bg-primaryM-500/20 text-primaryM-400 border border-primaryM-500/40"
-              : "bg-white/[0.05] text-gray-300 border border-white/10 hover:bg-white/10"
+              ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
+              : "border border-white/10 bg-white/[0.05] text-gray-300 hover:bg-white/10"
           }`}
         >
           <Film className="h-4 w-4" />
@@ -106,8 +111,8 @@ export function WatchedMediaGrid({
           onClick={() => setFilter("tv")}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
             filter === "tv"
-              ? "bg-primaryM-500/20 text-primaryM-400 border border-primaryM-500/40"
-              : "bg-white/[0.05] text-gray-300 border border-white/10 hover:bg-white/10"
+              ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
+              : "border border-white/10 bg-white/[0.05] text-gray-300 hover:bg-white/10"
           }`}
         >
           <Tv className="h-4 w-4" />
@@ -121,7 +126,7 @@ export function WatchedMediaGrid({
       {/* Media Grid */}
       {filteredItems.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-12 text-center">
-          <div className="flex justify-center mb-4">
+          <div className="mb-4 flex justify-center">
             {filter === "movie" ? (
               <Film className="h-12 w-12 text-gray-600" />
             ) : filter === "tv" ? (
@@ -180,7 +185,9 @@ export function WatchedMediaGrid({
                       </div>
                       <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-gray-300">
                         <span className="flex items-center gap-1">
-                          {item.watchType === "rewatch" ? "Rewatch" : "First watch"}
+                          {item.watchType === "rewatch"
+                            ? "Rewatch"
+                            : "First watch"}
                         </span>
                         {item.rating !== null && (
                           <span className="flex items-center gap-1 text-primaryM-500">

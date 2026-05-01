@@ -258,7 +258,7 @@ function ProfilePosterGrid({
           {seeMoreLink && items.length > maxItems && (
             <Link
               href={seeMoreLink}
-              className="text-xs font-medium text-primaryM-500 hover:text-primaryM-400 transition underline underline-offset-2"
+              className="text-xs font-medium text-primaryM-500 underline underline-offset-2 transition hover:text-primaryM-400"
             >
               See all
             </Link>
@@ -777,14 +777,14 @@ export default async function Page({
                   <div className="mt-4 flex flex-wrap gap-2 text-xs text-gray-300">
                     <Link
                       href={`/profile/${username ?? usernameParam}/watched?filter=movie`}
-                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 transition hover:bg-white/10 hover:border-primaryM-500/40"
+                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 transition hover:border-primaryM-500/40 hover:bg-white/10"
                     >
                       {loggedMovies.length} film
                       {loggedMovies.length === 1 ? "" : "s"}
                     </Link>
                     <Link
                       href={`/profile/${username ?? usernameParam}/watched?filter=tv`}
-                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 transition hover:bg-white/10 hover:border-primaryM-500/40"
+                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 transition hover:border-primaryM-500/40 hover:bg-white/10"
                     >
                       {tvShowsWatchedCount} show
                       {tvShowsWatchedCount === 1 ? "" : "s"}

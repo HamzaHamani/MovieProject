@@ -17,13 +17,10 @@ interface Props {
   searchParams: Promise<{ filter?: string }>;
 }
 
-export default async function WatchedPage({
-  params,
-  searchParams,
-}: Props) {
+export default async function WatchedPage({ params, searchParams }: Props) {
   const { username: usernameParam } = await params;
   const { filter } = await searchParams;
-  
+
   const profileUser = await getUserDbProfileByUsername(usernameParam);
   if (!profileUser) notFound();
 
@@ -40,7 +37,7 @@ export default async function WatchedPage({
           <div className="space-y-4">
             <Link
               href={`/profile/${usernameParam}`}
-              className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-300 transition"
+              className="inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-gray-300"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to profile
@@ -50,7 +47,8 @@ export default async function WatchedPage({
               <div className="flex items-center gap-2">
                 <Clock3 className="h-6 w-6 text-primaryM-500" />
                 <h1 className="text-4xl font-semibold text-white lg:text-3xl sm:text-2xl">
-                  {profileUser.name ?? profileUser.username ?? "User"}'s Watched Media
+                  {profileUser.name ?? profileUser.username ?? "User"}'s Watched
+                  Media
                 </h1>
               </div>
               <p className="text-sm text-gray-400">

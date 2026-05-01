@@ -81,12 +81,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const loggedMovies = await getLoggedMoviesForUser(userId);
-    
+
     const resolvedPairs = await Promise.all(
-      loggedMovies.map(async (item) => [
-        item.showId,
-        await resolveMediaById(item.showId),
-      ] as const)
+      loggedMovies.map(
+        async (item) =>
+          [item.showId, await resolveMediaById(item.showId)] as const,
+      ),
     );
 
     const mediaMap = Object.fromEntries(resolvedPairs);
@@ -94,6 +94,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(mediaMap);
   } catch (error) {
     console.error("Error fetching watched media:", error);
-    return NextResponse.json({ error: "Failed to fetch media" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch media" },
+      { status: 500 },
+    );
   }
 }

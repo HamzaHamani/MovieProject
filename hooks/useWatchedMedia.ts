@@ -18,7 +18,7 @@ export function useWatchedMedia(userId: string) {
     queryKey: ["watchedMedia", userId],
     queryFn: async () => {
       const loggedMovies = await getLoggedMoviesForUser(userId);
-      
+
       return loggedMovies.map((item) => {
         const decoded = decodeStoredMediaId(item.showId);
         return {
