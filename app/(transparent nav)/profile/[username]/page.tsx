@@ -220,6 +220,7 @@ function ProfilePosterGrid({
   emptyTitle,
   emptyDescription,
   canEdit,
+  seeMoreLink,
 }: {
   title: string;
   description: string;
@@ -231,6 +232,7 @@ function ProfilePosterGrid({
   emptyTitle: string;
   emptyDescription: string;
   canEdit: boolean;
+  seeMoreLink?: string;
 }) {
   const visibleItems = items.slice(0, maxItems);
 
@@ -249,8 +251,18 @@ function ProfilePosterGrid({
             </div>
           ) : null}
         </div>
-        <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-gray-300">
-          {items.length} title{items.length === 1 ? "" : "s"}
+        <div className="flex flex-col items-end gap-2">
+          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-gray-300">
+            {items.length} title{items.length === 1 ? "" : "s"}
+          </div>
+          {seeMoreLink && items.length > maxItems && (
+            <Link
+              href={seeMoreLink}
+              className="text-xs font-medium text-primaryM-500 hover:text-primaryM-400 transition underline underline-offset-2"
+            >
+              See all
+            </Link>
+          )}
         </div>
       </div>
 
@@ -572,6 +584,7 @@ export default async function Page({
       ...watchlistMovies.map((item) => item.movieId),
       ...recentActivity.map((item) => item.showId),
       ...recentReviews.map((item) => item.showId),
+      ...loggedMovies.map((item) => item.showId),
     ]),
   );
 
@@ -580,8 +593,41 @@ export default async function Page({
   );
   const mediaMap = new Map<string, ResolvedMedia | null>(resolvedPairs);
 
+  // Separate logged movies and TV shows
+  const loggedMoviesWatched = loggedMovies
+    .filter((item) => {
+      const media = mediaMap.get(item.showId);
+      return media?.mediaTypeLabel === "Movie";
+    })
+    .map((item) => ({
+      movieId: item.showId,
+      addedAt: item.watchedAt,
+      sourceListName: "Watched",
+    }));
+
+  const loggedTvShowsWatched = loggedMovies
+    .filter((item) => {
+      const media = mediaMap.get(item.showId);
+      return media?.mediaTypeLabel === "TV Show";
+    })
+    .map((item) => ({
+      movieId: item.showId,
+      addedAt: item.watchedAt,
+      sourceListName: "Watched",
+    }));
+
+  // Sort by date descending
+  loggedMoviesWatched.sort(
+    (a, b) => toTimestamp(b.addedAt) - toTimestamp(a.addedAt),
+  );
+  loggedTvShowsWatched.sort(
+    (a, b) => toTimestamp(b.addedAt) - toTimestamp(a.addedAt),
+  );
+
   const totalSavedMovies = allSavedMovies.length;
   const reviewedCount = recentReviews.length;
+  const moviesWatchedCount = loggedMoviesWatched.length;
+  const tvShowsWatchedCount = loggedTvShowsWatched.length;
 
   const displayName =
     profileUser.name?.trim() || profileUser.email || "Profile";
@@ -729,10 +775,20 @@ export default async function Page({
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2 text-xs text-gray-300">
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                    <Link
+                      href={`/profile/${username ?? usernameParam}/watched?filter=movie`}
+                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 transition hover:bg-white/10 hover:border-primaryM-500/40"
+                    >
                       {loggedMovies.length} film
                       {loggedMovies.length === 1 ? "" : "s"}
-                    </span>
+                    </Link>
+                    <Link
+                      href={`/profile/${username ?? usernameParam}/watched?filter=tv`}
+                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 transition hover:bg-white/10 hover:border-primaryM-500/40"
+                    >
+                      {tvShowsWatchedCount} show
+                      {tvShowsWatchedCount === 1 ? "" : "s"}
+                    </Link>
                     <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
                       {favoriteMovies.length} favorite
                       {favoriteMovies.length === 1 ? "" : "s"}
@@ -844,6 +900,42 @@ export default async function Page({
                   : "This user has no watchlist yet."
               }
               canEdit={isOwner}
+            />
+
+            <ProfilePosterGrid
+              title="Movies Watched"
+              description="Movies you have logged and watched."
+              icon={Clock3}
+              sectionType="likes"
+              items={loggedMoviesWatched}
+              mediaMap={mediaMap}
+              maxItems={12}
+              emptyTitle="No movies watched yet"
+              emptyDescription={
+                isOwner
+                  ? "Log a movie to add it to your watched list."
+                  : "This user has no movies watched yet."
+              }
+              canEdit={false}
+              seeMoreLink={`/profile/${username ?? usernameParam}/watched?filter=movie`}
+            />
+
+            <ProfilePosterGrid
+              title="TV Shows Watched"
+              description="TV shows you have logged and watched."
+              icon={Clock3}
+              sectionType="likes"
+              items={loggedTvShowsWatched}
+              mediaMap={mediaMap}
+              maxItems={12}
+              emptyTitle="No TV shows watched yet"
+              emptyDescription={
+                isOwner
+                  ? "Log a TV show to add it to your watched list."
+                  : "This user has no TV shows watched yet."
+              }
+              canEdit={false}
+              seeMoreLink={`/profile/${username ?? usernameParam}/watched?filter=tv`}
             />
 
             <section

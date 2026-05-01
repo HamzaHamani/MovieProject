@@ -9,6 +9,7 @@ import NotificationBell from "./notificationBell";
 import TransparentNavbarShell from "./transparentNavbarShell";
 
 const links = [
+  { href: "/", label: "Home" },
   { href: "/explore", label: "Explore" },
   { href: "/upcoming", label: "Upcoming" },
   { href: "/bookmarks", label: "Bookmarks" },

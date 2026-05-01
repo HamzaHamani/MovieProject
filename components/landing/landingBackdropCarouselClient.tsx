@@ -61,7 +61,7 @@ export default function LandingBackdropCarouselClient({
                 fill
                 className="object-cover"
                 priority
-                quality={85}
+                unoptimized
               />
             </motion.div>
 

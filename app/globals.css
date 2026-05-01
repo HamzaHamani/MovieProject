@@ -147,3 +147,20 @@ it-scrollbar {
   display: none; /* 
 .hide-scrollbar::-webkSafari and Chrome */
 }
+
+@layer utilities {
+  /* Optional legacy gradient popup surface. Add this class to DialogContent/DrawerContent when needed. */
+  .popup-gradient-shell {
+    background-image: radial-gradient(
+        circle at top,
+        rgba(234, 179, 8, 0.14),
+        transparent 45%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(12, 12, 12, 0.96) 0%,
+        rgba(8, 8, 8, 0.96) 100%
+      );
+    background-color: rgba(10, 10, 14, 0.92);
+  }
+}

@@ -283,7 +283,7 @@ export default function ListCollaboratorsManager({
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 text-textMain">
+        <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-hidden p-5">
           <DialogHeader className="pb-1">
             <DialogTitle className="text-white">
               Invite Collaborators
@@ -310,7 +310,7 @@ export default function ListCollaboratorsManager({
                 <UserRoundCog className="h-4 w-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 text-textMain">
+            <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-hidden p-5">
               <DialogHeader className="pb-1">
                 <DialogTitle className="text-white">
                   Manage Collaborators
@@ -335,7 +335,7 @@ export default function ListCollaboratorsManager({
                 <UserRoundCog className="h-4 w-4" />
               </Button>
             </DrawerTrigger>
-            <DrawerContent className="max-h-[88svh] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 text-textMain">
+            <DrawerContent className="max-h-[88svh] overflow-hidden px-4">
               <DrawerHeader className="px-0 pb-2 pt-2 text-left">
                 <DrawerTitle className="text-white">
                   Manage Collaborators

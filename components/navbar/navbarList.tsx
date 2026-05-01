@@ -10,8 +10,8 @@ export default function NavbarList({ links }: Props) {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
-    if (href === "/explore") {
-      return pathname === "/explore" || pathname === "/";
+    if (href === "/") {
+      return pathname === "/";
     }
 
     return pathname === href || pathname.startsWith(`${href}/`);

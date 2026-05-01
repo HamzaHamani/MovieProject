@@ -12,6 +12,7 @@ import { TspecifiedMovie } from "@/types/api";
 import { TspecifiedTv } from "@/types/apiTv";
 import { Button } from "../ui/button";
 import { sendLoggedMovieTv } from "@/lib/actions";
+import { encodeStoredMediaId } from "@/lib/utils";
 import { showProfileMovieToast } from "@/components/profile/profileToasts";
 import { showErrorNotification } from "@/components/notificationSystem";
 
@@ -100,7 +101,7 @@ export default function ModeleLog({
       date: date.toISOString(),
       review,
       watchType: watchTime,
-      showId: show.id,
+      showId: encodeStoredMediaId(show.id, typeM === "movie" ? "movie" : "tv"),
     };
 
     try {

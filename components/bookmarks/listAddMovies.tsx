@@ -211,7 +211,7 @@ export default function ListAddMovies({
             Add movies
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-y-auto border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] p-5 text-textMain">
+        <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-y-auto p-5">
           <DialogHeader className="pb-1">
             <DialogTitle className="text-white">Add movies</DialogTitle>
             <DialogDescription className="text-gray-300">
@@ -236,7 +236,7 @@ export default function ListAddMovies({
           Add movies
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[88svh] overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.14),transparent_45%),linear-gradient(180deg,rgba(12,12,12,0.96)_0%,rgba(8,8,8,0.96)_100%)] px-4 text-textMain">
+      <DrawerContent className="max-h-[88svh] overflow-hidden px-4">
         <DrawerHeader className="px-0 pb-2 pt-2 text-left">
           <DrawerTitle className="text-white">Add movies</DrawerTitle>
           <DrawerDescription className="text-gray-300">
