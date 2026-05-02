@@ -22,7 +22,7 @@ type Props = {
   }>;
 };
 
-type SearchQueryKey = [string, SearchMode, number, string];
+type SearchQueryKey = [string, SearchMode, string, number];
 
 function normalizeSearchMode(value: string | undefined): SearchMode {
   if (value === "film" || value === "tv" || value === "person") {
