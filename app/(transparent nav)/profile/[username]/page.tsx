@@ -170,7 +170,7 @@ async function resolveMediaById(id: string): Promise<ResolvedMedia | null> {
         title: movie.title ?? "Untitled",
         posterPath: movie.poster_path,
         voteAverage: Number(movie.vote_average ?? 0),
-        mediaTypeLabel: "Film",
+        mediaTypeLabel: "Movie",
         year: movie.release_date?.slice(0, 4) ?? "----",
         href: `/movie/${resolvedId}`,
       };
@@ -187,7 +187,7 @@ async function resolveMediaById(id: string): Promise<ResolvedMedia | null> {
       title: movie.title ?? "Untitled",
       posterPath: movie.poster_path,
       voteAverage: Number(movie.vote_average ?? 0),
-      mediaTypeLabel: "Film",
+      mediaTypeLabel: "Movie",
       year: movie.release_date?.slice(0, 4) ?? "----",
       href: `/movie/${resolvedId}`,
     };
@@ -598,7 +598,7 @@ export default async function Page({
   const loggedMoviesWatched = loggedMovies
     .filter((item) => {
       const media = mediaMap.get(item.showId);
-      return media?.mediaTypeLabel === "Film";
+      return media?.mediaTypeLabel === "Movie";
     })
     .map((item) => ({
       movieId: item.showId,
