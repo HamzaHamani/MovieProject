@@ -537,7 +537,9 @@ export default function EditProfileDialog({
                               {selectedBackdropMovie.title}
                             </p>
                             <p className="mt-1 text-xs text-gray-300">
-                              {selectedBackdropMovie.mediaType === "tv" ? "TV" : "Movie"}
+                              {selectedBackdropMovie.mediaType === "tv"
+                                ? "TV"
+                                : "Movie"}
                             </p>
                           </div>
                         </div>
