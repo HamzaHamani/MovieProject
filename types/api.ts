@@ -152,3 +152,34 @@ export const searchMultiSchema = z.object({
 });
 
 export type TsearchMovie = z.infer<typeof searchMultiSchema>;
+
+export const SearchModeSchema = z.enum(["all", "film", "tv", "person"]);
+export type SearchMode = z.infer<typeof SearchModeSchema>;
+
+export const SearchResultKindSchema = z.enum(["film", "tv", "person", "user"]);
+export type SearchResultKind = z.infer<typeof SearchResultKindSchema>;
+
+export const searchResultSchema = z.object({
+  kind: SearchResultKindSchema,
+  id: z.string(),
+  title: z.string(),
+  subtitle: z.string().optional(),
+  imagePath: z.string().nullable(),
+  href: z.string(),
+  mediaLabel: z.string(),
+  voteAverage: z.number().nullable().optional(),
+  year: z.string().optional(),
+  username: z.string().optional(),
+  bio: z.string().optional(),
+});
+
+export type SearchResult = z.infer<typeof searchResultSchema>;
+
+export const searchApiResponseSchema = z.object({
+  page: z.number(),
+  total_pages: z.number(),
+  total_results: z.number(),
+  results: z.array(searchResultSchema),
+});
+
+export type TsearchApiResponse = z.infer<typeof searchApiResponseSchema>;

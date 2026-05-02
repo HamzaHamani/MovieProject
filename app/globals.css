@@ -9,7 +9,7 @@
 }
 @layer base {
   :root {
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 54 100% 94.1%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -37,6 +37,20 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+  }
+}
+
+@layer utilities {
+  .text-white,
+  .text-white\/80,
+  .text-white\/70,
+  .text-white\/60,
+  .text-white\/50,
+  .text-white\/40,
+  .text-white\/30,
+  .text-white\/20,
+  .text-white\/10 {
+    color: #fffce1 !important;
   }
 }
 

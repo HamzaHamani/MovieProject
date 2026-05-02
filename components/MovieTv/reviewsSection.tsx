@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { stopInternalLoad } from "@/components/ui/loadingBus";
 import Link from "next/link";
 import { TReviewItem } from "@/lib/actions";
+import MentionText from "@/components/general/mentionText";
 
 type Props = {
   items: TReviewItem[];
@@ -147,7 +148,10 @@ export default function ReviewsSection({ items, mediaId, mediaType }: Props) {
                 </div>
 
                 <p className="line-clamp-4 text-sm text-gray-300">
-                  {getReviewText(review)}
+                  <MentionText
+                    text={getReviewText(review)}
+                    disableLinks={isLocalSocialReview}
+                  />
                 </p>
 
                 {typeof review.author_details?.rating === "number" && (

@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { TReviewItem } from "@/lib/actions";
+import MentionText from "@/components/general/mentionText";
 
 type ReviewFeed = {
   items: TReviewItem[];
@@ -177,7 +178,12 @@ export default function ReviewsTabs({
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-300">{reviewText(review)}</p>
+                <p className="text-sm text-gray-300">
+                  <MentionText
+                    text={reviewText(review)}
+                    disableLinks={Boolean(href)}
+                  />
+                </p>
 
                 {typeof review.author_details?.rating === "number" && (
                   <p className="mt-2 text-xs text-primaryM-400">

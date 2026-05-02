@@ -76,7 +76,7 @@ const config = {
       },
       colors: {
         backgroundM: "#0d0c0f",
-        textMain: "#F8FCFF",
+        textMain: "#FFFCE1",
         primaryM: {
           50: "#fefaed",
           100: "#fcf0c8",

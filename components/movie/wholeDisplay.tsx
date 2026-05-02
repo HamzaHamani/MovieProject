@@ -44,7 +44,7 @@ export default function WholeDisplay({ response, similar, activeTab }: Props) {
               "linear-gradient(to bottom, rgba(13, 12, 15, 0.01),rgba(13, 12, 15, 0.5), #0d0c0f, #0d0c0f)",
           }}
         ></div>
-        <section className="relative z-20 mx-auto flex h-[107%] w-[90%] flex-col justify-end gap-5">
+        <section className="relative z-20 mx-auto flex h-[125%] w-[90%] flex-col justify-end gap-5">
           <FirstContainer response={response} typeM="movie" />
         </section>
 

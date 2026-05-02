@@ -33,7 +33,7 @@ async function resolveMediaById(id: string) {
         title: movie.title ?? "Untitled",
         posterPath: movie.poster_path,
         voteAverage: Number(movie.vote_average ?? 0),
-        mediaTypeLabel: "Movie",
+        mediaTypeLabel: "Film",
         year: movie.release_date?.slice(0, 4) ?? "----",
         href: `/movie/${resolvedId}`,
       };
@@ -49,7 +49,7 @@ async function resolveMediaById(id: string) {
       title: movie.title ?? "Untitled",
       posterPath: movie.poster_path,
       voteAverage: Number(movie.vote_average ?? 0),
-      mediaTypeLabel: "Movie",
+      mediaTypeLabel: "Film",
       year: movie.release_date?.slice(0, 4) ?? "----",
       href: `/movie/${resolvedId}`,
     };

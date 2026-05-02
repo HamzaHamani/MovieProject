@@ -26,6 +26,7 @@ import ShelfAddMovies from "@/components/profile/shelfAddMovies";
 import UserStatisticsSection from "../../../../components/profile/userStatisticsSection";
 import { ReplyForm } from "@/components/profile/replyForm";
 import { Separator } from "@/components/ui/separator";
+import MentionText from "@/components/general/mentionText";
 import {
   addReviewReply,
   getBookmarks,
@@ -169,7 +170,7 @@ async function resolveMediaById(id: string): Promise<ResolvedMedia | null> {
         title: movie.title ?? "Untitled",
         posterPath: movie.poster_path,
         voteAverage: Number(movie.vote_average ?? 0),
-        mediaTypeLabel: "Movie",
+        mediaTypeLabel: "Film",
         year: movie.release_date?.slice(0, 4) ?? "----",
         href: `/movie/${resolvedId}`,
       };
@@ -186,7 +187,7 @@ async function resolveMediaById(id: string): Promise<ResolvedMedia | null> {
       title: movie.title ?? "Untitled",
       posterPath: movie.poster_path,
       voteAverage: Number(movie.vote_average ?? 0),
-      mediaTypeLabel: "Movie",
+      mediaTypeLabel: "Film",
       year: movie.release_date?.slice(0, 4) ?? "----",
       href: `/movie/${resolvedId}`,
     };
@@ -451,7 +452,7 @@ function ReviewRow({
           </div>
 
           <p className="mt-3 line-clamp-4 text-sm leading-6 text-gray-200">
-            {review}
+            <MentionText text={review} disableLinks />
           </p>
 
           <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
@@ -471,7 +472,7 @@ function ReviewRow({
                     <span className="font-semibold text-white">
                       @{reply.username ?? "user"}
                     </span>{" "}
-                    {reply.content}
+                    <MentionText text={reply.content} disableLinks />
                   </div>
                 ))}
               </div>
@@ -597,7 +598,7 @@ export default async function Page({
   const loggedMoviesWatched = loggedMovies
     .filter((item) => {
       const media = mediaMap.get(item.showId);
-      return media?.mediaTypeLabel === "Movie";
+      return media?.mediaTypeLabel === "Film";
     })
     .map((item) => ({
       movieId: item.showId,
@@ -722,7 +723,7 @@ export default async function Page({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-gray-400">
                       <UserRound className="h-4 w-4 text-primaryM-500" />
-                      <span>Movie Profile</span>
+                      <span>Film Profile</span>
                     </div>
                     {isOwner && (
                       <ProfileBackdropPicker
@@ -741,7 +742,9 @@ export default async function Page({
                       ? `@${username}`
                       : profileUser.email ?? "No email linked"}
                   </p>
-                  <p className="mt-1 text-sm text-gray-400">{profileBio}</p>
+                  <p className="mt-1 text-sm text-gray-400">
+                    <MentionText text={profileBio} />
+                  </p>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     {isOwner && username ? (
@@ -756,7 +759,7 @@ export default async function Page({
                       asChild
                       className="border border-white/10 bg-white/[0.06] text-white hover:bg-white/[0.1]"
                     >
-                      <Link href="/explore">Explore Movies</Link>
+                      <Link href="/explore">Explore Films</Link>
                     </Button>
                     {!isOwner && viewer?.id && username ? (
                       <div className="flex flex-wrap items-center gap-2">
@@ -853,7 +856,7 @@ export default async function Page({
           <div className="space-y-8">
             <ProfilePosterGrid
               title="Favorite Movies"
-              description="Your pinned movies, surfaced from your favorites list."
+              description="Your pinned films, surfaced from your favorites list."
               icon={Heart}
               sectionType="favorites"
               items={favoriteMovies}
@@ -863,13 +866,13 @@ export default async function Page({
               emptyDescription={
                 isOwner
                   ? "Create or rename a list to Favorites and your pinned titles will appear here."
-                  : "This user has no favorite movies yet."
+                  : "This user has no favorite films yet."
               }
               canEdit={isOwner}
             />
 
             <ProfilePosterGrid
-              title="Movies I Like"
+              title="Films I Like"
               description="The titles you have saved across your lists, shown as a bigger shelf."
               icon={ThumbsUp}
               sectionType="likes"
@@ -880,14 +883,14 @@ export default async function Page({
               emptyDescription={
                 isOwner
                   ? "Add titles to any list and they will show up here."
-                  : "This user has no liked movies yet."
+                  : "This user has no liked films yet."
               }
               canEdit={isOwner}
             />
 
             <ProfilePosterGrid
               title="Watchlist"
-              description="Movies and shows you still want to get to."
+              description="Films and shows you still want to get to."
               icon={Bookmark}
               sectionType="watchlist"
               items={watchlistMovies}
@@ -903,18 +906,18 @@ export default async function Page({
             />
 
             <ProfilePosterGrid
-              title="Movies Watched"
-              description="Movies you have logged and watched."
+              title="Films Watched"
+              description="Films you have logged and watched."
               icon={Clock3}
               sectionType="likes"
               items={loggedMoviesWatched}
               mediaMap={mediaMap}
               maxItems={12}
-              emptyTitle="No movies watched yet"
+              emptyTitle="No films watched yet"
               emptyDescription={
                 isOwner
-                  ? "Log a movie to add it to your watched list."
-                  : "This user has no movies watched yet."
+                  ? "Log a film to add it to your watched list."
+                  : "This user has no films watched yet."
               }
               canEdit={false}
               seeMoreLink={`/profile/${username ?? usernameParam}/watched?filter=movie`}
@@ -962,7 +965,7 @@ export default async function Page({
               {recentActivity.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-white/15 bg-black/20 p-5 text-sm text-gray-300">
                   {isOwner
-                    ? "Log a movie or TV show to start building your activity feed."
+                    ? "Log a film or TV show to start building your activity feed."
                     : "This user has no recent activity yet."}
                 </div>
               ) : (

@@ -15,7 +15,7 @@ export default function Search({}: Props) {
           Discover Your Next
         </h1>
         <p className="textGradient -mt-28 text-center font-extrabold uppercase xl:-mt-24 h1text2:text-[145px] h1text3:-mt-28 h1text4:-mt-24 h1text4:text-[130px] h1text5:-mt-20 h1text5:text-[120px] h1text6:-mt-16 h1text6:text-[105px] h1text7:text-[95px] lg:-mt-16 lg:text-[90px] h1text8:-mt-12 h1text8:text-[77px] xsmd:text-[65px] md:-mt-10 md:text-[57px] smd:text-[55px] sm:-mt-8 ss:text-[50px] sss:text-[45px] s:-mt-6 s:text-[40px] h1text9:-mt-4 h1text9:text-[30px] xss:-mt-4 xss:text-[30px] xs:-mt-4 xs:text-[27px]">
-          favorite movie or
+          favorite film or
         </p>
         <p className="textGradient -mt-28 text-center font-extrabold uppercase xl:-mt-24 h1text3:-mt-28 h1text4:-mt-24 h1text4:text-[130px] h1text5:-mt-20 h1text5:text-[120px] h1text6:-mt-16 h1text6:text-[105px] h1text7:text-[95px] lg:-mt-16 lg:text-[90px] h1text8:-mt-12 h1text8:text-[77px] xsmd:text-[65px] md:-mt-10 md:text-[57px] smd:text-[55px] sm:-mt-8 sss:text-[45px] s:-mt-6 s:text-[40px] h1text9:-mt-4 h1text9:text-[30px] xss:-mt-4 xss:text-[30px] xs:-mt-4 xs:text-[27px]">
           tv show here

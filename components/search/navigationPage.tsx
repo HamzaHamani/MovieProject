@@ -1,8 +1,8 @@
 import usePage from "@/hooks/usePage";
-import { TsearchMovie } from "@/types/api";
+import type { TsearchApiResponse } from "@/types/api";
 
 type Props = {
-  data: TsearchMovie;
+  data: TsearchApiResponse;
 };
 
 export default function NavigationPage({ data }: Props) {

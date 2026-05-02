@@ -4,24 +4,20 @@ import { useRouter } from "next/navigation";
 import { PlaceholdersAndVanishInput } from "../ui/PlaceholdersAndVanishInput";
 import { useEffect, useState } from "react";
 import usePage from "@/hooks/usePage";
+import { useSearchParams } from "next/navigation";
 
 export function SearchVanishComp({ className }: { className?: string }) {
   const router = useRouter();
   const { setPage } = usePage();
-  const [originUrl, setOriginUrl] = useState("");
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setOriginUrl(window.location.origin);
-    }
-  }, []);
   const placeholders = [
-    "Search for a movie...",
+    "Search for a film...",
     "Find your favorite TV show...",
     "Discover new releases...",
     "What's trending now?",
     "Explore top-rated films...",
-    "Find a classic movie...",
+    "Find a classic film...",
     "Search for a TV series...",
     "What's popular this week?",
   ];
@@ -32,9 +28,12 @@ export function SearchVanishComp({ className }: { className?: string }) {
     const formData = new FormData(e.currentTarget);
     const searchValue = formData.get("search");
     setPage(1);
+    const activeType = searchParams.get("type") ?? "all";
 
     if (searchValue) {
-      router.push(`${originUrl}/search/${searchValue}`);
+      router.push(
+        `/search/${encodeURIComponent(String(searchValue))}?type=${activeType}`,
+      );
     }
   };
   return (

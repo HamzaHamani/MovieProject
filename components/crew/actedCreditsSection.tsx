@@ -33,6 +33,7 @@ export default async function ActedCreditsSection({
       title="Acted In"
       items={actedIn}
       emptyText="No acting credits found."
+      enableMediaFilter
     />
   );
 }

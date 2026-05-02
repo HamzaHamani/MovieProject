@@ -10,8 +10,7 @@ type Props = {
 export default function CastComponent({ id, typeM }: Props) {
   return (
     <div className="mb-10 flex flex-col gap-4">
-      {" "}
-      <h3 className="mb-4 text-3xl font-medium xl:text-2xl">Top Cast</h3>
+      <h3 className="mb-4 text-3xl font-medium xl:text-2xl">Cast & Crew</h3>
       <div className="bg-ed-200">
         <Suspense fallback={<CarouselCLoadingIndicator />}>
           <Cast typeM={typeM} id={id} />

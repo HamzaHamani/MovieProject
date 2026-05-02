@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { CalendarIcon, Star } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -15,6 +14,7 @@ import { sendLoggedMovieTv } from "@/lib/actions";
 import { encodeStoredMediaId } from "@/lib/utils";
 import { showProfileMovieToast } from "@/components/profile/profileToasts";
 import { showErrorNotification } from "@/components/notificationSystem";
+import MentionTextarea from "@/components/ui/mentionTextarea";
 
 type Props = {
   typeM: "movie" | "tv" | undefined;
@@ -289,10 +289,10 @@ export default function ModeleLog({
             Review
           </label>
           <div className="mb-2 text-sm text-gray-400">(Optional)</div>
-          <Textarea
+          <MentionTextarea
             placeholder="Share your thoughts..."
             value={review}
-            onChange={(e) => setReview(e.target.value)}
+            onChange={setReview}
             className="min-h-[260px] w-full flex-1 resize-y border-white/20 bg-white/5 text-white placeholder:text-gray-400 sm:min-h-[160px]"
             rows={8}
             maxLength={500}

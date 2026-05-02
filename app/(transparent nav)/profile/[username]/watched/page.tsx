@@ -52,7 +52,7 @@ export default async function WatchedPage({ params, searchParams }: Props) {
                 </h1>
               </div>
               <p className="text-sm text-gray-400">
-                All movies and TV shows they've logged and watched
+                All films and TV shows they've logged and watched
               </p>
             </div>
           </div>

@@ -2,14 +2,16 @@
 
 import { TPersonCreditItem } from "@/lib/actions";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
+import gsap from "gsap";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { RiStarSFill } from "react-icons/ri";
 
 type Props = {
   title: string;
   items: TPersonCreditItem[];
   emptyText: string;
+  enableMediaFilter?: boolean;
 };
 
 function getCreditTitle(credit: TPersonCreditItem): string {
@@ -86,31 +88,204 @@ function buildCreditHref(credit: TPersonCreditItem): string {
     : `/tv/${credit.id}`;
 }
 
-export default function CreditsGridClient({ title, items, emptyText }: Props) {
+export default function CreditsGridClient({
+  title,
+  items,
+  emptyText,
+  enableMediaFilter = false,
+}: Props) {
   const [visibleCount, setVisibleCount] = useState(12);
+  const [filter, setFilter] = useState<"all" | "film" | "tv">("all");
+  const [displayedItems, setDisplayedItems] = useState<TPersonCreditItem[]>(
+    () => items.slice(0, 12),
+  );
+  const cardRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const mountedRef = useRef(false);
+  const transitionRef = useRef<gsap.core.Timeline | null>(null);
+  const animatingRef = useRef(false);
+
+  const filteredItems = useMemo(() => {
+    if (!enableMediaFilter || filter === "all") return items;
+    if (filter === "film") {
+      return items.filter((item) => item.media_type === "movie");
+    }
+    return items.filter((item) => item.media_type === "tv");
+  }, [items, filter, enableMediaFilter]);
 
   const visibleItems = useMemo(
-    () => items.slice(0, visibleCount),
-    [items, visibleCount],
+    () => filteredItems.slice(0, visibleCount),
+    [filteredItems, visibleCount],
   );
 
-  const hasMore = items.length > visibleCount;
+  const visibleSignature = useMemo(
+    () =>
+      visibleItems
+        .map(
+          (item) =>
+            `${item.media_type}-${item.id}-${item.job ?? item.character ?? ""}`,
+        )
+        .join("|"),
+    [visibleItems],
+  );
+
+  const hasMore = filteredItems.length > visibleCount;
+
+  const movieCount = useMemo(
+    () => items.filter((item) => item.media_type === "movie").length,
+    [items],
+  );
+  const tvCount = useMemo(
+    () => items.filter((item) => item.media_type === "tv").length,
+    [items],
+  );
+
+  useEffect(() => {
+    const nextItems = visibleItems;
+
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      setDisplayedItems(nextItems);
+      return;
+    }
+
+    if (
+      visibleSignature ===
+      displayedItems
+        .map(
+          (item) =>
+            `${item.media_type}-${item.id}-${item.job ?? item.character ?? ""}`,
+        )
+        .join("|")
+    ) {
+      return;
+    }
+
+    transitionRef.current?.kill();
+    const outgoingCards = cardRefs.current.filter(
+      (node): node is HTMLAnchorElement => Boolean(node),
+    );
+
+    if (outgoingCards.length === 0) {
+      setDisplayedItems(nextItems);
+      return;
+    }
+
+    animatingRef.current = true;
+    transitionRef.current = gsap.timeline({
+      onComplete: () => {
+        setDisplayedItems(nextItems);
+      },
+    });
+
+    transitionRef.current.to(outgoingCards, {
+      autoAlpha: 0,
+      y: 18,
+      scale: 0.98,
+      duration: 0.5,
+      stagger: 0.015,
+      ease: "power2.inOut",
+    });
+
+    return () => {
+      transitionRef.current?.kill();
+    };
+  }, [displayedItems, visibleItems, visibleSignature]);
+
+  useLayoutEffect(() => {
+    if (!animatingRef.current) return;
+
+    const incomingCards = cardRefs.current.filter(
+      (node): node is HTMLAnchorElement => Boolean(node),
+    );
+
+    if (incomingCards.length === 0) {
+      animatingRef.current = false;
+      return;
+    }
+
+    const intro = gsap.fromTo(
+      incomingCards,
+      { autoAlpha: 0, y: 18, scale: 0.98 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.5,
+        stagger: 0.04,
+        ease: "power3.out",
+        onComplete: () => {
+          animatingRef.current = false;
+        },
+      },
+    );
+
+    return () => {
+      intro.kill();
+    };
+  }, [displayedItems]);
 
   return (
     <section className="space-y-4">
       <div className="flex items-end justify-between gap-3">
         <h2 className="text-2xl font-semibold">{title}</h2>
         <p className="text-sm text-zinc-400 md:text-xs">
-          {items.length} credits
+          {filteredItems.length} credits
         </p>
       </div>
 
-      {items.length === 0 ? (
+      {enableMediaFilter ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setFilter("all");
+              setVisibleCount(12);
+            }}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              filter === "all"
+                ? "border-primaryM-500 bg-primaryM-500 text-black"
+                : "border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+            }`}
+          >
+            All ({items.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setFilter("film");
+              setVisibleCount(12);
+            }}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              filter === "film"
+                ? "border-primaryM-500 bg-primaryM-500 text-black"
+                : "border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+            }`}
+          >
+            Films ({movieCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setFilter("tv");
+              setVisibleCount(12);
+            }}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              filter === "tv"
+                ? "border-primaryM-500 bg-primaryM-500 text-black"
+                : "border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+            }`}
+          >
+            TV Shows ({tvCount})
+          </button>
+        </div>
+      ) : null}
+
+      {filteredItems.length === 0 ? (
         <p className="text-sm text-zinc-400">{emptyText}</p>
       ) : (
         <>
           <div className="grid grid-cols-4 gap-4 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 s:grid-cols-1">
-            {visibleItems.map((credit) => {
+            {displayedItems.map((credit, index) => {
               const cardTitle = getCreditTitle(credit);
               const year = getCreditYear(credit);
               const rating = getCreditRating(credit);
@@ -120,6 +295,9 @@ export default function CreditsGridClient({ title, items, emptyText }: Props) {
                 <Link
                   key={`${title}-${credit.media_type}-${credit.id}-${credit.job ?? credit.character ?? ""}`}
                   href={buildCreditHref(credit)}
+                  ref={(node) => {
+                    cardRefs.current[index] = node;
+                  }}
                   className="group block w-[300px] overflow-hidden rounded-xl xl:w-[280px] lg:w-[270px] h1text8:w-[240px] xsmd:w-[270px] smd:w-[230px] sss:w-[210px] s:w-[230px]"
                 >
                   <div className="relative h-[430px] w-full overflow-hidden rounded-xl bg-zinc-800 lg:h-[390px] h1text8:h-[360px] xsmd:h-[390px] smd:h-[330px] sss:h-[320px] s:h-[350px]">

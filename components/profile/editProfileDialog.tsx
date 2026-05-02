@@ -27,10 +27,10 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { UploadDropzone } from "@/lib/uploadthing";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
+import MentionTextarea from "@/components/ui/mentionTextarea";
 
 type Props = {
   currentUsername: string;
@@ -326,11 +326,12 @@ export default function EditProfileDialog({
 
       <div className="space-y-2 rounded-xl border border-white/10 bg-black/25 p-3">
         <label className="text-sm text-gray-300">Bio</label>
-        <Textarea
+        <MentionTextarea
           value={bio}
-          onChange={(event) => setBio(event.target.value)}
+          onChange={setBio}
           maxLength={240}
-          placeholder="Tell people about your taste in movies..."
+          placeholder="Tell people about your taste in films..."
+          rows={5}
           className="min-h-[110px] border-white/15 bg-black/30 text-white placeholder:text-gray-500"
         />
         <p className="text-right text-xs text-gray-500">{bio.length}/240</p>
@@ -405,7 +406,7 @@ export default function EditProfileDialog({
               <Input
                 value={backdropQuery}
                 onChange={(event) => setBackdropQuery(event.target.value)}
-                placeholder="Search a movie or show..."
+                placeholder="Search a film or show..."
                 className="border-white/15 bg-black/30 text-white placeholder:text-gray-500"
               />
             ) : (
@@ -536,7 +537,7 @@ export default function EditProfileDialog({
                               {selectedBackdropMovie.title}
                             </p>
                             <p className="mt-1 text-xs text-gray-300">
-                              Backdrop {idx + 1}
+                              {item.mediaType === "tv" ? "TV" : "Film"}
                             </p>
                           </div>
                         </div>

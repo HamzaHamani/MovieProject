@@ -10,7 +10,7 @@ type Props = {
   posterPath: string | null;
   title: string;
   voteAverage: number | null | undefined;
-  mediaTypeLabel: "Movie" | "TV Show" | "TV";
+  mediaTypeLabel: "Film" | "Movie" | "TV Show" | "TV";
   year: string;
   className?: string;
   imageClassName?: string;

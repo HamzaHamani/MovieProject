@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import { ReplyForm } from "@/components/profile/replyForm";
 import ReviewLikeButton from "@/components/profile/reviewLikeButton";
+import MentionText from "@/components/general/mentionText";
 import {
   addReviewReply,
   getLoggedMoviesForUser,
@@ -17,6 +18,7 @@ import {
   getUser,
   getUserDbProfileByUsername,
 } from "@/lib/actions";
+import { decodeStoredMediaId } from "@/lib/utils";
 
 type ResolvedMedia = {
   id: string;
@@ -31,31 +33,77 @@ async function resolveShowForLog(id: string): Promise<{
   typeM: "movie" | "tv" | undefined;
   show: any;
 }> {
+  const decoded = decodeStoredMediaId(id);
+  const resolvedId = decoded.id;
+  if (!resolvedId) {
+    return { media: null, typeM: undefined, show: null };
+  }
+
+  if (decoded.mediaType === "tv") {
+    try {
+      const tv = await getSpecifiedTV(resolvedId);
+
+      return {
+        media: {
+          id: resolvedId,
+          title: tv.name ?? "Untitled",
+          posterPath: tv.poster_path,
+          year: tv.first_air_date?.slice(0, 4) ?? "----",
+          href: `/tv/${resolvedId}`,
+        },
+        typeM: "tv",
+        show: tv,
+      };
+    } catch {
+      return { media: null, typeM: undefined, show: null };
+    }
+  }
+
+  if (decoded.mediaType === "movie") {
+    try {
+      const movie = await getSpecifiedMovie(resolvedId);
+
+      return {
+        media: {
+          id: resolvedId,
+          title: movie.title ?? "Untitled",
+          posterPath: movie.poster_path,
+          year: movie.release_date?.slice(0, 4) ?? "----",
+          href: `/movie/${resolvedId}`,
+        },
+        typeM: "movie",
+        show: movie,
+      };
+    } catch {
+      return { media: null, typeM: undefined, show: null };
+    }
+  }
+
   try {
-    const movie = await getSpecifiedMovie(id);
+    const movie = await getSpecifiedMovie(resolvedId);
 
     return {
       media: {
-        id,
+        id: resolvedId,
         title: movie.title ?? "Untitled",
         posterPath: movie.poster_path,
         year: movie.release_date?.slice(0, 4) ?? "----",
-        href: `/movie/${id}`,
+        href: `/movie/${resolvedId}`,
       },
       typeM: "movie",
       show: movie,
     };
   } catch {
     try {
-      const tv = await getSpecifiedTV(id);
+      const tv = await getSpecifiedTV(resolvedId);
 
       return {
         media: {
-          id,
+          id: resolvedId,
           title: tv.name ?? "Untitled",
           posterPath: tv.poster_path,
           year: tv.first_air_date?.slice(0, 4) ?? "----",
-          href: `/tv/${id}`,
+          href: `/tv/${resolvedId}`,
         },
         typeM: "tv",
         show: tv,
@@ -313,9 +361,13 @@ export default async function Page({
                 ) : null}
 
                 <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-gray-200">
-                  {review.review?.trim().length
-                    ? review.review
-                    : "No written review"}
+                  <MentionText
+                    text={
+                      review.review?.trim().length
+                        ? review.review
+                        : "No written review"
+                    }
+                  />
                 </p>
 
                 <div className="mt-4 flex items-center gap-4 text-xs text-gray-400">
@@ -375,7 +427,9 @@ export default async function Page({
                     <p className="text-xs text-gray-400">
                       @{reply.username ?? "user"}
                     </p>
-                    <p className="mt-1 break-words">{reply.content}</p>
+                    <p className="mt-1 break-words">
+                      <MentionText text={reply.content} />
+                    </p>
                   </div>
                 ))}
               </div>

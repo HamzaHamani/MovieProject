@@ -3,13 +3,13 @@ import SearcMovieNavigation from "@/components/search/movieNavigation";
 import SearchMoviesDisplay from "@/components/search/moviesDisplay";
 import { SearchVanishComp } from "@/components/search/searchVanishComp";
 import usePage from "@/hooks/usePage";
-import { getSearchMovie } from "@/lib/actions";
-import { TsearchMovie } from "@/types/api";
+import type { SearchMode, TsearchApiResponse } from "@/types/api";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NoResults from "@/components/search/noResults";
 import MovieLoadingIndicator from "@/components/search/movieLoadingIndicator";
-import { use, useEffect } from "react";
+import { use, useEffect, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -17,63 +17,83 @@ type Props = {
   params: Promise<{
     query: string;
   }>;
+  searchParams: Promise<{
+    type?: string;
+  }>;
 };
 
-type SearchMovieQueryKey = [string, string, number];
-// ! TODO ISSUE WITH PAGINATION UCZ M USING, MULTI ENDPOINT SO I GET ALSO CHRATCHTERS BUT I FILTER THEM, BUT THAT CUZZ ISSUE WITH PAGINATION
+type SearchQueryKey = [string, SearchMode, number, string];
 
-const Page = ({ params }: Props) => {
+function normalizeSearchMode(value: string | undefined): SearchMode {
+  if (value === "film" || value === "tv" || value === "person") {
+    return value;
+  }
+
+  return "all";
+}
+
+const Page = ({ params, searchParams }: Props) => {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { query } = use(params);
+  const { type } = use(searchParams);
   const { page } = usePage();
+  const currentType = normalizeSearchMode(type);
 
   const prefetchNextPage = async () => {
     await queryClient.prefetchQuery({
       queryFn: fetchSearchMovie,
-      queryKey: ["searchMovie", query, page + 1],
+      queryKey: ["searchMovie", currentType, query, page + 1],
     });
   };
   const fetchSearchMovie = async ({
     queryKey,
   }: {
-    queryKey: SearchMovieQueryKey;
+    queryKey: SearchQueryKey;
   }) => {
-    const [, query, page] = queryKey;
-    const values = {
-      query: query,
-      page: page,
-    };
-    const data: TsearchMovie = (await getSearchMovie(values)) as TsearchMovie;
-
-    const filtered = data.results.filter(
-      (result) => result.media_type !== "person",
+    const [, activeType, searchQuery, searchPage] = queryKey;
+    const response = await fetch(
+      `/api/search?q=${encodeURIComponent(searchQuery)}&type=${activeType}&page=${searchPage}`,
+      {
+        cache: "no-store",
+      },
     );
 
-    const filteredData = { ...data, results: filtered };
+    if (!response.ok) {
+      throw new Error("Failed to search");
+    }
 
-    return filteredData;
+    return (await response.json()) as TsearchApiResponse;
   };
 
   const { data, error, isLoading, isSuccess } = useQuery({
     queryFn: fetchSearchMovie,
-    queryKey: ["searchMovie", query, page],
+    queryKey: ["searchMovie", currentType, query, page],
   });
 
   useEffect(() => {
     if (!isSuccess) return;
     prefetchNextPage();
-  }, [isSuccess, query, page]);
+  }, [isSuccess, query, page, currentType]);
 
   if (isLoading) return <MovieLoadingIndicator />;
   if (error) return <div>Error: {error.message}</div>;
-  if (data?.results.length == 0) return <NoResults />;
 
-  // return <MovieLoadingIndicator />;
   return data ? (
     <RenderUi query={query}>
-      {" "}
-      <SearcMovieNavigation data={data} />
-      <SearchMoviesDisplay data={data} />
+      <SearcMovieNavigation
+        data={data}
+        query={query}
+        activeType={currentType}
+        onTypeChange={(nextType) => {
+          router.push(`/search/${encodeURIComponent(query)}?type=${nextType}`);
+        }}
+      />
+      {data.results.length === 0 ? (
+        <NoResults />
+      ) : (
+        <SearchMoviesDisplay data={data} />
+      )}
     </RenderUi>
   ) : null;
 };
@@ -83,7 +103,7 @@ function RenderUi({
   children,
 }: {
   query: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <>

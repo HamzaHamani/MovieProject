@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { showProfileMovieToast } from "@/components/profile/profileToasts";
 import { showErrorNotification } from "@/components/notificationSystem";
+import MentionTextarea from "@/components/ui/mentionTextarea";
 
 export function ReplyForm({
   reviewId,
@@ -54,14 +54,14 @@ export function ReplyForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-1 gap-2">
       <input type="hidden" name="reviewId" value={reviewId} />
-      <Input
+      <MentionTextarea
         name="replyContent"
         placeholder="Write a reply..."
         value={content}
-        onChange={(e) => setContent(e.target.value)}
-        required
+        onChange={setContent}
+        rows={1}
         disabled={isSubmitting}
-        className="border-white/15 bg-white/5 text-white"
+        className="min-h-10 resize-none border-white/15 bg-white/5 text-white"
       />
       <Button
         type="submit"

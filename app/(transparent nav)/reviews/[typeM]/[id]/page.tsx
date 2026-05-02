@@ -62,12 +62,15 @@ export default async function ReviewsPage({ params, searchParams }: Props) {
       page: criticPage,
       pageSize: 10,
     }),
-  ]).then(([media, socialFeedResult, criticFeedResult]) => [
-    media.title,
-    media.backdropPath,
-    socialFeedResult,
-    criticFeedResult,
-  ] as const);
+  ]).then(
+    ([media, socialFeedResult, criticFeedResult]) =>
+      [
+        media.title,
+        media.backdropPath,
+        socialFeedResult,
+        criticFeedResult,
+      ] as const,
+  );
 
   const backHref = `/${typeM}/${id}?tab=reviews`;
 
@@ -85,7 +88,7 @@ export default async function ReviewsPage({ params, searchParams }: Props) {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-gray-500">
-              {typeM === "movie" ? "Movie" : "TV Show"} Reviews
+              {typeM === "movie" ? "Film" : "TV Show"} Reviews
             </p>
             <h1 className="mt-2 text-3xl font-semibold text-white lg:mt-6 lg:text-2xl sm:mt-2 sm:text-xl">
               {title}

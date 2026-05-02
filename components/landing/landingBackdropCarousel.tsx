@@ -11,25 +11,25 @@ interface TrendingMovie {
 const FALLBACK_MOVIES: TrendingMovie[] = [
   {
     id: 550,
-    backdrop_path: "/path1.jpg",
+    backdrop_path: null,
     title: "Fight Club",
     media_type: "movie",
   },
   {
     id: 278,
-    backdrop_path: "/path2.jpg",
+    backdrop_path: null,
     title: "The Shawshank Redemption",
     media_type: "movie",
   },
   {
     id: 238,
-    backdrop_path: "/path3.jpg",
+    backdrop_path: null,
     title: "The Godfather",
     media_type: "movie",
   },
   {
     id: 240,
-    backdrop_path: "/path4.jpg",
+    backdrop_path: null,
     title: "The Godfather Part II",
     media_type: "movie",
   },

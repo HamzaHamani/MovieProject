@@ -1,10 +1,10 @@
 "use client";
 import usePage from "@/hooks/usePage";
-import { TsearchMovie } from "@/types/api";
+import type { TsearchApiResponse } from "@/types/api";
 import { ArrowLeftToLine, ArrowRightToLine } from "lucide-react";
 
 type Props = {
-  data: TsearchMovie;
+  data: TsearchApiResponse;
 };
 
 export default function ArrowButtons({ data }: Props) {

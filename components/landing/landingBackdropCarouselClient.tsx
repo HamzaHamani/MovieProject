@@ -38,44 +38,41 @@ export default function LandingBackdropCarouselClient({
   if (!movies.length) return null;
 
   const currentMovie = movies[currentIndex];
+  const backdropSrc = currentMovie.backdrop_path
+    ? `https://image.tmdb.org/t/p/original${currentMovie.backdrop_path}`
+    : "/authBG.webp";
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Background Carousel */}
       <div className="relative h-full min-h-screen w-full">
-        {currentMovie?.backdrop_path && (
-          <>
-            <motion.div
-              key={currentMovie.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
-              className="absolute inset-0"
-            >
-              <Image
-                src={`https://image.tmdb.org/t/p/original${currentMovie.backdrop_path}`}
-                alt={
-                  currentMovie.title || currentMovie.name || "Movie backdrop"
-                }
-                fill
-                className="object-cover"
-                priority
-                unoptimized
-              />
-            </motion.div>
+        <motion.div
+          key={currentMovie.id}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="absolute inset-0"
+        >
+          <Image
+            src={backdropSrc}
+            alt={currentMovie.title || currentMovie.name || "Movie backdrop"}
+            fill
+            className="object-cover"
+            priority
+            unoptimized
+          />
+        </motion.div>
 
-            {/* Multiple overlays for unique design */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/60" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-backgroundM" />
+        {/* Multiple overlays for unique design */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-backgroundM" />
 
-            {/* Accent lines */}
-            <div className="absolute inset-0">
-              <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-transparent via-primaryM-500 to-transparent opacity-40" />
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primaryM-500 to-transparent opacity-40" />
-            </div>
-          </>
-        )}
+        {/* Accent lines */}
+        <div className="absolute inset-0">
+          <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-transparent via-primaryM-500 to-transparent opacity-40" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primaryM-500 to-transparent opacity-40" />
+        </div>
 
         {/* Carousel Indicators */}
         <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2 smd:bottom-4 smd:gap-1.5">
