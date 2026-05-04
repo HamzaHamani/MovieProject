@@ -367,6 +367,11 @@ export default async function Saved() {
                 {list.description}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                <span
+                  className={`rounded-full border px-2 py-1 ${list.isPublic ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-white/[0.04] text-gray-300"}`}
+                >
+                  {list.isPublic ? "Public" : "Private"}
+                </span>
                 {ownerById.get(list.userId)?.username ? (
                   <Link
                     href={`/profile/${ownerById.get(list.userId)?.username}`}
@@ -500,6 +505,11 @@ export default async function Saved() {
                         {list.description}
                       </p>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                        <span
+                          className={`rounded-full border px-2 py-1 ${list.isPublic ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-white/[0.04] text-gray-300"}`}
+                        >
+                          {list.isPublic ? "Public" : "Private"}
+                        </span>
                         {ownerById.get(list.userId)?.username ? (
                           <Link
                             href={`/profile/${ownerById.get(list.userId)?.username}`}

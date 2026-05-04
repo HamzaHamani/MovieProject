@@ -166,11 +166,13 @@ export default async function Page({
 
     const bookmarkName = String(formData.get("bookmarkName") ?? "");
     const description = String(formData.get("description") ?? "");
+    const isPublic = formData.get("isPublic") === "on";
 
     await updateBookmarkDetails({
       bookmarkId: list.id,
       bookmarkName,
       description,
+      isPublic,
     });
 
     revalidatePath(`/list/${list.id}`);
@@ -212,6 +214,11 @@ export default async function Page({
               <h1 className="text-3xl font-semibold text-white sm:text-2xl">
                 {list.bookmarkName}
               </h1>
+              <div
+                className={`mt-3 inline-flex rounded-full border px-2 py-1 text-xs font-medium ${list.isPublic ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300" : "border-white/10 bg-white/[0.04] text-gray-300"}`}
+              >
+                {list.isPublic ? "Public list" : "Private list"}
+              </div>
               <p className="mt-2 text-sm text-gray-300">{list.description}</p>
               <p className="mt-3 text-xs text-gray-400">
                 {movies.length} item{movies.length === 1 ? "" : "s"}
@@ -312,6 +319,22 @@ export default async function Page({
                 className="border-white/15 bg-white/5 text-white"
                 required
               />
+              <label className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200">
+                <span>
+                  <span className="block text-xs uppercase tracking-[0.2em] text-gray-400">
+                    Privacy
+                  </span>
+                  <span className="text-sm text-white">
+                    Make this list public
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  name="isPublic"
+                  defaultChecked={list.isPublic ?? true}
+                  className="h-4 w-4 accent-primaryM-500"
+                />
+              </label>
               <Button
                 type="submit"
                 className="w-fit bg-primaryM-500 text-black hover:bg-primaryM-600"

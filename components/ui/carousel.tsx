@@ -157,7 +157,11 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel();
 
   return (
-    <div ref={carouselRef} className="overflow-hidden">
+    <div
+      ref={carouselRef}
+      className="overflow-hidden"
+      style={{ touchAction: orientation === "horizontal" ? "pan-y" : "pan-x" }}
+    >
       <div
         ref={ref}
         className={cn(
@@ -232,13 +236,7 @@ const CarouselNext = React.forwardRef<
       ref={ref}
       variant={variant}
       size={size}
-      className={cn(
-        "h-8 w-8 rounded-full",
-        orientation === "horizontal"
-          ? "-right-8 top-[-80%]"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
-        className,
-      )}
+      className={cn("h-8 w-8 rounded-full", className)}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}

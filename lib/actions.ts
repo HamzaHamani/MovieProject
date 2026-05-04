@@ -9,6 +9,7 @@ import {
   reviewReplies,
   listLikes,
   userFollows,
+  activities,
   users,
   notifications,
   listCollaborators,
@@ -49,6 +50,30 @@ export const getUser = cache(async () => {
     return null;
   }
 });
+
+export async function createActivity(activity: {
+  userId?: string | null;
+  type: string;
+  referenceId?: string | null;
+  targetId?: string | null;
+  message?: string | null;
+  data?: string | null;
+}) {
+  if (!activity.userId) return;
+
+  try {
+    await db.insert(activities).values({
+      userId: activity.userId,
+      type: activity.type,
+      referenceId: activity.referenceId ?? null,
+      targetId: activity.targetId ?? null,
+      message: activity.message ?? null,
+      data: activity.data ?? null,
+    });
+  } catch {
+    // non-fatal
+  }
+}
 
 export async function getCurrentUserDbProfile() {
   const user = await getUser();
@@ -493,6 +518,11 @@ export async function followUserByUsername(targetUsernameInput: string) {
       sourceUserId: user.id,
       message: `${user.name ?? "Someone"} started following you`,
     });
+    await createActivity({
+      userId: user.id,
+      type: "follow",
+      targetId: targetUser.id,
+    });
   }
 
   return { ok: true as const };
@@ -642,6 +672,13 @@ export async function toggleReviewLike(reviewId: string) {
     reviewId,
   });
 
+  // create activity for review like
+  await createActivity({
+    userId: user.id,
+    type: "review_liked",
+    targetId: reviewId,
+  });
+
   const targetReview = await db
     .select({ userId: loggedMovies.userId })
     .from(loggedMovies)
@@ -700,6 +737,15 @@ export async function addReviewReply(reviewId: string, content: string) {
     });
   }
 
+  // create activity for review reply
+  await createActivity({
+    userId: user.id,
+    type: "review_replied",
+    referenceId: inserted[0].id,
+    targetId: reviewId,
+    message: normalizedContent,
+  });
+
   return { ok: true as const, reply: inserted[0] };
 }
 
@@ -757,6 +803,7 @@ export async function updateBookmarkDetails(data: {
   bookmarkId: string;
   bookmarkName: string;
   description: string;
+  isPublic?: boolean;
 }) {
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
@@ -776,7 +823,12 @@ export async function updateBookmarkDetails(data: {
 
   await db
     .update(bookmarks)
-    .set({ bookmarkName, description, updatedAt: new Date() })
+    .set({
+      bookmarkName,
+      description,
+      isPublic: data.isPublic ?? bookmark.isPublic ?? true,
+      updatedAt: new Date(),
+    })
     .where(eq(bookmarks.id, data.bookmarkId));
 
   return { ok: true as const };
@@ -824,6 +876,13 @@ export async function toggleListLike(bookmarkId: string) {
   await db.insert(listLikes).values({
     userId: user.id,
     bookmarkId,
+  });
+
+  // create activity for list like
+  await createActivity({
+    userId: user.id,
+    type: "list_liked",
+    targetId: bookmarkId,
   });
 
   return { liked: true as const };
@@ -971,6 +1030,326 @@ export async function getLoggedMoviesForUser(
   }
 }
 
+export type TFeedItem =
+  | {
+      kind: "watched" | "review_posted";
+      id: string;
+      userId: string;
+      username: string | null;
+      image: string | null;
+      showId: string;
+      mediaType: "movie" | "tv" | null;
+      review: string | null;
+      rating: number | null;
+      watchedAt: Date | null;
+      createdAt: Date | null;
+      href: string | null;
+      resolvedTitle?: string | null;
+    }
+  | {
+      kind: "list_created" | "list_item_added" | "list_liked";
+      id: string;
+      userId: string;
+      username: string | null;
+      image: string | null;
+      title: string;
+      description: string;
+      createdAt: Date;
+      href: string;
+      isPublic?: boolean;
+      itemTitle?: string | null; // for list_item_added resolved movie title
+    }
+  | {
+      kind: "review_liked" | "review_replied";
+      id: string;
+      userId: string;
+      username: string | null;
+      image: string | null;
+      reviewId: string;
+      reviewOwnerId: string | null;
+      message: string | null;
+      createdAt: Date;
+      href: string | null;
+    };
+
+export async function getFeedForViewer(limit = 50): Promise<TFeedItem[]> {
+  const viewer = await getUser();
+  if (!viewer?.id) return [];
+
+  const followingRows = await db
+    .select({ followingId: userFollows.followingId })
+    .from(userFollows)
+    .where(eq(userFollows.followerId, viewer.id));
+
+  const followingIds = followingRows.map((r) => r.followingId);
+  if (followingIds.length === 0) return [];
+
+  // fetch multiple activity types in parallel
+  const [
+    watches,
+    lists,
+    listAdds,
+    listLikesRows,
+    reviewLikesRows,
+    reviewRepliesRows,
+  ] = await Promise.all([
+    db
+      .select({
+        id: loggedMovies.id,
+        userId: loggedMovies.userId,
+        showId: loggedMovies.showId,
+        rating: loggedMovies.rating,
+        review: loggedMovies.review,
+        watchedAt: loggedMovies.watchedAt,
+        createdAt: loggedMovies.createdAt,
+        username: users.username,
+        image: users.image,
+      })
+      .from(loggedMovies)
+      .leftJoin(users, eq(users.id, loggedMovies.userId))
+      .where(inArray(loggedMovies.userId, followingIds))
+      .orderBy(desc(loggedMovies.createdAt))
+      .limit(limit),
+
+    db
+      .select({
+        id: bookmarks.id,
+        userId: bookmarks.userId,
+        bookmarkName: bookmarks.bookmarkName,
+        description: bookmarks.description,
+        createdAt: bookmarks.createdAt,
+        username: users.username,
+        image: users.image,
+      })
+      .from(bookmarks)
+      .leftJoin(users, eq(users.id, bookmarks.userId))
+      .where(inArray(bookmarks.userId, followingIds))
+      .orderBy(desc(bookmarks.createdAt))
+      .limit(limit),
+
+    db
+      .select({
+        id: bookmarksMovies.id,
+        bookmarkId: bookmarksMovies.bookmarkId,
+        movieId: bookmarksMovies.movieId,
+        review: bookmarksMovies.review,
+        addedAt: bookmarksMovies.addedAt,
+        username: users.username,
+        image: users.image,
+        ownerId: bookmarks.userId,
+      })
+      .from(bookmarksMovies)
+      .leftJoin(bookmarks, eq(bookmarks.id, bookmarksMovies.bookmarkId))
+      .leftJoin(users, eq(users.id, bookmarks.userId))
+      .where(inArray(bookmarks.userId, followingIds))
+      .orderBy(desc(bookmarksMovies.addedAt))
+      .limit(limit),
+
+    db
+      .select({
+        id: listLikes.id,
+        userId: listLikes.userId,
+        bookmarkId: listLikes.bookmarkId,
+        createdAt: listLikes.createdAt,
+        username: users.username,
+        image: users.image,
+      })
+      .from(listLikes)
+      .leftJoin(users, eq(users.id, listLikes.userId))
+      .where(inArray(listLikes.userId, followingIds))
+      .orderBy(desc(listLikes.createdAt))
+      .limit(limit),
+
+    db
+      .select({
+        id: reviewLikes.id,
+        userId: reviewLikes.userId,
+        reviewId: reviewLikes.reviewId,
+        createdAt: reviewLikes.createdAt,
+        username: users.username,
+        image: users.image,
+      })
+      .from(reviewLikes)
+      .leftJoin(users, eq(users.id, reviewLikes.userId))
+      .where(inArray(reviewLikes.userId, followingIds))
+      .orderBy(desc(reviewLikes.createdAt))
+      .limit(limit),
+
+    db
+      .select({
+        id: reviewReplies.id,
+        userId: reviewReplies.userId,
+        reviewId: reviewReplies.reviewId,
+        content: reviewReplies.content,
+        createdAt: reviewReplies.createdAt,
+        username: users.username,
+        image: users.image,
+      })
+      .from(reviewReplies)
+      .leftJoin(users, eq(users.id, reviewReplies.userId))
+      .where(inArray(reviewReplies.userId, followingIds))
+      .orderBy(desc(reviewReplies.createdAt))
+      .limit(limit),
+  ]);
+
+  const mappedWatches: TFeedItem[] = watches.map((row) => {
+    let href: string | null = null;
+    try {
+      const decoded = decodeStoredMediaId(String(row.showId));
+      if (decoded.id)
+        href =
+          decoded.mediaType === "tv"
+            ? `/tv/${decoded.id}`
+            : `/movie/${decoded.id}`;
+    } catch {
+      href = null;
+    }
+
+    const kind: "watched" | "review_posted" =
+      row.review && row.review.trim().length > 0 ? "review_posted" : "watched";
+
+    return {
+      kind,
+      id: row.id,
+      userId: row.userId,
+      username: row.username ?? null,
+      image: row.image ?? null,
+      showId: row.showId,
+      mediaType: null,
+      review: row.review ?? null,
+      rating: typeof row.rating === "number" ? row.rating : null,
+      watchedAt: row.watchedAt ?? null,
+      createdAt: row.createdAt ?? null,
+      href,
+      resolvedTitle: null,
+    };
+  });
+
+  const mappedListsCreated: TFeedItem[] = lists.map((row) => ({
+    kind: "list_created",
+    id: row.id,
+    userId: row.userId,
+    username: row.username ?? null,
+    image: row.image ?? null,
+    title: row.bookmarkName,
+    description: row.description ?? "",
+    createdAt: row.createdAt,
+    href: `/list/${row.id}`,
+    isPublic:
+      !String(row.bookmarkName).toLowerCase().includes("private") &&
+      !String(row.description ?? "")
+        .toLowerCase()
+        .includes("private"),
+  }));
+
+  const mappedListAdds: TFeedItem[] = listAdds.map((row: any) => ({
+    kind: "list_item_added",
+    id: row.id,
+    userId: row.ownerId,
+    username: row.username ?? null,
+    image: row.image ?? null,
+    title: row.movieId,
+    description: row.review ?? "",
+    createdAt: row.addedAt,
+    href: `/list/${row.bookmarkId}`,
+    isPublic: true,
+    itemTitle: null,
+  }));
+
+  // Resolve titles for watched items and list additions (TMDb lookups) sequentially to avoid hammering API
+  for (const item of mappedWatches) {
+    if (item.href && !item.resolvedTitle) {
+      try {
+        const decoded = decodeStoredMediaId(String(item.showId));
+        if (decoded.id) {
+          if (decoded.mediaType === "tv") {
+            const tv = await getSpecifiedTV(decoded.id);
+            item.resolvedTitle = tv.name ?? null;
+          } else {
+            const movie = await getSpecifiedMovie(decoded.id);
+            item.resolvedTitle = movie.title ?? null;
+          }
+        }
+      } catch {
+        item.resolvedTitle = null;
+      }
+    }
+  }
+
+  for (const item of mappedListAdds) {
+    // item.title currently stores the stored movie id; try to resolve human title
+    try {
+      const decoded = decodeStoredMediaId(String(item.title));
+      if (decoded.id) {
+        if (decoded.mediaType === "tv") {
+          const tv = await getSpecifiedTV(decoded.id);
+          item.itemTitle = tv.name ?? null;
+        } else {
+          const movie = await getSpecifiedMovie(decoded.id);
+          item.itemTitle = movie.title ?? null;
+        }
+      }
+    } catch {
+      item.itemTitle = null;
+    }
+  }
+
+  const mappedListLikes: TFeedItem[] = listLikesRows.map((row: any) => ({
+    kind: "list_liked",
+    id: row.id,
+    userId: row.userId,
+    username: row.username ?? null,
+    image: row.image ?? null,
+    title: row.bookmarkId,
+    description: "",
+    createdAt: row.createdAt,
+    href: `/list/${row.bookmarkId}`,
+  }));
+
+  const mappedReviewLikes: TFeedItem[] = reviewLikesRows.map((row: any) => ({
+    kind: "review_liked",
+    id: row.id,
+    userId: row.userId,
+    username: row.username ?? null,
+    image: row.image ?? null,
+    reviewId: row.reviewId,
+    reviewOwnerId: null,
+    message: null,
+    createdAt: row.createdAt,
+    href: `/review/${row.reviewId}`,
+  }));
+
+  const mappedReviewReplies: TFeedItem[] = reviewRepliesRows.map(
+    (row: any) => ({
+      kind: "review_replied",
+      id: row.id,
+      userId: row.userId,
+      username: row.username ?? null,
+      image: row.image ?? null,
+      reviewId: row.reviewId,
+      reviewOwnerId: null,
+      message: row.content ?? null,
+      createdAt: row.createdAt,
+      href: `/review/${row.reviewId}`,
+    }),
+  );
+
+  const combined: TFeedItem[] = [
+    ...mappedWatches,
+    ...mappedListsCreated,
+    ...mappedListAdds,
+    ...mappedListLikes,
+    ...mappedReviewLikes,
+    ...mappedReviewReplies,
+  ].sort((a, b) => {
+    const ta = (a as any).createdAt ?? (a as any).watchedAt ?? new Date(0);
+    const tb = (b as any).createdAt ?? (b as any).watchedAt ?? new Date(0);
+    return (tb as Date).getTime() - (ta as Date).getTime();
+  });
+
+  return combined.slice(0, limit);
+}
+
 //---------------------- handling adding movie
 
 export async function AddMovie(data: {
@@ -991,13 +1370,27 @@ export async function AddMovie(data: {
 
   if (existingMovieResponse) return { already: true };
   if (!existingMovieResponse) {
-    await db.insert(bookmarksMovies).values({
-      bookmarkId: data.bookmarkId as string,
-      review: data.review,
-      movieId: storedMovieId,
+    const inserted = await db
+      .insert(bookmarksMovies)
+      .values({
+        bookmarkId: data.bookmarkId as string,
+        review: data.review,
+        movieId: storedMovieId,
+      })
+      .returning({ id: bookmarksMovies.id });
+
+    const insertedRow = inserted[0];
+
+    // record activity
+    const actor = await getUser();
+    await createActivity({
+      userId: actor?.id,
+      type: "list_item_added",
+      referenceId: insertedRow.id,
+      targetId: data.bookmarkId,
+      message: storedMovieId,
     });
 
-    const actor = await getUser();
     const bookmark = await getBookmarkById(data.bookmarkId);
     if (actor?.id && bookmark?.userId && bookmark.userId !== actor.id) {
       await createNotification({
@@ -1115,6 +1508,7 @@ export async function CreateBookmark(data: {
   bookmarkName: string;
   userId: string;
   description: string;
+  isPublic?: boolean;
 }) {
   const insert = await db
     .insert(bookmarks)
@@ -1122,10 +1516,20 @@ export async function CreateBookmark(data: {
       bookmarkName: data.bookmarkName,
       userId: data.userId,
       description: data.description,
+      isPublic: data.isPublic ?? true,
     })
     .returning({ id: bookmarks.id });
-  // console.log(insert);
-  return insert[0];
+  const created = insert[0];
+
+  // create activity row
+  await createActivity({
+    userId: data.userId,
+    type: "list_created",
+    referenceId: created.id,
+    message: data.bookmarkName,
+  });
+
+  return created;
 }
 
 //------------------------------------------------------------------------#uilities for fetching data from the api##
@@ -2317,6 +2721,17 @@ export async function sendLoggedMovieTv({
       showId: normalizedShowId,
     });
   }
+
+  // create activity for watch/review
+  const actor = await getUser();
+  await createActivity({
+    userId: actor?.id,
+    type:
+      review && String(review).trim().length > 0 ? "review_posted" : "watched",
+    targetId: normalizedShowId,
+    message: review ?? null,
+    data: JSON.stringify({ rating: normalizedRating ?? null }),
+  });
 
   const userBookmarks = await getBookmarks(user.id);
   const watchlistIds = userBookmarks

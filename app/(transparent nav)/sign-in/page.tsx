@@ -22,9 +22,18 @@ export default async function Page({
   const user = await getUser();
   if (user) redirect("/explore");
   return (
-    <div className="grid min-h-screen w-full grid-cols-2 bg-[#111111] text-white xl:grid-cols-1">
+    <div className="relative grid min-h-screen w-full grid-cols-2 bg-[#111111] text-white xl:grid-cols-1">
+      <div
+        className="pointer-events-none absolute inset-0 z-0 hidden md:block"
+        style={{
+          backgroundImage: `url('/authBG.webp')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
       {/* Left Side (Form + Visuals) */}
-      <div className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-[#111111] px-4 py-12 xl:px-8 lg:px-12">
+      <div className="relative z-10 flex w-full flex-col items-center justify-center overflow-hidden bg-transparent px-4 py-12 xl:bg-[#111111] xl:px-8 lg:px-12">
         {/* Dithered Overlay Layers */}
         <div
           className="absolute inset-0 bg-white opacity-[0.02]"
@@ -116,7 +125,7 @@ export default async function Page({
       </div>
 
       {/* Right Side (Image + Quote) */}
-      <div className="relative block w-full overflow-hidden bg-[#111111] md:hidden">
+      <div className="relative z-10 block w-full overflow-hidden bg-[#111111] md:hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{

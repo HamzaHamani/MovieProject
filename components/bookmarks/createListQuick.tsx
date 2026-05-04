@@ -36,6 +36,7 @@ export default function CreateListQuick() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
   const [friends, setFriends] = useState<FriendUser[]>([]);
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>(
     [],
@@ -47,6 +48,7 @@ export default function CreateListQuick() {
   const resetForm = () => {
     setName("");
     setDescription("");
+    setIsPublic(true);
     setSelectedCollaborators([]);
   };
 
@@ -97,6 +99,7 @@ export default function CreateListQuick() {
         body: JSON.stringify({
           bookmarkName: trimmedName,
           description: trimmedDescription,
+          isPublic,
         }),
       });
 
@@ -166,6 +169,21 @@ export default function CreateListQuick() {
             maxLength={180}
           />
         </div>
+
+        <label className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200">
+          <span>
+            <span className="block text-xs uppercase tracking-[0.2em] text-gray-400">
+              Privacy
+            </span>
+            <span className="text-sm text-white">Make this list public</span>
+          </span>
+          <input
+            type="checkbox"
+            checked={isPublic}
+            onChange={(event) => setIsPublic(event.target.checked)}
+            className="h-4 w-4 accent-primaryM-500"
+          />
+        </label>
 
         <div>
           <p className="mb-1 text-xs uppercase tracking-[0.2em] text-gray-400">

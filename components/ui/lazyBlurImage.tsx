@@ -1,6 +1,6 @@
 "use client";
 
-import { ImgHTMLAttributes, useState } from "react";
+import { ImgHTMLAttributes, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -26,6 +26,17 @@ export default function LazyBlurImage({
 }: LazyBlurImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    setIsLoaded(false);
+    setHasError(false);
+
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth > 0) {
+      setIsLoaded(true);
+    }
+  }, [src]);
 
   return (
     <div
@@ -45,6 +56,7 @@ export default function LazyBlurImage({
       )}
 
       <img
+        ref={imageRef}
         src={src}
         alt={alt}
         loading={loading ?? "lazy"}

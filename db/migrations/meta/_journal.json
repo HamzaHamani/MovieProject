@@ -162,6 +162,13 @@
       "when": 1775423969731,
       "tag": "0022_special_luckman",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1777720000000,
+      "tag": "0023_public_bookmark_privacy",
+      "breakpoints": true
     }
   ]
 }

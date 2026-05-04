@@ -6,9 +6,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
-import { ReactNode } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ReactNode } from "react";
 
 type Props = {
   title: string;
@@ -22,12 +21,7 @@ type Props = {
   variant?: "cast" | "crew";
 };
 
-export function CarouselComponent({
-  title,
-  subtitle,
-  people,
-  variant = "cast",
-}: Props) {
+export function CarouselComponent({ title, subtitle, people }: Props) {
   return (
     <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-sm sm:p-4">
       <div className="flex items-end justify-between gap-3 border-b border-white/10 pb-4">
@@ -56,25 +50,13 @@ export function CarouselComponent({
             {people.map((person, index) => (
               <CarouselItem
                 key={`${person.id}-${index}`}
-                className={`${
-                  variant === "cast"
-                    ? "basis-1/6 xl:basis-1/5 lg:basis-1/4 md:basis-1/3 sm:basis-1/2 s:basis-64"
-                    : "basis-1/5 xl:basis-1/4 lg:basis-1/3 md:basis-1/2 sm:basis-60 s:basis-64"
-                } pl-0`}
+                className="basis-1/6 pl-0 xl:basis-1/5 lg:basis-1/4 md:basis-1/3 sm:basis-1/2 s:basis-64"
               >
                 <Link
                   href={`/crew/${person.id}`}
-                  className={`group flex h-full rounded-2xl border border-white/10 bg-black/20 p-3 transition duration-300 hover:-translate-y-1 hover:border-primaryM-500/35 hover:bg-white/[0.06] ${
-                    variant === "cast" ? "flex-col space-y-3" : "gap-3"
-                  }`}
+                  className="group flex h-full flex-col space-y-3 rounded-2xl border border-white/10 bg-black/20 p-3 transition duration-300 hover:-translate-y-1 hover:border-primaryM-500/35 hover:bg-white/[0.06]"
                 >
-                  <div
-                    className={`overflow-hidden bg-white/10 ${
-                      variant === "cast"
-                        ? "aspect-[4/5] rounded-2xl"
-                        : "h-16 w-16 shrink-0 rounded-2xl"
-                    }`}
-                  >
+                  <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-white/10">
                     {person.profile_path ? (
                       <LazyBlurImage
                         src={`https://image.tmdb.org/t/p/w500/${person.profile_path}`}
@@ -104,9 +86,9 @@ export function CarouselComponent({
             ))}
           </CarouselContent>
 
-          <div className="absolute -bottom-14 right-0 flex gap-2 sm:-bottom-12">
-            <CarouselPrevious className="relative h-9 w-9 border border-white/20 bg-white/5 text-textMain transition hover:border-primaryM-500/50 hover:bg-white/10 hover:text-primaryM-500 disabled:opacity-40" />
-            <CarouselNext className="relative h-9 w-9 border border-white/20 bg-white/5 text-textMain transition hover:border-primaryM-500/50 hover:bg-white/10 hover:text-primaryM-500 disabled:opacity-40" />
+          <div className="absolute bottom-3 right-3 flex gap-2">
+            <CarouselPrevious className="h-9 w-9 border border-white/20 bg-white/5 text-textMain transition hover:border-primaryM-500/50 hover:bg-white/10 hover:text-primaryM-500 disabled:opacity-40" />
+            <CarouselNext className="h-9 w-9 border border-white/20 bg-white/5 text-textMain transition hover:border-primaryM-500/50 hover:bg-white/10 hover:text-primaryM-500 disabled:opacity-40" />
           </div>
         </Carousel>
       </div>

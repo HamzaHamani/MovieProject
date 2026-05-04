@@ -17,6 +17,7 @@ type FriendUser = Awaited<ReturnType<typeof getFriendsForCurrentUser>>[number];
 type Inputs = {
   name: string;
   description: string;
+  isPublic: boolean;
 };
 
 export default function CreateListForm({
@@ -36,7 +37,9 @@ export default function CreateListForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({
+    defaultValues: { isPublic: true },
+  });
 
   useEffect(() => {
     void getFriendsForCurrentUser()
@@ -51,6 +54,7 @@ export default function CreateListForm({
         bookmarkName: data.name,
         userId: String(userId),
         description: data.description,
+        isPublic: data.isPublic,
       };
 
       const created = await CreateBookmark(values);
@@ -140,6 +144,20 @@ export default function CreateListForm({
           </span>
         )}
       </div>
+
+      <label className="mb-2 flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200">
+        <span>
+          <span className="block text-xs uppercase tracking-wide text-gray-400">
+            Privacy
+          </span>
+          <span className="text-sm text-white">Make this list public</span>
+        </span>
+        <input
+          type="checkbox"
+          className="h-4 w-4 accent-primaryM-500"
+          {...register("isPublic")}
+        />
+      </label>
 
       <div className="mb-2 flex flex-col gap-1">
         <p className="text-xs uppercase tracking-wide text-gray-400">

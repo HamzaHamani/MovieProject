@@ -12,10 +12,12 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       bookmarkName?: string;
       description?: string;
+      isPublic?: boolean;
     };
 
     const bookmarkName = String(body?.bookmarkName ?? "").trim();
     const description = String(body?.description ?? "").trim();
+    const isPublic = body?.isPublic !== false;
 
     if (bookmarkName.length < 2) {
       return NextResponse.json(
@@ -35,6 +37,7 @@ export async function POST(request: NextRequest) {
       bookmarkName,
       description,
       userId: user.id,
+      isPublic,
     });
 
     return NextResponse.json({ id: created.id });

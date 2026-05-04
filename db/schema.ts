@@ -48,6 +48,7 @@ export const bookmarks = pgTable("bookmarks", {
     .references(() => users.id, { onDelete: "cascade" }),
   bookmarkName: text("bookmarkName").notNull(),
   description: text("description").notNull(),
+  isPublic: boolean("isPublic").notNull().default(true),
   image: text("image"),
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
   updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
@@ -238,6 +239,21 @@ export const notifications = pgTable("notifications", {
   referenceId: text("referenceId"), // ID of related entity (review, list, etc.)
   message: text("message"),
   isRead: boolean("isRead").default(false),
+  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
+});
+
+export const activities = pgTable("activities", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // e.g., watched, review_posted, list_created, list_item_added, list_liked, review_liked, review_replied, follow
+  referenceId: text("referenceId"), // e.g., review id, bookmark id, bookmarksMovies id
+  targetId: text("targetId"), // e.g., showId or bookmarkId
+  message: text("message"),
+  data: text("data"), // optional JSON string with extra metadata
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
 });
 
