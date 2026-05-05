@@ -1225,6 +1225,26 @@ export async function getFeedForViewer(limit = 50): Promise<TFeedItem[]> {
     };
   });
 
+  type TWatchedFeedItem = Extract<
+    TFeedItem,
+    { kind: "watched" | "review_posted" }
+  >;
+  const watchedFeedItems = mappedWatches as TWatchedFeedItem[];
+
+  type TListAddedFeedItem = {
+    kind: "list_item_added";
+    id: string;
+    userId: string;
+    username: string | null;
+    image: string | null;
+    title: string;
+    description: string;
+    createdAt: Date;
+    href: string;
+    isPublic?: boolean;
+    itemTitle?: string | null;
+  };
+
   const mappedListsCreated: TFeedItem[] = lists.map((row) => ({
     kind: "list_created",
     id: row.id,
@@ -1242,7 +1262,7 @@ export async function getFeedForViewer(limit = 50): Promise<TFeedItem[]> {
         .includes("private"),
   }));
 
-  const mappedListAdds: TFeedItem[] = listAdds.map((row: any) => ({
+  const mappedListAdds: TListAddedFeedItem[] = listAdds.map((row: any) => ({
     kind: "list_item_added",
     id: row.id,
     userId: row.ownerId,
@@ -1250,14 +1270,14 @@ export async function getFeedForViewer(limit = 50): Promise<TFeedItem[]> {
     image: row.image ?? null,
     title: row.movieId,
     description: row.review ?? "",
-    createdAt: row.addedAt,
+    createdAt: row.addedAt ?? new Date(0),
     href: `/list/${row.bookmarkId}`,
     isPublic: true,
     itemTitle: null,
   }));
 
   // Resolve titles for watched items and list additions (TMDb lookups) sequentially to avoid hammering API
-  for (const item of mappedWatches) {
+  for (const item of watchedFeedItems) {
     if (item.href && !item.resolvedTitle) {
       try {
         const decoded = decodeStoredMediaId(String(item.showId));
