@@ -1233,7 +1233,7 @@ export async function getFeedForViewer(limit = 50): Promise<TFeedItem[]> {
     image: row.image ?? null,
     title: row.bookmarkName,
     description: row.description ?? "",
-    createdAt: row.createdAt,
+    createdAt: row.createdAt ?? new Date(0),
     href: `/list/${row.id}`,
     isPublic:
       !String(row.bookmarkName).toLowerCase().includes("private") &&
