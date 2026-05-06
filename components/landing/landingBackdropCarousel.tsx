@@ -1,4 +1,5 @@
 import LandingBackdropCarouselClient from "./landingBackdropCarouselClient";
+import { tmdbFetch } from "@/lib/tmdb-api";
 
 interface TrendingMovie {
   id: number;
@@ -37,22 +38,13 @@ const FALLBACK_MOVIES: TrendingMovie[] = [
 
 async function fetchBackdropMovies(): Promise<TrendingMovie[]> {
   try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
+    const response = await tmdbFetch<{ results: TrendingMovie[] }>(
+      "/trending/all/week",
+      { language: "en-US", page: 1 },
+      "Landing backdrop carousel",
+    );
 
-    const response = await fetch(`${baseUrl}/api/explore?kind=featured`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      next: { revalidate: 3600 },
-    });
-
-    if (!response.ok) {
-      return FALLBACK_MOVIES;
-    }
-
-    const movies: TrendingMovie[] = await response.json();
+    const movies = response.results ?? [];
     const moviesWithBackdrops = movies.filter(
       (m) =>
         m.backdrop_path && (m.media_type === "movie" || m.media_type === "tv"),

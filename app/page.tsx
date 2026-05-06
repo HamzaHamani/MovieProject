@@ -2,6 +2,8 @@ import LandingPageClient from "@/components/landing/landingPageClient";
 import Navbar from "@/components/navbar/navbar";
 import LandingBackdropCarousel from "@/components/landing/landingBackdropCarousel";
 
+export const dynamic = "force-dynamic";
+
 export default function LandingPage() {
   return (
     <div className="relative h-dvh overflow-hidden bg-backgroundM">
