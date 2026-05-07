@@ -76,18 +76,18 @@ export default function ButtonSignIn({ provider }: Props) {
   }
 
   return (
-    <form action={handle} className="w-full">
-      <div>
-        <Button
-          variant="outline"
-          className="relative flex h-12 w-full items-center justify-center gap-2 border-gray-600 bg-transparent text-white hover:bg-gray-300"
-        >
-          <span className="absolute left-4 flex w-6 items-center justify-center">
-            {icon}
-          </span>
-          <span className="flex-1 text-center">{label}</span>
-        </Button>
-      </div>
-    </form>
+    <div className="w-full">
+      <Button
+        type="button"
+        onClick={() => void handle()}
+        variant="outline"
+        className="relative flex h-12 w-full items-center justify-center gap-2 border-gray-600 bg-transparent text-white hover:bg-gray-300"
+      >
+        <span className="absolute left-4 flex w-6 items-center justify-center">
+          {icon}
+        </span>
+        <span className="flex-1 text-center">{label}</span>
+      </Button>
+    </div>
   );
 }
