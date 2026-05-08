@@ -75,6 +75,16 @@ export async function createActivity(activity: {
   }
 }
 
+export async function logProfileMenuOpened() {
+  const user = await getUser();
+  if (!user?.id) return;
+
+  await createActivity({
+    userId: user.id,
+    type: "profile_menu_opened",
+  });
+}
+
 export async function getCurrentUserDbProfile() {
   const user = await getUser();
 

@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import {
   SiGithub,
   SiGoogle,
@@ -18,36 +19,7 @@ type Props = {
 };
 
 export default function ButtonSignIn({ provider }: Props) {
-  async function handle() {
-    try {
-      const result = await signIn(provider, {
-        redirect: false,
-        callbackUrl: "/explore",
-      });
-
-      if (!result || result.error) {
-        showErrorNotification(
-          "Authentication",
-          "Failed to sign in. Please try again.",
-        );
-        return;
-      }
-
-      showSuccessNotification("Sign in", "Redirecting...");
-
-      if (result.url) {
-        window.location.href = result.url;
-        return;
-      }
-
-      window.location.href = "/explore";
-    } catch (e) {
-      showErrorNotification(
-        "Authentication",
-        "Failed to sign in. Please try again.",
-      );
-    }
-  }
+  const [isLoading, setIsLoading] = useState(false);
 
   let icon = null;
   let label = "";
@@ -75,18 +47,52 @@ export default function ButtonSignIn({ provider }: Props) {
       break;
   }
 
+  async function handle() {
+    try {
+      setIsLoading(true);
+
+      const result = await signIn(provider, {
+        redirect: false,
+        callbackUrl: "/explore",
+      });
+
+      if (!result || result.error) {
+        setIsLoading(false);
+        showErrorNotification(
+          "Authentication",
+          "Failed to sign in. Please try again.",
+        );
+        return;
+      }
+
+      showSuccessNotification("Sign in", "Opening auth window...");
+
+      if (result.url) {
+        window.open(result.url, "auth-popup", "width=500,height=600");
+        return;
+      }
+    } catch (e) {
+      setIsLoading(false);
+      showErrorNotification(
+        "Authentication",
+        "Failed to sign in. Please try again.",
+      );
+    }
+  }
+
   return (
     <div className="w-full">
       <Button
         type="button"
         onClick={() => void handle()}
+        disabled={isLoading}
         variant="outline"
-        className="relative flex h-12 w-full items-center justify-center gap-2 border-gray-600 bg-transparent text-white hover:bg-gray-300"
+        className="relative flex h-12 w-full items-center justify-center gap-2 border-gray-600 bg-transparent text-white hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span className="absolute left-4 flex w-6 items-center justify-center">
           {icon}
         </span>
-        <span className="flex-1 text-center">{label}</span>
+        <span className="flex-1 text-center">{isLoading ? "Opening..." : label}</span>
       </Button>
     </div>
   );

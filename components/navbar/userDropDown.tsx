@@ -28,6 +28,7 @@ import {
   showSuccessNotification,
   showErrorNotification,
 } from "@/components/notificationSystem";
+import { logProfileMenuOpened } from "@/lib/actions";
 
 type userSchema = z.infer<typeof usersSchema>;
 
@@ -35,11 +36,23 @@ type Props = { user: userSchema };
 
 export function UserDropDown({ user }: Props) {
   const [mounted, setMounted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const profileHref = user.username ? `/profile/${user.username}` : "/profile";
   const reviewsHref = user.username
     ? `/profile/${user.username}#reviews`
     : "/profile";
+
+  const handleOpenChange = async (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      try {
+        await logProfileMenuOpened();
+      } catch (error) {
+        // non-fatal
+      }
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -90,7 +103,7 @@ export function UserDropDown({ user }: Props) {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
