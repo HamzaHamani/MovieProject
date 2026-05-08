@@ -65,12 +65,14 @@ export default function ButtonSignIn({ provider }: Props) {
         return;
       }
 
-      showSuccessNotification("Sign in", "Opening auth window...");
+      showSuccessNotification("Sign in", "Redirecting...");
 
       if (result.url) {
-        window.open(result.url, "auth-popup", "width=500,height=600");
+        window.location.href = result.url;
         return;
       }
+
+      window.location.href = "/explore";
     } catch (e) {
       setIsLoading(false);
       showErrorNotification(
@@ -93,7 +95,7 @@ export default function ButtonSignIn({ provider }: Props) {
           {icon}
         </span>
         <span className="flex-1 text-center">
-          {isLoading ? "Opening..." : label}
+          {isLoading ? "Signing in..." : label}
         </span>
       </Button>
     </div>
