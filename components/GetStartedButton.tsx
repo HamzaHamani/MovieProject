@@ -7,7 +7,7 @@ export default function GetStartedButton() {
   const { openModal } = useSignInModal();
 
   return (
-    <Button 
+    <Button
       className="bg-transparent font-extrabold hover:bg-transparent active:bg-transparent md:hidden"
       onClick={openModal}
     >

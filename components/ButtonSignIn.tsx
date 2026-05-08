@@ -87,12 +87,14 @@ export default function ButtonSignIn({ provider }: Props) {
         onClick={() => void handle()}
         disabled={isLoading}
         variant="outline"
-        className="relative flex h-12 w-full items-center justify-center gap-2 border-gray-600 bg-transparent text-white hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="relative flex h-12 w-full items-center justify-center gap-2 border-gray-600 bg-transparent text-white hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <span className="absolute left-4 flex w-6 items-center justify-center">
           {icon}
         </span>
-        <span className="flex-1 text-center">{isLoading ? "Opening..." : label}</span>
+        <span className="flex-1 text-center">
+          {isLoading ? "Opening..." : label}
+        </span>
       </Button>
     </div>
   );
