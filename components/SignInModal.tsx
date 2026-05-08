@@ -26,7 +26,7 @@ export default function SignInModal({ open, onOpenChange }: Props) {
         </DialogHeader>
 
         <div className="py-4">
-          <DivSignin onSignInClose={() => onOpenChange(false)} />
+          <DivSignin />
         </div>
       </DialogContent>
     </Dialog>
