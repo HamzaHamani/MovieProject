@@ -1,7 +1,6 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
-import Facebook from "next-auth/providers/facebook";
 import Credentials from "next-auth/providers/credentials";
 import { db } from "./db";
 import { users } from "./db/schema";
@@ -42,17 +41,6 @@ if (twitterId && twitterSecret) {
     Twitter({
       clientId: twitterId,
       clientSecret: twitterSecret,
-    }),
-  );
-}
-
-const facebookId = getOptionalEnvVariable("AUTH_FACEBOOK_ID");
-const facebookSecret = getOptionalEnvVariable("AUTH_FACEBOOK_SECRET");
-if (facebookId && facebookSecret) {
-  providers.push(
-    Facebook({
-      clientId: facebookId,
-      clientSecret: facebookSecret,
     }),
   );
 }
@@ -153,5 +141,3 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
-
-// !TODO dont forget to add callbakc url on facebook, i couldnt uz they dont allow localhost they need https

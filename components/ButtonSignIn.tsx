@@ -1,12 +1,6 @@
 "use client";
 import { useState } from "react";
-import {
-  SiGithub,
-  SiGoogle,
-  SiTwitter,
-  SiFacebook,
-  SiReddit,
-} from "react-icons/si";
+import { SiGithub, SiGoogle, SiTwitter, SiReddit } from "react-icons/si";
 import { Button } from "./ui/button";
 import { signIn } from "next-auth/react";
 import {
@@ -15,7 +9,7 @@ import {
 } from "@/components/notificationSystem";
 
 type Props = {
-  provider: "github" | "google" | "twitter" | "facebook" | "reddit";
+  provider: "github" | "google" | "twitter" | "reddit";
 };
 
 export default function ButtonSignIn({ provider }: Props) {
@@ -36,10 +30,6 @@ export default function ButtonSignIn({ provider }: Props) {
     case "twitter":
       icon = <SiTwitter className="mr-2 h-5 w-5" />;
       label = "Continue with Twitter";
-      break;
-    case "facebook":
-      icon = <SiFacebook className="mr-2 h-5 w-5" />;
-      label = "Continue with Facebook";
       break;
     case "reddit":
       icon = <SiReddit className="mr-2 h-5 w-5" />;

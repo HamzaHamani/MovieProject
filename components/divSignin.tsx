@@ -42,7 +42,6 @@ export default function DivSignin({}: Props) {
       <ButtonSignIn provider="google" />
       <ButtonSignIn provider="github" />
       <ButtonSignIn provider="twitter" />
-      <ButtonSignIn provider="facebook" />
       <ButtonSignIn provider="reddit" />
     </div>
   );

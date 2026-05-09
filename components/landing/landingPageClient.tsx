@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import HeroWordTicker from "./heroWordTicker";
 
 export default function LandingPageClient() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -36,7 +37,7 @@ export default function LandingPageClient() {
     <div className="relative flex h-full min-h-0 w-full items-center justify-center px-8 py-16 xl:px-6 xl:py-14 lg:px-4 lg:py-12 md:px-3 md:py-10 sm:px-2 sm:py-8">
       {/* Content Container - Centered on Backdrop */}
       <motion.div
-        className="relative z-10 mx-auto max-w-4xl text-center"
+        className="relative z-10 mx-auto max-w-6xl text-center xl:max-w-5xl lg:max-w-4xl md:max-w-3xl"
         variants={containerVariants}
         initial="hidden"
         animate={isLoaded ? "visible" : "hidden"}
@@ -57,37 +58,13 @@ export default function LandingPageClient() {
           variants={itemVariants}
           className="mb-8 xl:mb-7 lg:mb-6 md:mb-5 sm:mb-4"
         >
-          <h1 className="mb-3 text-6xl font-bold leading-tight tracking-tight text-white xl:text-5xl lg:text-4xl md:text-3xl sm:text-[2.15rem] sm:leading-snug">
-            Your Cinema,{" "}
-            <span className="bg-gradient-to-r from-primaryM-400 to-primaryM-600 bg-clip-text text-transparent">
-              Your Community
-            </span>
+          <h1 className="mb-4 text-6xl font-bold leading-tight tracking-tight text-white xl:text-5xl lg:text-4xl md:text-3xl sm:text-[2.15rem] sm:leading-snug">
+            <HeroWordTicker />
           </h1>
           <p className="mx-auto max-w-[44ch] text-lg font-light text-gray-300 xl:text-base lg:text-sm md:text-xs sm:text-xs">
-            Discover thousands of movies and TV shows, build your collections,
-            and connect with fellow film enthusiasts
+            Discover movies and TV shows, build your watchlist, and connect with
+            fellow fans through reviews and collections.
           </p>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div
-          variants={itemVariants}
-          className="mb-8 grid grid-cols-3 gap-4 border-b border-t border-white/10 py-8 xl:mb-7 xl:gap-3 xl:py-7 lg:mb-6 lg:gap-3 lg:py-6 md:mb-5 md:gap-2.5 md:py-5 sm:mb-4 sm:gap-2 sm:py-4"
-        >
-          {[
-            { label: "Movies & Shows", value: "10,000+" },
-            { label: "Global Community", value: "50K+" },
-            { label: "Reviews & Ratings", value: "100K+" },
-          ].map((stat, index) => (
-            <div key={index}>
-              <p className="text-3xl font-bold text-primaryM-400 xl:text-2xl lg:text-xl md:text-lg smd:text-sm sm:text-lg">
-                {stat.value}
-              </p>
-              <p className="mt-1 text-sm text-gray-400 xl:text-xs lg:text-[11px] md:text-[10px] sm:text-[10px]">
-                {stat.label}
-              </p>
-            </div>
-          ))}
         </motion.div>
 
         {/* CTA Buttons */}
