@@ -11,6 +11,7 @@ import TransparentNavbarShell from "./transparentNavbarShell";
 const links = [
   { href: "/", label: "Home" },
   { href: "/explore", label: "Explore" },
+  { href: "/feed", label: "Feed" },
   { href: "/upcoming", label: "Upcoming" },
   { href: "/bookmarks", label: "Bookmarks" },
   { href: "/search", label: "Search" },

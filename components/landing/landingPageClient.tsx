@@ -6,12 +6,35 @@ import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import HeroWordTicker from "./heroWordTicker";
 
+interface MousePos {
+  x: number;
+  y: number;
+}
+
 export default function LandingPageClient() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [mousePos, setMousePos] = useState<MousePos>({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoaded(true);
   }, []);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handleMouseEnter = (buttonId: string) => {
+    setIsHovering(buttonId);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(null);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -73,15 +96,43 @@ export default function LandingPageClient() {
           className="mb-8 flex flex-row items-center justify-center gap-4 xl:mb-7 xl:gap-3 lg:mb-6 lg:gap-3 md:mb-5 md:gap-2 sm:mb-4 sm:gap-2"
         >
           <Link href="/explore">
-            <button className="group relative inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-primaryM-500 via-primaryM-600 to-primaryM-700 px-8 py-4 text-base font-bold text-black transition-all duration-200 hover:shadow-md active:scale-95 xl:px-7 xl:py-3.5 xl:text-sm lg:px-6 lg:py-3 lg:text-sm md:px-5 md:py-2.5 md:text-[13px] sm:px-4 sm:py-2 sm:text-sm">
-              <Play className="h-5 w-5 transition xl:h-4 xl:w-4 lg:h-4 lg:w-4 md:h-4 md:w-4 sm:h-3.5 sm:w-3.5" />
+            <button
+              className="group relative inline-flex transform items-center gap-2 rounded-lg bg-gradient-to-r from-primaryM-500 via-primaryM-600 to-primaryM-700 px-8 py-4 text-base font-bold text-black transition duration-500 ease-out hover:-rotate-2 hover:scale-110 hover:shadow-xl active:scale-95 xl:px-7 xl:py-3.5 xl:text-sm lg:px-6 lg:py-3 lg:text-sm md:px-5 md:py-2.5 md:text-[13px] sm:px-4 sm:py-2 sm:text-sm"
+              onMouseMove={handleMouseMove}
+              onMouseEnter={() => handleMouseEnter("explore")}
+              onMouseLeave={handleMouseLeave}
+            >
+              {/* Glow effect */}
+              {isHovering === "explore" && (
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{
+                    background: `radial-gradient(circle 100px at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.3) 0%, transparent 80%)`,
+                  }}
+                />
+              )}
+              <Play className="relative h-5 w-5 transition xl:h-4 xl:w-4 lg:h-4 lg:w-4 md:h-4 md:w-4 sm:h-3.5 sm:w-3.5" />
               Start Exploring
-              <ArrowRight className="h-5 w-5 transition xl:h-4 xl:w-4 lg:h-4 lg:w-4 md:h-4 md:w-4 sm:h-3.5 sm:w-3.5" />
+              <ArrowRight className="relative h-5 w-5 transition xl:h-4 xl:w-4 lg:h-4 lg:w-4 md:h-4 md:w-4 sm:h-3.5 sm:w-3.5" />
             </button>
           </Link>
 
           <Link href="/sign-in">
-            <button className="rounded-lg border border-primaryM-500/50 bg-primaryM-500/5 px-8 py-4 text-base font-bold text-primaryM-300 backdrop-blur-sm transition-all duration-300 hover:border-primaryM-500 hover:bg-primaryM-500/15 xl:px-7 xl:py-3.5 xl:text-sm lg:px-6 lg:py-3 lg:text-sm md:px-5 md:py-2.5 md:text-[13px] sm:px-4 sm:py-2 sm:text-sm">
+            <button
+              className="group relative transform rounded-lg border border-primaryM-500/50 bg-primaryM-500/5 px-8 py-4 text-base font-bold text-primaryM-300 transition duration-500 ease-out backdrop-blur-sm hover:-rotate-2 hover:scale-110 hover:border-primaryM-500 hover:bg-primaryM-500/15 hover:shadow-xl xl:px-7 xl:py-3.5 xl:text-sm lg:px-6 lg:py-3 lg:text-sm md:px-5 md:py-2.5 md:text-[13px] sm:px-4 sm:py-2 sm:text-sm"
+              onMouseMove={handleMouseMove}
+              onMouseEnter={() => handleMouseEnter("signin")}
+              onMouseLeave={handleMouseLeave}
+            >
+              {/* Glow effect */}
+              {isHovering === "signin" && (
+                <div
+                  className="pointer-events-none absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{
+                    background: `radial-gradient(circle 100px at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.2) 0%, transparent 80%)`,
+                  }}
+                />
+              )}
               Sign In to Your Account
             </button>
           </Link>

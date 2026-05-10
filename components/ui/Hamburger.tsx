@@ -9,14 +9,24 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import Link from "next/link";
-
+import MenuAnimation from "@/components/animata/list/menu-animation";
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/lib/actions";
-import { CircleDot } from "lucide-react";
 import { handleLogout } from "@/lib/actions";
 
 export default async function Hamburger() {
   const user = await getUser();
+
+  const menuItems = [
+    { label: "Home", href: "/" },
+    { label: "Explore", href: "/explore" },
+    { label: "Feed", href: "/feed" },
+    { label: "Upcoming", href: "/upcoming" },
+    { label: "Bookmarks", href: "/bookmarks" },
+    { label: "Search", href: "/search" },
+    { label: "Profile", href: "/profile" },
+  ];
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -50,70 +60,16 @@ export default async function Hamburger() {
           </SheetDescription>
         </SheetHeader>
         <div className="py-24">
-          <ul className="flex flex-col gap-5 text-2xl">
-            <SheetClose asChild>
-              <Link href="/">
-                <li className="flex items-center gap-2">
-                  <span className="">
-                    <CircleDot className="w-3 text-sm" />
-                  </span>
-                  Home
-                </li>
-              </Link>
-            </SheetClose>
-            <SheetClose asChild>
-              <Link href="/explore">
-                <li className="flex items-center gap-2">
-                  <span className="">
-                    <CircleDot className="w-3 text-sm" />
-                  </span>
-                  Explore
-                </li>
-              </Link>
-            </SheetClose>
-            <SheetClose asChild>
-              <Link href={"/upcoming"}>
-                <li className="flex items-center gap-2">
-                  {" "}
-                  <span className="">
-                    <CircleDot className="w-3 text-sm" />
-                  </span>
-                  Upcoming
-                </li>
-              </Link>
-            </SheetClose>
-            <SheetClose asChild>
-              <Link href={"/bookmarks"}>
-                <li className="flex items-center gap-2">
-                  <span className="">
-                    <CircleDot className="w-3 text-sm" />
-                  </span>
-                  BookMarks
-                </li>
-              </Link>
-            </SheetClose>
-            <SheetClose asChild>
-              <Link href={"/search"}>
-                <li className="flex items-center gap-2">
-                  <span className="">
-                    <CircleDot className="w-3 text-sm" />
-                  </span>
-                  Search
-                </li>
-              </Link>
-            </SheetClose>
-            <SheetClose asChild>
-              <Link href={"/profile"}>
-                <li className="flex items-center gap-2">
-                  <span className="">
-                    <CircleDot className="w-3 text-sm" />
-                  </span>
-                  Profile
-                </li>
-              </Link>
-            </SheetClose>
-          </ul>
-        </div>{" "}
+          <div className="flex flex-col gap-2">
+            {menuItems.map((item) => (
+              <SheetClose asChild key={item.href}>
+                <Link href={item.href}>
+                  <MenuAnimation menuItems={[item]} />
+                </Link>
+              </SheetClose>
+            ))}
+          </div>
+        </div>
         <SheetFooter>
           <SheetClose asChild className="w-full">
             {user ? (

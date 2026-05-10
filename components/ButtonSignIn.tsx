@@ -1,6 +1,12 @@
 "use client";
 import { useState } from "react";
-import { SiGithub, SiGoogle, SiTwitter, SiReddit } from "react-icons/si";
+import {
+  SiGithub,
+  SiGoogle,
+  SiTwitter,
+  SiFacebook,
+  SiReddit,
+} from "react-icons/si";
 import { Button } from "./ui/button";
 import { signIn } from "next-auth/react";
 import {
@@ -9,7 +15,7 @@ import {
 } from "@/components/notificationSystem";
 
 type Props = {
-  provider: "github" | "google" | "twitter" | "reddit";
+  provider: "github" | "google" | "twitter" | "facebook" | "reddit";
 };
 
 export default function ButtonSignIn({ provider }: Props) {
@@ -30,6 +36,10 @@ export default function ButtonSignIn({ provider }: Props) {
     case "twitter":
       icon = <SiTwitter className="mr-2 h-5 w-5" />;
       label = "Continue with Twitter";
+      break;
+    case "facebook":
+      icon = <SiFacebook className="mr-2 h-5 w-5" />;
+      label = "Continue with Facebook";
       break;
     case "reddit":
       icon = <SiReddit className="mr-2 h-5 w-5" />;
@@ -55,14 +65,12 @@ export default function ButtonSignIn({ provider }: Props) {
         return;
       }
 
-      showSuccessNotification("Sign in", "Redirecting...");
+      showSuccessNotification("Sign in", "Opening auth window...");
 
       if (result.url) {
-        window.location.href = result.url;
+        window.open(result.url, "auth-popup", "width=500,height=600");
         return;
       }
-
-      window.location.href = "/explore";
     } catch (e) {
       setIsLoading(false);
       showErrorNotification(
@@ -85,7 +93,7 @@ export default function ButtonSignIn({ provider }: Props) {
           {icon}
         </span>
         <span className="flex-1 text-center">
-          {isLoading ? "Signing in..." : label}
+          {isLoading ? "Opening..." : label}
         </span>
       </Button>
     </div>

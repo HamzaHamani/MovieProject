@@ -27,6 +27,7 @@ import UserStatisticsSection from "../../../../components/profile/userStatistics
 import { ReplyForm } from "@/components/profile/replyForm";
 import { Separator } from "@/components/ui/separator";
 import MentionText from "@/components/general/mentionText";
+import FilmCommitGraph from "@/components/animata/graphs/film-commit-graph";
 import {
   addReviewReply,
   getBookmarks,
@@ -848,6 +849,8 @@ export default async function Page({
               </div>
             </div>
           </section>
+
+          <FilmCommitGraph loggedMovies={loggedMovies} />
 
           <UserStatisticsSection username={username ?? usernameParam} />
 

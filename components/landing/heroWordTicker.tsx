@@ -5,19 +5,25 @@ const OUR_WORD = "Movies";
 
 export default function HeroWordTicker() {
   return (
-    <div className="flex w-full max-w-4xl flex-col items-center text-white">
-      <span className="flex w-[85%] items-center justify-between">
-        <span className="whitespace-nowrap text-3xl font-medium">your</span>
-        <span className="whitespace-nowrap text-[90px] font-extrabold uppercase tracking-tight text-primaryM-400">
-          {YOUR_WORD}
-        </span>
+    <div className="flex w-full flex-col items-center justify-center gap-0 text-white">
+      {/* Your Label */}
+      <span className="text-base font-medium text-gray-400 xl:text-sm lg:text-xs md:text-xs sm:text-[11px]">
+        your
       </span>
 
-      <span className="flex w-[85%] items-center justify-between">
-        <span className="whitespace-nowrap text-[90px] font-extrabold uppercase tracking-tight text-primaryM-400">
-          {OUR_WORD}
-        </span>
-        <span className="whitespace-nowrap text-3xl font-medium">our</span>
+      {/* Cinema */}
+      <span className="whitespace-nowrap text-[90px] font-extrabold uppercase tracking-tight text-primaryM-400 xl:text-[75px] lg:text-[60px] md:text-[48px] sm:text-[48px]">
+        {YOUR_WORD}
+      </span>
+
+      {/* Movies */}
+      <span className="whitespace-nowrap text-[90px] font-extrabold uppercase tracking-tight text-primaryM-400 xl:text-[75px] lg:text-[60px] md:text-[48px] sm:text-[48px]">
+        {OUR_WORD}
+      </span>
+
+      {/* Our Label */}
+      <span className="text-base font-medium text-gray-400 xl:text-sm lg:text-xs md:text-xs sm:text-[11px]">
+        our
       </span>
     </div>
   );

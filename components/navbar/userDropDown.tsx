@@ -181,7 +181,7 @@ export function UserDropDown({ user }: Props) {
           <div className="rounded-xl border border-red-500/15 bg-red-500/5 p-1.5">
             <DropdownMenuItem
               onClick={handleSignOut}
-              className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-red-300 outline-none transition hover:bg-red-500/10 hover:text-red-200 focus:bg-red-500/10"
+              className="rounded-lg px-3 py-2.5 text-sm text-red-300 outline-none transition hover:bg-red-500/10 hover:text-red-200 focus:bg-red-500/10 cursor-pointer"
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Sign out</span>
