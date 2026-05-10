@@ -119,7 +119,7 @@ export default function LandingPageClient() {
 
           <Link href="/sign-in">
             <button
-              className="group relative transform rounded-lg border border-primaryM-500/50 bg-primaryM-500/5 px-8 py-4 text-base font-bold text-primaryM-300 transition duration-500 ease-out backdrop-blur-sm hover:-rotate-2 hover:scale-110 hover:border-primaryM-500 hover:bg-primaryM-500/15 hover:shadow-xl xl:px-7 xl:py-3.5 xl:text-sm lg:px-6 lg:py-3 lg:text-sm md:px-5 md:py-2.5 md:text-[13px] sm:px-4 sm:py-2 sm:text-sm"
+              className="group relative transform rounded-lg border border-primaryM-500/50 bg-primaryM-500/5 px-8 py-4 text-base font-bold text-primaryM-300 backdrop-blur-sm transition duration-500 ease-out hover:-rotate-2 hover:scale-110 hover:border-primaryM-500 hover:bg-primaryM-500/15 hover:shadow-xl xl:px-7 xl:py-3.5 xl:text-sm lg:px-6 lg:py-3 lg:text-sm md:px-5 md:py-2.5 md:text-[13px] sm:px-4 sm:py-2 sm:text-sm"
               onMouseMove={handleMouseMove}
               onMouseEnter={() => handleMouseEnter("signin")}
               onMouseLeave={handleMouseLeave}
