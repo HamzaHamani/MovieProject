@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useState, useMemo } from "react";
 
 interface FilmCommitGraphProps {
   loggedMovies: Array<{
@@ -25,15 +26,38 @@ function getTooltipText(count: number, date: string): string {
 export default function FilmCommitGraph({
   loggedMovies,
 }: FilmCommitGraphProps) {
-  // Count movies logged by date
-  const movieCountByDate = new Map<string, number>();
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
-  loggedMovies.forEach((movie) => {
-    if (!movie.createdAt) return; // Skip null dates
-    const date = new Date(movie.createdAt);
-    const dateStr = date.toISOString().split("T")[0];
-    movieCountByDate.set(dateStr, (movieCountByDate.get(dateStr) ?? 0) + 1);
-  });
+  // Get all unique years from loggedMovies
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    loggedMovies.forEach((movie) => {
+      if (!movie.createdAt) return;
+      const date = new Date(movie.createdAt);
+      years.add(date.getFullYear());
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  }, [loggedMovies]);
+
+  // Count movies logged by date
+  const movieCountByDate = useMemo(() => {
+    const map = new Map<string, number>();
+    const filteredMovies = selectedYear
+      ? loggedMovies.filter((movie) => {
+          if (!movie.createdAt) return false;
+          const date = new Date(movie.createdAt);
+          return date.getFullYear() === selectedYear;
+        })
+      : loggedMovies;
+
+    filteredMovies.forEach((movie) => {
+      if (!movie.createdAt) return;
+      const date = new Date(movie.createdAt);
+      const dateStr = date.toISOString().split("T")[0];
+      map.set(dateStr, (map.get(dateStr) ?? 0) + 1);
+    });
+    return map;
+  }, [loggedMovies, selectedYear]);
 
   // Generate 52 weeks of data (looking back from today)
   const today = new Date();
@@ -92,9 +116,40 @@ export default function FilmCommitGraph({
   return (
     <section className="w-full">
       <div className="rounded-lg border border-white/10 bg-white/[0.03] p-6">
-        <h3 className="mb-4 text-sm font-semibold text-white">
-          Film Logging Activity
-        </h3>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-white">
+            Film Logging Activity
+          </h3>
+          {availableYears.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedYear(null)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                  selectedYear === null
+                    ? "border-primaryM-500 bg-primaryM-500 text-black"
+                    : "border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+                }`}
+              >
+                All Years
+              </button>
+              {availableYears.map((year) => (
+                <button
+                  key={year}
+                  type="button"
+                  onClick={() => setSelectedYear(year)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                    selectedYear === year
+                      ? "border-primaryM-500 bg-primaryM-500 text-black"
+                      : "border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+                  }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="overflow-x-auto">
           <div className="min-w-fit">
             <div className="mb-2 ml-8 flex gap-1 text-[10px] text-gray-500">

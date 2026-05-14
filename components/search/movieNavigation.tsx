@@ -5,10 +5,11 @@ import ArrowButtons from "./arrowButtons";
 import NavigationPage from "./navigationPage";
 
 type Props = {
-  data: TsearchApiResponse;
+  data?: TsearchApiResponse;
   query: string;
   activeType: SearchMode;
   onTypeChange: (type: SearchMode) => void;
+  isLoading?: boolean;
 };
 
 const filters: Array<{ label: string; value: SearchMode }> = [
@@ -23,6 +24,7 @@ export default function SearcMovieNavigation({
   query,
   activeType,
   onTypeChange,
+  isLoading = false,
 }: Props) {
   const { setPage } = usePage();
 
@@ -39,32 +41,35 @@ export default function SearcMovieNavigation({
                 onTypeChange(filter.value);
               }}
               variant={activeType === filter.value ? "default" : "outline"}
-              className={`h-9 rounded-full px-4 text-sm font-medium ${
+              className={`h-9 rounded-full px-4 text-sm font-medium transition ${
                 activeType === filter.value
                   ? "bg-primaryM-500 text-black hover:bg-primaryM-600"
                   : "border-white/15 bg-white/5 text-white hover:bg-white/10"
               }`}
+              disabled={isLoading}
             >
               {filter.label}
             </Button>
           ))}
         </div>
 
-        <div className="flex items-center justify-between gap-3 lg:text-sm">
-          <h2 className="text-lg lg:text-base">
-            Found:{" "}
-            <span className="font-bold text-primaryM-500">
-              {data.total_results}
-            </span>{" "}
-            results for <span className="text-white">{query}</span>
-          </h2>
-          <div className="flex items-center justify-center gap-3">
-            <NavigationPage data={data} />
-            <span className="flex items-center justify-center gap-1">
-              <ArrowButtons data={data} />
-            </span>
+        {!isLoading && data && (
+          <div className="flex items-center justify-between gap-3 lg:text-sm">
+            <h2 className="text-lg lg:text-base">
+              Found:{" "}
+              <span className="font-bold text-primaryM-500">
+                {data.total_results}
+              </span>{" "}
+              results for <span className="text-white">{query}</span>
+            </h2>
+            <div className="flex items-center justify-center gap-3">
+              <NavigationPage data={data} />
+              <span className="flex items-center justify-center gap-1">
+                <ArrowButtons data={data} />
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

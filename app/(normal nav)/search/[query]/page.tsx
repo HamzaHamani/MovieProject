@@ -4,6 +4,7 @@ import SearchMoviesDisplay from "@/components/search/moviesDisplay";
 import { SearchVanishComp } from "@/components/search/searchVanishComp";
 import usePage from "@/hooks/usePage";
 import type { SearchMode, TsearchApiResponse } from "@/types/api";
+import MovieSkeleton from "@/components/general/movieSkeleton";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NoResults from "@/components/search/noResults";
@@ -76,10 +77,7 @@ const Page = ({ params, searchParams }: Props) => {
     prefetchNextPage();
   }, [isSuccess, query, page, currentType]);
 
-  if (isLoading) return <MovieLoadingIndicator />;
-  if (error) return <div>Error: {error.message}</div>;
-
-  return data ? (
+  return (
     <RenderUi query={query}>
       <SearcMovieNavigation
         data={data}
@@ -88,14 +86,23 @@ const Page = ({ params, searchParams }: Props) => {
         onTypeChange={(nextType) => {
           router.push(`/search/${encodeURIComponent(query)}?type=${nextType}`);
         }}
+        isLoading={isLoading}
       />
-      {data.results.length === 0 ? (
+      {isLoading ? (
+        <div className="ds:grid-cols-3 xssmd:grid-cols-2 relative mt-10 grid w-full grid-cols-5 items-center gap-5 xxl:grid-cols-4 lg:grid-cols-3 smd:grid-cols-2 s:grid-cols-1">
+          {Array.from({ length: 10 }, (_, index) => (
+            <MovieSkeleton key={index} />
+          ))}
+        </div>
+      ) : error ? (
+        <div>Error: {error.message}</div>
+      ) : data && data.results.length === 0 ? (
         <NoResults />
-      ) : (
+      ) : data ? (
         <SearchMoviesDisplay data={data} />
-      )}
+      ) : null}
     </RenderUi>
-  ) : null;
+  );
 };
 
 function RenderUi({

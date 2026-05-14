@@ -96,8 +96,8 @@ export function showNotification({
   posterPath,
   duration = 3500,
 }: NotificationInput) {
-  toast.custom(
-    () => (
+  const toastId = toast.custom(
+    (t) => (
       <div
         className={`flex h-14 w-[350px] items-stretch overflow-hidden rounded-xl border bg-backgroundM text-textMain shadow-lg ${notificationColors[type]}`}
       >
@@ -126,6 +126,26 @@ export function showNotification({
             </p>
           )}
         </div>
+        <button
+          type="button"
+          onClick={() => toast.dismiss()}
+          className="flex h-full w-12 shrink-0 items-center justify-center transition hover:bg-white/10"
+          aria-label="Dismiss notification"
+        >
+          <svg
+            className="h-4 w-4 text-white/60 hover:text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
       </div>
     ),
     { position: "bottom-left", duration },

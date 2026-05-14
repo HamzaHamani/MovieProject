@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import gsap from "gsap";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
@@ -36,7 +38,7 @@ function PersonCard({ result }: { result: SearchResult }) {
             placeholderClassName="bg-zinc-800/70"
           />
         ) : (
-          <div className="grid h-full w-full place-items-center bg-white/[0.03] text-sm text-gray-500">
+          <div className="h-full w-full flex items-center justify-center bg-gradient-to-b from-white/5 to-black/20 text-xs text-gray-400">
             No image
           </div>
         )}
@@ -102,29 +104,149 @@ function UserCard({ result }: { result: SearchResult }) {
 }
 
 export default function SearchMoviesDisplay({ data }: Props) {
+  const [displayedResults, setDisplayedResults] = useState<SearchResult[]>(
+    data.results,
+  );
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const mountedRef = useRef(false);
+  const transitionRef = useRef<gsap.core.Timeline | null>(null);
+  const animatingRef = useRef(false);
+
+  const resultSignature = data.results
+    .map((result) => `${result.kind}-${result.id}`)
+    .join("|");
+
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+
+    const newSignature = data.results
+      .map((result) => `${result.kind}-${result.id}`)
+      .join("|");
+    const oldSignature = displayedResults
+      .map((result) => `${result.kind}-${result.id}`)
+      .join("|");
+
+    if (newSignature === oldSignature) {
+      return;
+    }
+
+    transitionRef.current?.kill();
+    const outgoingCards = cardRefs.current.filter(
+      (node): node is HTMLDivElement => Boolean(node),
+    );
+
+    if (outgoingCards.length === 0) {
+      setDisplayedResults(data.results);
+      return;
+    }
+
+    animatingRef.current = true;
+    transitionRef.current = gsap.timeline({
+      onComplete: () => {
+        setDisplayedResults(data.results);
+      },
+    });
+
+    transitionRef.current.to(outgoingCards, {
+      autoAlpha: 0,
+      y: 18,
+      scale: 0.98,
+      duration: 0.5,
+      stagger: 0.015,
+      ease: "power2.inOut",
+    });
+
+    return () => {
+      transitionRef.current?.kill();
+    };
+  }, [resultSignature, data.results, displayedResults]);
+
+  useLayoutEffect(() => {
+    if (!animatingRef.current) return;
+
+    const incomingCards = cardRefs.current.filter(
+      (node): node is HTMLDivElement => Boolean(node),
+    );
+
+    if (incomingCards.length === 0) {
+      animatingRef.current = false;
+      return;
+    }
+
+    const intro = gsap.fromTo(
+      incomingCards,
+      { autoAlpha: 0, y: 18, scale: 0.98 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.5,
+        stagger: 0.04,
+        ease: "power3.out",
+        onComplete: () => {
+          animatingRef.current = false;
+        },
+      },
+    );
+
+    return () => {
+      intro.kill();
+    };
+  }, [displayedResults]);
+
   return (
     <div className="relative mt-10 grid w-full grid-cols-5 items-start justify-items-center gap-5 xxl:grid-cols-4 ds:grid-cols-3 lg:grid-cols-3 xssmd:grid-cols-2 smd:grid-cols-2 s:grid-cols-1">
-      {data.results.map((result) => {
+      {displayedResults.map((result, index) => {
         if (result.kind === "user") {
-          return <UserCard key={result.id} result={result} />;
+          return (
+            <div
+              key={result.id}
+              ref={(el) => {
+                cardRefs.current[index] = el;
+              }}
+              className="w-full"
+            >
+              <UserCard result={result} />
+            </div>
+          );
         }
 
         if (result.kind === "person") {
-          return <PersonCard key={result.id} result={result} />;
+          return (
+            <div
+              key={result.id}
+              ref={(el) => {
+                cardRefs.current[index] = el;
+              }}
+              className="w-full"
+            >
+              <PersonCard result={result} />
+            </div>
+          );
         }
 
         return (
-          <MovieTvCard
+          <div
             key={result.id}
-            href={result.href}
-            posterPath={result.imagePath}
-            title={result.title}
-            voteAverage={result.voteAverage}
-            mediaTypeLabel={result.mediaLabel as "Film" | "TV Show" | "TV"}
-            year={result.year || "----"}
-            className="w-full max-w-[340px] self-center xl:max-w-[310px] lg:max-w-[280px] h1text8:max-w-[250px] smd:max-w-[220px] sss:max-w-[200px] s:max-w-[210px]"
-            imageClassName="h-[550px] xl:h-[430px] lg:h-[390px] h1text8:h-[400px] xsmd:h-[450px] smd:h-[350px] sss:h-[330px] s:h-[370px]"
-          />
+            ref={(el) => {
+              cardRefs.current[index] = el;
+            }}
+            className="w-full"
+          >
+            <MovieTvCard
+              href={result.href}
+              posterPath={result.imagePath}
+              title={result.title}
+              voteAverage={result.voteAverage}
+              mediaTypeLabel={result.mediaLabel as "Film" | "TV Show" | "TV"}
+              year={result.year || "----"}
+              className="w-full max-w-[340px] self-center xl:max-w-[310px] lg:max-w-[280px] h1text8:max-w-[250px] smd:max-w-[220px] sss:max-w-[200px] s:max-w-[210px]"
+              imageClassName="h-[550px] xl:h-[430px] lg:h-[390px] h1text8:h-[400px] xsmd:h-[450px] smd:h-[350px] sss:h-[330px] s:h-[370px]"
+            />
+          </div>
         );
       })}
     </div>
