@@ -38,7 +38,7 @@ function PersonCard({ result }: { result: SearchResult }) {
             placeholderClassName="bg-zinc-800/70"
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center bg-gradient-to-b from-white/5 to-black/20 text-xs text-gray-400">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-white/5 to-black/20 text-xs text-gray-400">
             No image
           </div>
         )}

@@ -89,7 +89,7 @@ const Page = ({ params, searchParams }: Props) => {
         isLoading={isLoading}
       />
       {isLoading ? (
-        <div className="ds:grid-cols-3 xssmd:grid-cols-2 relative mt-10 grid w-full grid-cols-5 items-center gap-5 xxl:grid-cols-4 lg:grid-cols-3 smd:grid-cols-2 s:grid-cols-1">
+        <div className="relative mt-10 grid w-full grid-cols-5 items-center gap-5 xxl:grid-cols-4 ds:grid-cols-3 lg:grid-cols-3 xssmd:grid-cols-2 smd:grid-cols-2 s:grid-cols-1">
           {Array.from({ length: 10 }, (_, index) => (
             <MovieSkeleton key={index} />
           ))}

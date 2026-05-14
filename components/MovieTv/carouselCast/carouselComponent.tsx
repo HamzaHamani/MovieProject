@@ -54,7 +54,7 @@ export function CarouselComponent({ title, subtitle, people }: Props) {
               >
                 <Link
                   href={`/crew/${person.id}`}
-                  className="group flex w-full h-full flex-col space-y-3 rounded-2xl border border-white/10 bg-black/20 p-3 transition duration-300 hover:-translate-y-1 hover:border-primaryM-500/35 hover:bg-white/[0.06]"
+                  className="group flex h-full w-full flex-col space-y-3 rounded-2xl border border-white/10 bg-black/20 p-3 transition duration-300 hover:-translate-y-1 hover:border-primaryM-500/35 hover:bg-white/[0.06]"
                 >
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-white/10">
                     {person.profile_path ? (
@@ -65,7 +65,7 @@ export function CarouselComponent({ title, subtitle, people }: Props) {
                         placeholderClassName="bg-zinc-300/70"
                       />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center bg-gradient-to-b from-white/5 to-black/20 text-[10px] text-gray-400">
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-white/5 to-black/20 text-[10px] text-gray-400">
                         No image
                       </div>
                     )}
