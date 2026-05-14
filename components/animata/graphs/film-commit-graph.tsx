@@ -122,15 +122,18 @@ export default function FilmCommitGraph({
 
               <div className="flex gap-1">
                 {weeksData.map((week, weekIndex) => (
-                  <div key={`week-${weekIndex}`} className="flex flex-col gap-1">
+                  <div
+                    key={`week-${weekIndex}`}
+                    className="flex flex-col gap-1"
+                  >
                     {week.counts.map((count, dayIndex) => {
                       const currentDay = week.dates[dayIndex];
                       const dateStr = currentDay.toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  });
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      });
 
                       return (
                         <div

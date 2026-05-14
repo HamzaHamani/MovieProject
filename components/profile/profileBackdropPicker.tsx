@@ -282,124 +282,124 @@ export default function ProfileBackdropPicker({
         </button>
         <div className="flex max-h-[70vh] flex-col">
           <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div>
-              <h3 className="font-semibold text-white">
-                {selectedMovie.title}
-              </h3>
-              <p className="mt-1 text-sm text-gray-400">
-                Select a backdrop from available images
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleBackBackToSearch}
-              className="text-gray-400 hover:bg-white/10 hover:text-white"
-            >
-              Back
-            </Button>
-          </div>
-
-          {isLoadingBackdrops && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-5 w-5 animate-spin text-primaryM-400" />
-            </div>
-          )}
-
-          {!isLoadingBackdrops && movieBackdrops.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
-                Available backdrops
-              </p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {movieBackdrops.map((backdrop, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() =>
-                      handleSelectBackdrop(`${backdrop.file_path}`)
-                    }
-                    className={`group relative overflow-hidden rounded-2xl border text-left transition ${
-                      selectedBackdrop === backdrop.file_path
-                        ? "border-primaryM-500/70 ring-1 ring-primaryM-500/40"
-                        : "border-white/10 hover:border-primaryM-500/50"
-                    }`}
-                  >
-                    <div className="relative aspect-[16/9] bg-black/40">
-                      <LazyBlurImage
-                        src={`https://image.tmdb.org/t/p/w500${backdrop.file_path}`}
-                        alt={`Backdrop ${idx + 1}`}
-                        width={500}
-                        height={281}
-                        className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 p-3">
-                        <p className="text-xs text-gray-300">
-                          Backdrop {idx + 1}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <h3 className="font-semibold text-white">
+                  {selectedMovie.title}
+                </h3>
+                <p className="mt-1 text-sm text-gray-400">
+                  Select a backdrop from available images
+                </p>
               </div>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleBackBackToSearch}
+                className="text-gray-400 hover:bg-white/10 hover:text-white"
+              >
+                Back
+              </Button>
             </div>
-          )}
 
-          {!isLoadingBackdrops && movieBackdrops.length === 0 && (
-            <div className="flex items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.03] py-12">
-              <p className="text-sm text-gray-400">
-                No backdrops available for this movie
-              </p>
-            </div>
-          )}
+            {isLoadingBackdrops && (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-5 w-5 animate-spin text-primaryM-400" />
+              </div>
+            )}
 
-          {selectedBackdrop && (
-            <div className="space-y-2 border-t border-white/10 pb-4 pt-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
-                Preview
-              </p>
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
-                <div className="relative aspect-[16/9]">
-                  <LazyBlurImage
-                    src={`https://image.tmdb.org/t/p/original${selectedBackdrop}`}
-                    alt="Selected backdrop"
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+            {!isLoadingBackdrops && movieBackdrops.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
+                  Available backdrops
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {movieBackdrops.map((backdrop, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() =>
+                        handleSelectBackdrop(`${backdrop.file_path}`)
+                      }
+                      className={`group relative overflow-hidden rounded-2xl border text-left transition ${
+                        selectedBackdrop === backdrop.file_path
+                          ? "border-primaryM-500/70 ring-1 ring-primaryM-500/40"
+                          : "border-white/10 hover:border-primaryM-500/50"
+                      }`}
+                    >
+                      <div className="relative aspect-[16/9] bg-black/40">
+                        <LazyBlurImage
+                          src={`https://image.tmdb.org/t/p/w500${backdrop.file_path}`}
+                          alt={`Backdrop ${idx + 1}`}
+                          width={500}
+                          height={281}
+                          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                        <div className="absolute inset-x-0 bottom-0 p-3">
+                          <p className="text-xs text-gray-300">
+                            Backdrop {idx + 1}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {!isLoadingBackdrops && movieBackdrops.length === 0 && (
+              <div className="flex items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.03] py-12">
+                <p className="text-sm text-gray-400">
+                  No backdrops available for this movie
+                </p>
+              </div>
+            )}
+
+            {selectedBackdrop && (
+              <div className="space-y-2 border-t border-white/10 pb-4 pt-4">
+                <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
+                  Preview
+                </p>
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                  <div className="relative aspect-[16/9]">
+                    <LazyBlurImage
+                      src={`https://image.tmdb.org/t/p/original${selectedBackdrop}`}
+                      alt="Selected backdrop"
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="sticky bottom-0 z-10 -mx-4 mt-2 border-t border-white/10 bg-[rgba(8,8,12,0.96)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-md">
             <div className="flex gap-2">
-            {selectedBackdrop && (
+              {selectedBackdrop && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleClear}
+                  className="flex-1 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
+                >
+                  Clear
+                </Button>
+              )}
               <Button
                 type="button"
-                variant="ghost"
-                onClick={handleClear}
-                className="flex-1 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
+                onClick={handleSave}
+                disabled={isSaving || !selectedBackdrop}
+                className="flex-1 border border-primaryM-500/30 bg-primaryM-500/10 text-primaryM-400 hover:bg-primaryM-500/20 hover:text-primaryM-300 disabled:opacity-50"
               >
-                Clear
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Backdrop"
+                )}
               </Button>
-            )}
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving || !selectedBackdrop}
-              className="flex-1 border border-primaryM-500/30 bg-primaryM-500/10 text-primaryM-400 hover:bg-primaryM-500/20 hover:text-primaryM-300 disabled:opacity-50"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Backdrop"
-              )}
-            </Button>
             </div>
           </div>
         </div>
