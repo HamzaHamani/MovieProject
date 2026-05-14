@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db";
 import { bookmarks } from "@/db/schema";
-import { AddMovie, getUser } from "@/lib/actions";
+import { AddMovie, ensureBookmarkPrivacyColumn, getUser } from "@/lib/actions";
 import type { StoredMediaType } from "@/lib/utils";
 import { and, eq } from "drizzle-orm";
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureBookmarkPrivacyColumn();
+
     const user = await getUser();
     if (!user?.id) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

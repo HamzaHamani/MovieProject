@@ -15,7 +15,7 @@ import {
   listCollaborators,
 } from "@/db/schema";
 import { db } from "@/db";
-import { and, desc, eq, inArray, ne, sum, avg, count } from "drizzle-orm";
+import { and, desc, eq, inArray, ne, sum, avg, count, sql } from "drizzle-orm";
 import { signOut } from "@/auth";
 import {
   bookmarksMoviesSchema,
@@ -267,7 +267,29 @@ function isSystemListName(name: string) {
   );
 }
 
+export const ensureBookmarkPrivacyColumn = (() => {
+  let pending: Promise<void> | null = null;
+
+  return async () => {
+    if (!pending) {
+      pending = (async () => {
+        try {
+          await db.execute(
+            sql`ALTER TABLE "bookmarks" ADD COLUMN IF NOT EXISTS "isPublic" boolean DEFAULT true NOT NULL`,
+          );
+        } catch (error) {
+          if (!isSchemaDriftError(error)) throw error;
+        }
+      })();
+    }
+
+    await pending;
+  };
+})();
+
 async function cleanupSystemListCollaborations() {
+  await ensureBookmarkPrivacyColumn();
+
   const rows = await db
     .select({ id: bookmarks.id, bookmarkName: bookmarks.bookmarkName })
     .from(bookmarks);
@@ -306,6 +328,8 @@ function getStoredMovieIdCandidates(
 }
 
 async function ensureDefaultSystemListsForUser(userId: string) {
+  await ensureBookmarkPrivacyColumn();
+
   const current = await db
     .select()
     .from(bookmarks)
@@ -800,6 +824,8 @@ export async function getReviewEngagement(reviewId: string) {
 }
 
 export async function getBookmarkById(bookmarkId: string) {
+  await ensureBookmarkPrivacyColumn();
+
   const rows = await db
     .select()
     .from(bookmarks)
@@ -815,6 +841,8 @@ export async function updateBookmarkDetails(data: {
   description: string;
   isPublic?: boolean;
 }) {
+  await ensureBookmarkPrivacyColumn();
+
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
 
@@ -924,6 +952,8 @@ export async function getListLikeStats(bookmarkId: string) {
 
 type bookSchemaType = z.infer<typeof bookmarksSchema>;
 export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
+  await ensureBookmarkPrivacyColumn();
+
   try {
     await ensureDefaultSystemListsForUser(userId);
   } catch (error) {
@@ -1540,6 +1570,8 @@ export async function CreateBookmark(data: {
   description: string;
   isPublic?: boolean;
 }) {
+  await ensureBookmarkPrivacyColumn();
+
   const insert = await db
     .insert(bookmarks)
     .values({
@@ -3373,6 +3405,8 @@ export async function getFriendsForCurrentUser() {
 }
 
 export async function getCollaborativeBookmarksForCurrentUser() {
+  await ensureBookmarkPrivacyColumn();
+
   const user = await getUser();
   if (!user?.id) return [];
 
@@ -3402,6 +3436,8 @@ export async function getCollaborativeBookmarksForCurrentUser() {
 }
 
 export async function getLikedBookmarksForCurrentUser() {
+  await ensureBookmarkPrivacyColumn();
+
   const user = await getUser();
   if (!user?.id) return [];
 
