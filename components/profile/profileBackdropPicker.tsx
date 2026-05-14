@@ -280,7 +280,8 @@ export default function ProfileBackdropPicker({
         >
           <X className="h-4 w-4" />
         </button>
-        <div className="space-y-4">
+        <div className="flex max-h-[70vh] flex-col">
+          <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
               <h3 className="font-semibold text-white">
@@ -354,7 +355,7 @@ export default function ProfileBackdropPicker({
           )}
 
           {selectedBackdrop && (
-            <div className="space-y-2 border-t border-white/10 pt-4">
+            <div className="space-y-2 border-t border-white/10 pb-4 pt-4">
               <p className="text-xs uppercase tracking-[0.24em] text-gray-500">
                 Preview
               </p>
@@ -370,8 +371,10 @@ export default function ProfileBackdropPicker({
               </div>
             </div>
           )}
+          </div>
 
-          <div className="flex gap-2 border-t border-white/10 pt-4">
+          <div className="sticky bottom-0 z-10 -mx-4 mt-2 border-t border-white/10 bg-[rgba(8,8,12,0.96)] px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur-md">
+            <div className="flex gap-2">
             {selectedBackdrop && (
               <Button
                 type="button"
@@ -397,6 +400,7 @@ export default function ProfileBackdropPicker({
                 "Save Backdrop"
               )}
             </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -423,7 +427,7 @@ export default function ProfileBackdropPicker({
               Select a movie or TV show and choose a backdrop to set as your
               profile background
             </DialogDescription>
-            <div className="max-h-[70vh] overflow-y-auto">
+            <div className="max-h-[70vh] overflow-hidden">
               {contentProps.children}
             </div>
           </DialogContent>
@@ -444,7 +448,7 @@ export default function ProfileBackdropPicker({
 
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
         <DrawerContent className="border-0 bg-transparent bg-none">
-          <div className="max-h-[70vh] overflow-y-auto px-4 pb-6">
+          <div className="max-h-[70vh] overflow-hidden px-4 pb-6">
             {contentProps.children}
           </div>
         </DrawerContent>
