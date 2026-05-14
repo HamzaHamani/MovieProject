@@ -487,7 +487,16 @@ export async function updateMyProfile(input: {
   const nextImage = parsed.data.image?.trim() || null;
   const nextBackdropPath = parsed.data.backdropPath?.trim() || null;
 
-  if (nextImage && !isAllowedProfileImageUrl(nextImage)) {
+  const currentProfile = await db
+    .select({ image: users.image })
+    .from(users)
+    .where(eq(users.id, user.id))
+    .limit(1);
+
+  const currentImage = currentProfile[0]?.image?.trim() || null;
+  const hasImageChanged = nextImage !== currentImage;
+
+  if (nextImage && hasImageChanged && !isAllowedProfileImageUrl(nextImage)) {
     return {
       ok: false as const,
       error: "Invalid profile image URL. Please upload via UploadThing.",
