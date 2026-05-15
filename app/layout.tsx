@@ -8,7 +8,12 @@ import NextAuthProvider from "@/provider/nextAuthProvider";
 import { GeistMono } from "geist/font/mono";
 import TopLoaderClient from "@/components/ui/TopLoaderClient";
 import InternalTopProgress from "@/components/ui/InternalTopProgress";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/config/site";
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_URL,
+  SITE_NAME,
+  SITE_DESCRIPTION,
+} from "@/config/site";
 
 export const viewport: Viewport = {
   themeColor: "#8b5cf6",
@@ -52,7 +57,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/og-image.jpg",
+        url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
         alt: `${SITE_NAME} - Discover movies and TV shows`,
@@ -64,7 +69,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE_NAME} | Discover Movies & TV Shows`,
     description: SITE_DESCRIPTION,
-    images: ["/og-image.jpg"],
+    images: [DEFAULT_OG_IMAGE],
   },
   alternates: {
     canonical: SITE_URL,

@@ -1,11 +1,89 @@
 import { Metadata } from "next";
 
 import ExplorePageClient from "@/components/explore/explorePageClient";
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
+import { getCurrentUserDbProfile, getUser } from "@/lib/actions";
 
-export const metadata: Metadata = {
-  title: "Explore",
+type TMDBResult = {
+  name?: string;
+  overview?: string;
+  backdrop_path?: string | null;
+  poster_path?: string | null;
 };
 
-export default function ExplorePage() {
-  return <ExplorePageClient />;
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const apiKey = process.env.TMDB_API_KEY;
+
+    if (!apiKey) {
+      return generatePageMetadata({
+        title: "Explore",
+        description:
+          "Explore popular and top-rated movies and TV shows. Find your next watch on Cinesphere.",
+        canonical: `${SITE_URL}/explore`,
+        ogImage: DEFAULT_OG_IMAGE,
+      });
+    }
+
+    const response = await fetch(
+      `https://api.themoviedb.org/3/tv/popular?language=en-US&page=1&api_key=${apiKey}`,
+      { next: { revalidate: 3600 } },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch popular TV metadata");
+    }
+
+    const data = (await response.json()) as { results?: TMDBResult[] };
+    const featured = data.results?.[0];
+
+    const imagePath = featured?.backdrop_path || featured?.poster_path;
+    const ogImage = imagePath
+      ? `https://image.tmdb.org/t/p/w1280${imagePath}`
+      : DEFAULT_OG_IMAGE;
+
+    const title = featured?.name
+      ? `Explore with ${featured.name}`
+      : "Explore";
+    const description = featured?.overview?.trim()
+      ? `${featured.overview.slice(0, 150)}${featured.overview.length > 150 ? "..." : ""}`
+      : `Explore popular and top-rated movies and TV shows on ${SITE_NAME}.`;
+
+    return generatePageMetadata({
+      title,
+      description,
+      canonical: `${SITE_URL}/explore`,
+      ogImage,
+      ogType: "website",
+    });
+  } catch {
+    return generatePageMetadata({
+      title: "Explore",
+      description:
+        "Explore popular and top-rated movies and TV shows. Find your next watch on Cinesphere.",
+      canonical: `${SITE_URL}/explore`,
+      ogImage: DEFAULT_OG_IMAGE,
+    });
+  }
+}
+
+type Props = {
+  searchParams?: Promise<{ setupUsername?: string }>;
+};
+
+export default async function ExplorePage({ searchParams }: Props) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const setupFlag = resolvedSearchParams?.setupUsername === "1";
+
+  const user = await getUser();
+  const profile = user?.id ? await getCurrentUserDbProfile() : null;
+  const needsUsernameSetup = Boolean(user?.id && !profile?.username && setupFlag);
+
+  return (
+    <ExplorePageClient
+      showUsernameSetup={needsUsernameSetup}
+      suggestedName={user?.name ?? null}
+    />
+  );
 }

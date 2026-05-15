@@ -20,6 +20,8 @@ import {
   getUser,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
+import { SITE_URL } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
 const systemLikesKeywords = ["likes", "like", "liked", "love", "loved"];
 const systemFavoritesKeywords = ["favorite", "favourite", "fav"];
@@ -39,9 +41,14 @@ function isSystemListName(name: string) {
   );
 }
 
-export const metadata: Metadata = {
+export const metadata: Metadata = generatePageMetadata({
   title: "Bookmarks",
-};
+  description:
+    "Save, organize, and manage your favorite movies and TV shows in custom lists.",
+  canonical: `${SITE_URL}/bookmarks`,
+  ogImage: `${SITE_URL}/bookmarks/opengraph-image`,
+  ogType: "website",
+});
 
 type TResolvedSavedItem = {
   id: string;

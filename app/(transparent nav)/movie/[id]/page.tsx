@@ -3,7 +3,7 @@ import { getSimilarByType, getSpecifiedMovie } from "@/lib/actions";
 import { TspecifiedMovie } from "@/types/api";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
@@ -30,16 +30,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const movie = await fetchMovie();
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w1280${movie.poster_path}`
-    : `${SITE_URL}/og-image.jpg`;
+    : DEFAULT_OG_IMAGE;
 
   const releaseYear = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : undefined;
 
+  const shortDescription = movie.overview?.trim()
+    ? `${movie.overview.slice(0, 150)}${movie.overview.length > 150 ? "..." : ""}`
+    : `Discover details about ${movie.title} on ${SITE_NAME}`;
+
   return generatePageMetadata({
     title: movie.title || "Movie",
-    description:
-      movie.overview || `Discover details about ${movie.title} on ${SITE_NAME}`,
+    description: shortDescription,
     canonical: `${SITE_URL}/movie/${id}`,
     ogImage: posterUrl,
     ogType: "website",

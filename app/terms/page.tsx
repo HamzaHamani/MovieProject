@@ -1,9 +1,14 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = generatePageMetadata({
   title: "Terms of Service",
-};
+  description:
+    "Read the terms and conditions for using Cinesphere, including account, content, and platform usage rules.",
+  canonical: `${SITE_URL}/terms`,
+});
 
 export default function TermsPage() {
   return (

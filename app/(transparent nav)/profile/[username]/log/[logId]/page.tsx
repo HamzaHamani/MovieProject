@@ -12,7 +12,7 @@ import {
   getUser,
   getUserDbProfileByUsername,
 } from "@/lib/actions";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 type ResolvedMedia = {
@@ -87,7 +87,7 @@ export async function generateMetadata({
 
     const posterUrl = media.posterPath
       ? `https://image.tmdb.org/t/p/w1280${media.posterPath}`
-      : `${SITE_URL}/og-image.jpg`;
+      : DEFAULT_OG_IMAGE;
 
     const title = `${username} logged ${media.title}`;
     const description = `${username} watched ${media.title} on ${SITE_NAME}. Check out their activity and reviews.`;

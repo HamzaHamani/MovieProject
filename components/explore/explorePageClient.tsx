@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import FeaturedRecentSection from "@/components/explore/featuredRecentSection";
 import GenreSpotlightSection from "@/components/explore/genreSpotlightSection";
 import MovieTvCard from "@/components/general/movieTvCard";
+import UsernameSetupModal from "@/components/profile/usernameSetupModal";
 import useNearViewport from "@/hooks/useNearViewport";
 import {
   fetchExploreGenreMovies,
@@ -311,7 +312,15 @@ function JustReleaseSection({ cards }: { cards: ExploreCard[] }) {
   );
 }
 
-export default function ExplorePageClient() {
+type ExplorePageClientProps = {
+  showUsernameSetup?: boolean;
+  suggestedName?: string | null;
+};
+
+export default function ExplorePageClient({
+  showUsernameSetup = false,
+  suggestedName = null,
+}: ExplorePageClientProps) {
   const featured = useQuery({
     queryKey: ["explore", "featured"],
     queryFn: fetchExploreTrendingList,
@@ -396,6 +405,13 @@ export default function ExplorePageClient() {
 
   return (
     <div className="w-full pb-14">
+      {showUsernameSetup ? (
+        <UsernameSetupModal
+          openByDefault={showUsernameSetup}
+          suggestedName={suggestedName}
+        />
+      ) : null}
+
       {featured.isPending && <FeaturedSkeleton />}
       {featuredCards.length > 0 && (
         <FeaturedRecentSection cards={featuredCards} />

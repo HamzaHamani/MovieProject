@@ -5,7 +5,7 @@
  */
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://cinesphere.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cinesphere.app";
 export const SITE_NAME = "Cinesphere";
 export const SITE_DESCRIPTION =
   "Discover movies, TV shows, and connect with cinephiles. Log films, create lists, and share reviews on Cinesphere.";
@@ -15,4 +15,4 @@ export const SOCIAL_LINKS = {
   instagram: "https://instagram.com",
 };
 
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/authBG.webp`;

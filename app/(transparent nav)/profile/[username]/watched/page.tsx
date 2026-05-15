@@ -5,10 +5,34 @@ import { WatchedMediaGrid } from "@/components/profile/watchedMediaGrid";
 import Link from "next/link";
 import { ArrowLeft, Clock3 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
-export const metadata: Metadata = {
-  title: "Watched Media",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
+
+  try {
+    const profileUser = await getUserDbProfileByUsername(username);
+    if (!profileUser) return { title: "Watched Media" };
+
+    return generatePageMetadata({
+      title: `${username}'s Watched Media`,
+      description:
+        profileUser.bio ||
+        `See movies and TV shows watched by ${username} on ${SITE_NAME}.`,
+      canonical: `${SITE_URL}/profile/${username}/watched`,
+      ogImage: profileUser.image || DEFAULT_OG_IMAGE,
+      ogType: "profile",
+      authors: [username],
+    });
+  } catch {
+    return { title: "Watched Media" };
+  }
+}
 
 export const dynamic = "force-dynamic";
 

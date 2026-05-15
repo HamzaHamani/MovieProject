@@ -7,7 +7,7 @@ import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       getPersonDetails(personId),
       getPersonImages(personId),
     ]);
-
+      import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
     if (!person?.id) {
       return {
         title: "Person Not Found",
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const imagePath = person.profile_path ?? images[0]?.file_path ?? null;
     const profileImageUrl = imagePath
       ? `https://image.tmdb.org/t/p/w500${imagePath}`
-      : `${SITE_URL}/og-image.jpg`;
+      : DEFAULT_OG_IMAGE;
 
     return generatePageMetadata({
       title: person.name || "Person",
@@ -73,8 +73,7 @@ function formatBirthday(
   const born = new Date(birthday);
   const bornText = Number.isNaN(born.getTime())
     ? birthday
-    : born.toLocaleDateString("en-US", {
-        month: "short",
+            : DEFAULT_OG_IMAGE;
         day: "numeric",
         year: "numeric",
       });

@@ -1,10 +1,15 @@
 import { SearchVanishComp } from "@/components/search/searchVanishComp";
 
 import { Metadata } from "next";
+import { SITE_URL } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = generatePageMetadata({
   title: "Search",
-};
+  description:
+    "Search for movies, TV shows, cast members, and users on Cinesphere.",
+  canonical: `${SITE_URL}/search`,
+});
 type Props = {};
 
 export default function Search({}: Props) {

@@ -40,22 +40,30 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DrawerPortal>
-    <DrawerOverlay />
-    <DrawerPrimitive.Content
-      ref={ref}
-      className={cn(
-        "popup-gradient-shell fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col overflow-hidden rounded-t-2xl border border-white/10 text-textMain shadow-[0_-24px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl",
-        className,
-      )}
-      {...props}
-    >
-      <div className="mx-auto mt-3 h-1.5 w-[120px] rounded-full bg-white/25" />
-      {children}
-    </DrawerPrimitive.Content>
-  </DrawerPortal>
-));
+>(({ className, children, ...props }, ref) => {
+  const disableShell =
+    typeof className === "string" && className.includes("no-popup-shell");
+
+  return (
+    <DrawerPortal>
+      <DrawerOverlay />
+      <DrawerPrimitive.Content
+        ref={ref}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col overflow-hidden rounded-t-2xl text-textMain",
+          disableShell
+            ? "border-0 bg-transparent shadow-none backdrop-blur-none"
+            : "popup-gradient-shell border border-white/10 shadow-[0_-24px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl",
+          className,
+        )}
+        {...props}
+      >
+        <div className="mx-auto mt-3 h-1.5 w-[120px] rounded-full bg-white/25" />
+        {children}
+      </DrawerPrimitive.Content>
+    </DrawerPortal>
+  );
+});
 DrawerContent.displayName = "DrawerContent";
 
 const DrawerHeader = ({
@@ -87,7 +95,7 @@ const DrawerTitle = React.forwardRef<
   <DrawerPrimitive.Title
     ref={ref}
     className={cn(
-      "text-sm font-semibold uppercase tracking-[0.2em] text-gray-100",
+      "!text-sm !font-semibold !uppercase !tracking-[0.2em] !text-gray-300",
       className,
     )}
     {...props}

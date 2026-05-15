@@ -1,9 +1,14 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { SITE_URL } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = generatePageMetadata({
   title: "Privacy Policy",
-};
+  description:
+    "Learn how Cinesphere collects, uses, and protects your account, profile, and activity data.",
+  canonical: `${SITE_URL}/privacy`,
+});
 
 export default function PrivacyPage() {
   return (

@@ -3,7 +3,7 @@ import { getSimilarByType, getSpecifiedTV } from "@/lib/actions";
 import { TspecifiedTv } from "@/types/apiTv";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
@@ -30,16 +30,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const show = await fetchTV();
   const posterUrl = show.poster_path
     ? `https://image.tmdb.org/t/p/w1280${show.poster_path}`
-    : `${SITE_URL}/og-image.jpg`;
+    : DEFAULT_OG_IMAGE;
 
   const releaseYear = show.first_air_date
     ? new Date(show.first_air_date).getFullYear()
     : undefined;
 
+  const shortDescription = show.overview?.trim()
+    ? `${show.overview.slice(0, 150)}${show.overview.length > 150 ? "..." : ""}`
+    : `Discover details about ${show.name} on ${SITE_NAME}`;
+
   return generatePageMetadata({
     title: show.name || "TV Show",
-    description:
-      show.overview || `Discover details about ${show.name} on ${SITE_NAME}`,
+    description: shortDescription,
     canonical: `${SITE_URL}/tv/${id}`,
     ogImage: posterUrl,
     ogType: "website",

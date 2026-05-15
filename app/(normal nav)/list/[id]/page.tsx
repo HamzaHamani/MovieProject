@@ -24,7 +24,7 @@ import {
   updateBookmarkDetails,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 const systemLikesKeywords = ["likes", "like", "liked", "love", "loved"];
@@ -144,7 +144,7 @@ export async function generateMetadata({
     const owner = await getUserDbProfileById(list.userId);
 
     // Get poster from first movie in list
-    let posterUrl = `${SITE_URL}/og-image.jpg`;
+    let posterUrl = DEFAULT_OG_IMAGE;
     if (movies && movies.length > 0) {
       const firstMovie = movies[0];
       const resolved = await resolveSavedItem(firstMovie.movieId);

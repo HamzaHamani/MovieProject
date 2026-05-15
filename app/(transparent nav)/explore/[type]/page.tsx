@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
 import ExploreTypePageClient from "@/components/explore/exploreTypePageClient";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
@@ -83,7 +83,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: meta.title,
     description: meta.description,
     canonical: `${SITE_URL}/explore/${type}`,
-    ogImage: `${SITE_URL}/og-image.jpg`,
+    ogImage: DEFAULT_OG_IMAGE,
     ogType: "website",
   });
 }

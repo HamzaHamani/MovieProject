@@ -20,7 +20,7 @@ import {
   getUserDbProfileByUsername,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 type ResolvedMedia = {
@@ -148,10 +148,20 @@ export async function generateMetadata({
 
     const posterUrl = media.posterPath
       ? `https://image.tmdb.org/t/p/w1280${media.posterPath}`
-      : `${SITE_URL}/og-image.jpg`;
+      : DEFAULT_OG_IMAGE;
+
+    const reviewedDate = review.watchedAt
+      ? new Date(review.watchedAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : null;
 
     const title = `${username}'s review of ${media.title}`;
-    const description = `Read ${username}'s review and rating of ${media.title} on ${SITE_NAME}`;
+    const description = reviewedDate
+      ? `Read ${username}'s review and rating of ${media.title}, added on ${reviewedDate}, on ${SITE_NAME}.`
+      : `Read ${username}'s review and rating of ${media.title} on ${SITE_NAME}.`;
 
     return generatePageMetadata({
       title,

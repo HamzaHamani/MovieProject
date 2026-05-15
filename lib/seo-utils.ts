@@ -3,7 +3,7 @@
  */
 
 import { Metadata } from "next";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 
 interface PageMetadataProps {
   title: string;
@@ -44,7 +44,7 @@ export function generatePageMetadata({
   title,
   description,
   canonical,
-  ogImage = `${SITE_URL}/og-image.jpg`,
+  ogImage = DEFAULT_OG_IMAGE,
   ogType = "website",
   publishedTime,
   authors,
@@ -98,7 +98,7 @@ export function generateMovieMetadata({
   const description = overview || `Watch ${title} on ${SITE_NAME}`;
   const ogImage = posterPath
     ? `https://image.tmdb.org/t/p/w1280${posterPath}`
-    : `${SITE_URL}/og-image.jpg`;
+    : DEFAULT_OG_IMAGE;
 
   return generatePageMetadata({
     title: fullTitle,
@@ -121,7 +121,7 @@ export function generateReviewMetadata({
     reviewExcerpt || `Read the review for ${movieTitle} on ${SITE_NAME}`;
   const ogImage = movieImage
     ? `https://image.tmdb.org/t/p/w1280${movieImage}`
-    : `${SITE_URL}/og-image.jpg`;
+    : DEFAULT_OG_IMAGE;
 
   return generatePageMetadata({
     title,
@@ -139,7 +139,7 @@ export function generateProfileMetadata({
 }: ProfileMetadataProps): Metadata {
   const title = `@${username}`;
   const description = bio || `${username}'s profile on ${SITE_NAME}`;
-  const ogImage = profileImage || `${SITE_URL}/og-image.jpg`;
+  const ogImage = profileImage || DEFAULT_OG_IMAGE;
 
   return generatePageMetadata({
     title,

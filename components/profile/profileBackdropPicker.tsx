@@ -419,7 +419,7 @@ export default function ProfileBackdropPicker({
         </button>
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="max-w-2xl border-0 bg-transparent bg-none shadow-none backdrop-blur-0 [&>button]:hidden">
+          <DialogContent className="no-popup-shell max-w-2xl border-0 bg-transparent bg-none shadow-none backdrop-blur-none [&>button]:hidden">
             <DialogTitle className="sr-only">
               Change Profile Backdrop
             </DialogTitle>
@@ -447,7 +447,7 @@ export default function ProfileBackdropPicker({
       </button>
 
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerContent className="border-0 bg-transparent bg-none">
+        <DrawerContent className="no-popup-shell border-0 bg-transparent bg-none backdrop-blur-none">
           <div className="max-h-[70vh] overflow-hidden px-4 pb-6">
             {contentProps.children}
           </div>

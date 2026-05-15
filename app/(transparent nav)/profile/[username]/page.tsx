@@ -42,7 +42,7 @@ import {
   getUserSocialStats,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       };
     }
 
-    const profileImageUrl = userProfile.image || `${SITE_URL}/og-image.jpg`;
+    const profileImageUrl = userProfile.image || DEFAULT_OG_IMAGE;
 
     return generatePageMetadata({
       title: `${userProfile.name || username}`,

@@ -8,7 +8,7 @@ import {
   getSpecifiedTV,
 } from "@/lib/actions";
 import ReviewsTabs from "@/components/reviews/reviewsTabs";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       typeM === "movie" ? (media as any).title : (media as any).name;
     const backdrop = media.backdrop_path
       ? `https://image.tmdb.org/t/p/w1280${media.backdrop_path}`
-      : `${SITE_URL}/og-image.jpg`;
+      : DEFAULT_OG_IMAGE;
     const description = `Read and discover reviews for ${title} on ${SITE_NAME}. See what others think about this ${typeM === "movie" ? "film" : "TV show"}.`;
 
     return generatePageMetadata({

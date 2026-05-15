@@ -18,7 +18,7 @@ export default async function Page() {
   const username = profile?.username?.trim();
 
   if (!username) {
-    redirect("/username");
+    redirect("/explore?setupUsername=1");
   }
 
   redirect(`/profile/${username}`);
