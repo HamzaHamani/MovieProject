@@ -2,29 +2,51 @@ import WholeDisplay from "@/components/tv/WholeDisplay";
 import { getSimilarByType, getSpecifiedTV } from "@/lib/actions";
 import { TspecifiedTv } from "@/types/apiTv";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { SITE_URL, SITE_NAME } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-// export async function generateMetadata({ params }: Props): Promise<Metadata> {
-//   const { id } = params;
-//   async function fetchMovie(): Promise<TspecifiedTv> {
-//     try {
-//       const data = await getSpecifiedTV(id);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  
+  async function fetchTV(): Promise<TspecifiedTv> {
+    try {
+      const data = await getSpecifiedTV(id);
+      return data as TspecifiedTv;
+    } catch (e) {
+      return {
+        id: 0,
+        name: "TV Show",
+        overview: "TV Show details",
+      } as TspecifiedTv;
+    }
+  }
 
-//       return data as TspecifiedTv;
-//     } catch (e) {
-//       throw new Error("Failed to fetch the movie");
-//     }
-//   }
-//   const res = await fetchMovie();
-//   return {
-//     title: res.name,
-//     description: res.overview,
-//   };
-// }
+  const show = await fetchTV();
+  const posterUrl = show.poster_path
+    ? `https://image.tmdb.org/t/p/w1280${show.poster_path}`
+    : `${SITE_URL}/og-image.jpg`;
+
+  const releaseYear = show.first_air_date
+    ? new Date(show.first_air_date).getFullYear()
+    : undefined;
+
+  return generatePageMetadata({
+    title: show.name || "TV Show",
+    description:
+      show.overview ||
+      `Discover details about ${show.name} on ${SITE_NAME}`,
+    canonical: `${SITE_URL}/tv/${id}`,
+    ogImage: posterUrl,
+    ogType: "website",
+  });
+}
+
 export default async function page({ params, searchParams }: Props) {
   const { id } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;

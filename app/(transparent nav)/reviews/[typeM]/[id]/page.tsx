@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
 import {
   getCategorizedReviewsByType,
@@ -7,6 +8,8 @@ import {
   getSpecifiedTV,
 } from "@/lib/actions";
 import ReviewsTabs from "@/components/reviews/reviewsTabs";
+import { SITE_URL, SITE_NAME } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
   params: Promise<{ typeM: string; id: string }>;
@@ -17,6 +20,38 @@ function parsePositiveInt(value: string | string[] | undefined, fallback = 1) {
   const raw = Array.isArray(value) ? value[0] : value;
   const parsed = raw ? Number.parseInt(raw, 10) : NaN;
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { typeM, id } = await params;
+
+  if (typeM !== "movie" && typeM !== "tv") {
+    return { title: "Reviews Not Found" };
+  }
+
+  try {
+    const media = typeM === "movie" 
+      ? await getSpecifiedMovie(id)
+      : await getSpecifiedTV(id);
+
+    const title = typeM === "movie" 
+      ? (media as any).title 
+      : (media as any).name;
+    const backdrop = media.backdrop_path 
+      ? `https://image.tmdb.org/t/p/w1280${media.backdrop_path}`
+      : `${SITE_URL}/og-image.jpg`;
+    const description = `Read and discover reviews for ${title} on ${SITE_NAME}. See what others think about this ${typeM === "movie" ? "film" : "TV show"}.`;
+
+    return generatePageMetadata({
+      title: `${title} - Reviews`,
+      description,
+      canonical: `${SITE_URL}/reviews/${typeM}/${id}`,
+      ogImage: backdrop,
+      ogType: "website",
+    });
+  } catch (error) {
+    return { title: "Reviews" };
+  }
 }
 
 export default async function ReviewsPage({ params, searchParams }: Props) {

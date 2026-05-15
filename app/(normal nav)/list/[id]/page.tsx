@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { Metadata } from "next";
 
 import ListLikeButton from "@/components/list/listLikeButton";
 import ListAddMovies from "@/components/bookmarks/listAddMovies";
@@ -23,6 +24,8 @@ import {
   updateBookmarkDetails,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
+import { SITE_URL, SITE_NAME } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
 const systemLikesKeywords = ["likes", "like", "liked", "love", "loved"];
 const systemFavoritesKeywords = ["favorite", "favourite", "fav"];
@@ -124,6 +127,46 @@ function getInitials(name: string) {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
 
   return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const list = await getBookmarkById(id);
+    if (!list) return { title: "List Not Found" };
+
+    const movies = await getMoviesBook(list.id);
+    const owner = await getUserDbProfileById(list.userId);
+
+    // Get poster from first movie in list
+    let posterUrl = `${SITE_URL}/og-image.jpg`;
+    if (movies && movies.length > 0) {
+      const firstMovie = movies[0];
+      const resolved = await resolveSavedItem(firstMovie.movieId);
+      if (resolved?.posterPath) {
+        posterUrl = `https://image.tmdb.org/t/p/w1280${resolved.posterPath}`;
+      }
+    }
+
+    const description = list.description || 
+      `Check out the "${list.bookmarkName}" list on ${SITE_NAME}. ${movies?.length || 0} movies and shows curated by ${owner?.name || "a cinephile"}.`;
+
+    return generatePageMetadata({
+      title: `${list.bookmarkName} - List by ${owner?.name || "User"}`,
+      description,
+      canonical: `${SITE_URL}/list/${id}`,
+      ogImage: posterUrl,
+      ogType: "website",
+      authors: [owner?.name || "User"],
+    });
+  } catch (error) {
+    return { title: "List" };
+  }
 }
 
 export default async function Page({

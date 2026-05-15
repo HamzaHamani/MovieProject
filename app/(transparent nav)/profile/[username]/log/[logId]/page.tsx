@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
+import { Metadata } from "next";
 
 import LogTheMT from "@/components/MovieTv/buttons/logTheMT";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
@@ -11,6 +12,8 @@ import {
   getUser,
   getUserDbProfileByUsername,
 } from "@/lib/actions";
+import { SITE_URL, SITE_NAME } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
 type ResolvedMedia = {
   id: string;
@@ -59,6 +62,46 @@ async function resolveShowForLog(id: string): Promise<{
         show: null,
       };
     }
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string; logId: string }>;
+}): Promise<Metadata> {
+  const { username, logId } = await params;
+
+  try {
+    const profileUser = await getUserDbProfileByUsername(username);
+    if (!profileUser) return { title: "Log Not Found" };
+
+    const logs = await getLoggedMoviesForUser(profileUser.id);
+    const log = logs.find((item) => item.id === logId);
+    if (!log) return { title: "Log Not Found" };
+
+    const showInfo = await resolveShowForLog(log.showId);
+    const media = showInfo.media;
+
+    if (!media) return { title: "Log Not Found" };
+
+    const posterUrl = media.posterPath
+      ? `https://image.tmdb.org/t/p/w1280${media.posterPath}`
+      : `${SITE_URL}/og-image.jpg`;
+
+    const title = `${username} logged ${media.title}`;
+    const description = `${username} watched ${media.title} on ${SITE_NAME}. Check out their activity and reviews.`;
+
+    return generatePageMetadata({
+      title,
+      description,
+      canonical: `${SITE_URL}/profile/${username}/log/${logId}`,
+      ogImage: posterUrl,
+      ogType: "article",
+      authors: [username],
+    });
+  } catch (error) {
+    return { title: "Log" };
   }
 }
 

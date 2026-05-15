@@ -1,4 +1,15 @@
 import UpcomingPageClient from "@/components/upcoming/upcomingPageClient";
+import { Metadata } from "next";
+import { SITE_URL, SITE_NAME } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
+
+export const metadata: Metadata = generatePageMetadata({
+  title: "Upcoming Movies & TV Shows",
+  description: "Discover what's coming soon to theaters and streaming platforms. Stay updated with the latest upcoming movies and TV shows on Cinesphere.",
+  canonical: `${SITE_URL}/upcoming`,
+  ogImage: `${SITE_URL}/og-image.jpg`,
+  ogType: "website",
+});
 
 type UpcomingMovie = {
   adult: boolean;

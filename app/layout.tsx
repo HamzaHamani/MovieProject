@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
 import { GlobalContextProvider } from "@/context/globalContext";
@@ -8,11 +8,58 @@ import NextAuthProvider from "@/provider/nextAuthProvider";
 import { GeistMono } from "geist/font/mono";
 import TopLoaderClient from "@/components/ui/TopLoaderClient";
 import InternalTopProgress from "@/components/ui/InternalTopProgress";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/config/site";
+
+export const viewport: Viewport = {
+  themeColor: '#8b5cf6',
+}
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Cine-Sphere",
-    template: "%s | Cine-Sphere",
+    default: `${SITE_NAME} | Discover Movies, TV Shows & Connect with Cinephiles`,
+    template: "%s | " + SITE_NAME,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: ['movies', 'tv shows', 'reviews', 'watchlist', 'cinema', 'films', 'streaming'],
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    title: `${SITE_NAME} | Movie & TV Discovery Platform`,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} - Discover movies and TV shows`,
+      },
+    ],
+    siteName: SITE_NAME,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME} | Discover Movies & TV Shows`,
+    description: SITE_DESCRIPTION,
+    images: ['/og-image.jpg'],
+  },
+  alternates: {
+    canonical: SITE_URL,
   },
 };
 // GeistMono is already imported and can be used directly in your className or font configuration.
@@ -55,6 +102,59 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Organization Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              '@id': `${SITE_URL}/#organization`,
+              name: SITE_NAME,
+              url: SITE_URL,
+              logo: {
+                '@type': 'ImageObject',
+                url: `${SITE_URL}/logo.png`,
+                width: 250,
+                height: 250,
+              },
+              description: SITE_DESCRIPTION,
+              sameAs: [
+                'https://twitter.com/cinesphere',
+                'https://instagram.com/cinesphere',
+              ],
+            }),
+          }}
+        />
+        
+        {/* Website Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              '@id': `${SITE_URL}/#website`,
+              url: SITE_URL,
+              name: SITE_NAME,
+              description: SITE_DESCRIPTION,
+              publisher: {
+                '@id': `${SITE_URL}/#organization`,
+              },
+              inLanguage: 'en-US',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+                },
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
+      </head>
       <body
         className={`font-geist- relative bg-backgroundM font-normal text-textMain ${chillax.className} relative`}
       >

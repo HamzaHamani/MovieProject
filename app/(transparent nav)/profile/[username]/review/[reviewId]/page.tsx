@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { MessageSquareQuote, Star } from "lucide-react";
+import { Metadata } from "next";
 
 import LogTheMT from "@/components/MovieTv/buttons/logTheMT";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +20,8 @@ import {
   getUserDbProfileByUsername,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
+import { SITE_URL, SITE_NAME } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
 type ResolvedMedia = {
   id: string;
@@ -121,6 +124,46 @@ function getInitials(name: string) {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
 
   return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string; reviewId: string }>;
+}): Promise<Metadata> {
+  const { username, reviewId } = await params;
+
+  try {
+    const profileUser = await getUserDbProfileByUsername(username);
+    if (!profileUser) return { title: 'Review Not Found' };
+
+    const logs = await getLoggedMoviesForUser(profileUser.id);
+    const review = logs.find((item) => item.id === reviewId);
+    if (!review) return { title: 'Review Not Found' };
+
+    const showInfo = await resolveShowForLog(review.showId);
+    const media = showInfo.media;
+
+    if (!media) return { title: 'Review Not Found' };
+
+    const posterUrl = media.posterPath
+      ? `https://image.tmdb.org/t/p/w1280${media.posterPath}`
+      : `${SITE_URL}/og-image.jpg`;
+
+    const title = `${username}'s review of ${media.title}`;
+    const description = `Read ${username}'s review and rating of ${media.title} on ${SITE_NAME}`;
+
+    return generatePageMetadata({
+      title,
+      description,
+      canonical: `${SITE_URL}/profile/${username}/review/${reviewId}`,
+      ogImage: posterUrl,
+      ogType: 'article',
+      authors: [username],
+    });
+  } catch (error) {
+    return { title: 'Review' };
+  }
 }
 
 export default async function Page({

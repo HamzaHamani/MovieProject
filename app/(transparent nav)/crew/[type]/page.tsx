@@ -6,6 +6,9 @@ import CreditsSectionSkeleton from "@/components/crew/creditsSectionSkeleton";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Metadata } from "next";
+import { SITE_URL, SITE_NAME } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
 type Props = {
   params: Promise<{ type: string }>;
@@ -14,6 +17,52 @@ type Props = {
 function normalizePersonId(raw: string): string | null {
   const maybeId = raw.split("-").at(-1) ?? raw;
   return /^\d+$/.test(maybeId) ? maybeId : null;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { type } = await params;
+  const personId = normalizePersonId(type);
+
+  if (!personId) {
+    return {
+      title: 'Person Not Found',
+      description: 'The person you are looking for could not be found.',
+    };
+  }
+
+  try {
+    const [person, images] = await Promise.all([
+      getPersonDetails(personId),
+      getPersonImages(personId),
+    ]);
+
+    if (!person?.id) {
+      return {
+        title: 'Person Not Found',
+        description: 'The person you are looking for could not be found.',
+      };
+    }
+
+    const imagePath = person.profile_path ?? images[0]?.file_path ?? null;
+    const profileImageUrl = imagePath
+      ? `https://image.tmdb.org/t/p/w500${imagePath}`
+      : `${SITE_URL}/og-image.jpg`;
+
+    return generatePageMetadata({
+      title: person.name || 'Person',
+      description:
+        person.biography?.slice(0, 160) ||
+        `${person.name} - ${person.known_for_department} on ${SITE_NAME}`,
+      canonical: `${SITE_URL}/crew/${personId}`,
+      ogImage: profileImageUrl,
+      ogType: 'profile',
+    });
+  } catch (error) {
+    return {
+      title: 'Person',
+      description: 'View person details on ' + SITE_NAME,
+    };
+  }
 }
 
 function formatBirthday(

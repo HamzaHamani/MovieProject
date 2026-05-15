@@ -42,10 +42,44 @@ import {
   getUserSocialStats,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
+import { SITE_URL, SITE_NAME } from "@/config/site";
+import { generatePageMetadata } from "@/lib/seo-utils";
 
-export const metadata: Metadata = {
-  title: "Profile",
+type Props = {
+  params: Promise<{ username: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username } = await params;
+
+  try {
+    const userProfile = await getUserDbProfileByUsername(username);
+
+    if (!userProfile) {
+      return {
+        title: `${username} | ${SITE_NAME}`,
+        description: `Profile of ${username} on ${SITE_NAME}`,
+      };
+    }
+
+    const profileImageUrl = userProfile.image || `${SITE_URL}/og-image.jpg`;
+
+    return generatePageMetadata({
+      title: `${userProfile.name || username}`,
+      description:
+        userProfile.bio ||
+        `${userProfile.name || username}'s profile on ${SITE_NAME}. View their movie reviews, watchlists, and activity.`,
+      canonical: `${SITE_URL}/profile/${username}`,
+      ogImage: profileImageUrl,
+      ogType: 'profile',
+    });
+  } catch (error) {
+    return {
+      title: `${username} | ${SITE_NAME}`,
+      description: `Profile of ${username} on ${SITE_NAME}`,
+    };
+  }
+}
 
 export const dynamic = "force-dynamic";
 

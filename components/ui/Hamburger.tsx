@@ -9,7 +9,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import Link from "next/link";
-import MenuAnimation from "@/components/animata/list/menu-animation";
+import HamburgerMenuItems from "./HamburgerMenuItems";
 import { Button } from "@/components/ui/button";
 import { getUser } from "@/lib/actions";
 import { handleLogout } from "@/lib/actions";
@@ -41,7 +41,7 @@ export default async function Hamburger() {
           </div>
         </Button>
       </SheetTrigger>
-      <SheetContent className="border-none">
+      <SheetContent className="border-none flex flex-col">
         <SheetHeader>
           {user ? (
             <div>
@@ -59,21 +59,13 @@ export default async function Hamburger() {
               : "You can log-in to access your profile and bookmarks"}
           </SheetDescription>
         </SheetHeader>
-        <div className="py-24">
-          <div className="flex flex-col gap-2">
-            {menuItems.map((item) => (
-              <SheetClose asChild key={item.href}>
-                <Link href={item.href}>
-                  <MenuAnimation menuItems={[item]} />
-                </Link>
-              </SheetClose>
-            ))}
-          </div>
+        <div className="flex-1 overflow-y-auto py-6">
+          <HamburgerMenuItems items={menuItems} />
         </div>
-        <SheetFooter>
+        <SheetFooter className="mt-auto">
           <SheetClose asChild className="w-full">
             {user ? (
-              <form action={handleLogout}>
+              <form action={handleLogout} className="w-full">
                 <Button
                   type="submit"
                   className="w-full bg-primaryM-500 text-backgroundM hover:bg-primaryM-400 active:bg-primaryM-800"
@@ -82,7 +74,7 @@ export default async function Hamburger() {
                 </Button>
               </form>
             ) : (
-              <Link href="/sign-in">
+              <Link href="/sign-in" className="w-full">
                 <Button
                   type="submit"
                   className="w-full bg-primaryM-500 text-backgroundM hover:bg-primaryM-400 active:bg-primaryM-800"

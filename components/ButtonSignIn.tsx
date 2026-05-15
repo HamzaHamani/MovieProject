@@ -65,10 +65,10 @@ export default function ButtonSignIn({ provider }: Props) {
         return;
       }
 
-      showSuccessNotification("Sign in", "Opening auth window...");
+      showSuccessNotification("Sign in", "Redirecting...");
 
       if (result.url) {
-        window.open(result.url, "auth-popup", "width=500,height=600");
+        window.location.href = result.url;
         return;
       }
     } catch (e) {
