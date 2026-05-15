@@ -46,11 +46,14 @@ function isSystemListName(name: string) {
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getCurrentUserDbProfile();
 
-  const ogImage = profile?.image ? profile.image : `${SITE_URL}/bookmarks/opengraph-image`;
+  const ogImage = profile?.image
+    ? profile.image
+    : `${SITE_URL}/bookmarks/opengraph-image`;
 
   return generatePageMetadata({
     title: "Bookmarks",
-    description: "Save, organize, and manage your favorite movies and TV shows in custom lists.",
+    description:
+      "Save, organize, and manage your favorite movies and TV shows in custom lists.",
     canonical: `${SITE_URL}/bookmarks`,
     ogImage,
     ogType: "website",
@@ -419,7 +422,9 @@ export default async function Saved() {
                 )}
 
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1">
-                  {listRole.get(list.id) === "owner" ? "You own this list" : "You collaborate on this list"}
+                  {listRole.get(list.id) === "owner"
+                    ? "You own this list"
+                    : "You collaborate on this list"}
                 </span>
 
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1">

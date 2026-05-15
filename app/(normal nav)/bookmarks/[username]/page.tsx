@@ -165,7 +165,9 @@ export default async function UserBookmarksPage({
 
   const [ownedLists, collaborativeLists, likedLists] = await Promise.all([
     getBookmarks(userProfile.id),
-    isOwnBookmarks ? getCollaborativeBookmarksForCurrentUser() : Promise.resolve([]),
+    isOwnBookmarks
+      ? getCollaborativeBookmarksForCurrentUser()
+      : Promise.resolve([]),
     isOwnBookmarks ? getLikedBookmarksForCurrentUser() : Promise.resolve([]),
   ]);
 
@@ -450,7 +452,8 @@ export default async function UserBookmarksPage({
           {movies.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/20 bg-white/[0.02] p-5 text-sm text-gray-300">
               This list is empty.
-              {isOwnBookmarks && " Add titles from any movie or TV details page."}
+              {isOwnBookmarks &&
+                " Add titles from any movie or TV details page."}
             </div>
           ) : (
             <div className="grid grid-cols-5 gap-3 xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 s:grid-cols-1">

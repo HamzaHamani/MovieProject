@@ -43,7 +43,8 @@ export async function generateMetadata(): Promise<Metadata> {
       ? `https://image.tmdb.org/t/p/w1280${imagePath}`
       : DEFAULT_OG_IMAGE;
 
-    const description = "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.";
+    const description =
+      "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.";
 
     return generatePageMetadata({
       title: "Explore",
