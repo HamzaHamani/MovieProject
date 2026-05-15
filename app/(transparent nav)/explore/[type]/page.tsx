@@ -30,34 +30,44 @@ type ExploreType =
   | "on-the-air"
   | "genre";
 
-const typeMetadata: Record<ExploreType, { title: string; description: string }> = {
+const typeMetadata: Record<
+  ExploreType,
+  { title: string; description: string }
+> = {
   featured: {
     title: "Featured",
-    description: "Browse our hand-picked selection of featured movies and TV shows on Cinesphere.",
+    description:
+      "Browse our hand-picked selection of featured movies and TV shows on Cinesphere.",
   },
   "just-release": {
     title: "Just Released",
-    description: "Discover the latest movies and TV shows that just hit theaters and streaming platforms.",
+    description:
+      "Discover the latest movies and TV shows that just hit theaters and streaming platforms.",
   },
   "top-rated": {
     title: "Top Rated Movies",
-    description: "Explore the highest-rated movies on Cinesphere. Find critically acclaimed films loved by cinephiles.",
+    description:
+      "Explore the highest-rated movies on Cinesphere. Find critically acclaimed films loved by cinephiles.",
   },
   "popular-tv": {
     title: "Popular TV Shows",
-    description: "Discover the most popular TV shows trending on Cinesphere. Find your next binge-watch.",
+    description:
+      "Discover the most popular TV shows trending on Cinesphere. Find your next binge-watch.",
   },
   "on-air-today": {
     title: "On Air Today",
-    description: "See which TV shows are airing today. Stay updated with current TV schedules on Cinesphere.",
+    description:
+      "See which TV shows are airing today. Stay updated with current TV schedules on Cinesphere.",
   },
   "on-the-air": {
     title: "Currently Airing",
-    description: "Browse TV shows that are currently airing. Discover new series and follow ongoing favorites.",
+    description:
+      "Browse TV shows that are currently airing. Discover new series and follow ongoing favorites.",
   },
   genre: {
     title: "Browse by Genre",
-    description: "Explore movies and TV shows by genre. Find exactly what you're in the mood for on Cinesphere.",
+    description:
+      "Explore movies and TV shows by genre. Find exactly what you're in the mood for on Cinesphere.",
   },
 };
 

@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         `${userProfile.name || username}'s profile on ${SITE_NAME}. View their movie reviews, watchlists, and activity.`,
       canonical: `${SITE_URL}/profile/${username}`,
       ogImage: profileImageUrl,
-      ogType: 'profile',
+      ogType: "profile",
     });
   } catch (error) {
     return {

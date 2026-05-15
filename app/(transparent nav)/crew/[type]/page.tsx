@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!personId) {
     return {
-      title: 'Person Not Found',
-      description: 'The person you are looking for could not be found.',
+      title: "Person Not Found",
+      description: "The person you are looking for could not be found.",
     };
   }
 
@@ -38,8 +38,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!person?.id) {
       return {
-        title: 'Person Not Found',
-        description: 'The person you are looking for could not be found.',
+        title: "Person Not Found",
+        description: "The person you are looking for could not be found.",
       };
     }
 
@@ -49,18 +49,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : `${SITE_URL}/og-image.jpg`;
 
     return generatePageMetadata({
-      title: person.name || 'Person',
+      title: person.name || "Person",
       description:
         person.biography?.slice(0, 160) ||
         `${person.name} - ${person.known_for_department} on ${SITE_NAME}`,
       canonical: `${SITE_URL}/crew/${personId}`,
       ogImage: profileImageUrl,
-      ogType: 'profile',
+      ogType: "profile",
     });
   } catch (error) {
     return {
-      title: 'Person',
-      description: 'View person details on ' + SITE_NAME,
+      title: "Person",
+      description: "View person details on " + SITE_NAME,
     };
   }
 }

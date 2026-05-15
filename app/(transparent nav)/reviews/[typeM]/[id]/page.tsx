@@ -30,14 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   try {
-    const media = typeM === "movie" 
-      ? await getSpecifiedMovie(id)
-      : await getSpecifiedTV(id);
+    const media =
+      typeM === "movie"
+        ? await getSpecifiedMovie(id)
+        : await getSpecifiedTV(id);
 
-    const title = typeM === "movie" 
-      ? (media as any).title 
-      : (media as any).name;
-    const backdrop = media.backdrop_path 
+    const title =
+      typeM === "movie" ? (media as any).title : (media as any).name;
+    const backdrop = media.backdrop_path
       ? `https://image.tmdb.org/t/p/w1280${media.backdrop_path}`
       : `${SITE_URL}/og-image.jpg`;
     const description = `Read and discover reviews for ${title} on ${SITE_NAME}. See what others think about this ${typeM === "movie" ? "film" : "TV show"}.`;

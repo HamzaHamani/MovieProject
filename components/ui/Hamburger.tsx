@@ -41,7 +41,7 @@ export default async function Hamburger() {
           </div>
         </Button>
       </SheetTrigger>
-      <SheetContent className="border-none flex flex-col">
+      <SheetContent className="flex flex-col border-none">
         <SheetHeader>
           {user ? (
             <div>

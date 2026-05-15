@@ -135,16 +135,16 @@ export async function generateMetadata({
 
   try {
     const profileUser = await getUserDbProfileByUsername(username);
-    if (!profileUser) return { title: 'Review Not Found' };
+    if (!profileUser) return { title: "Review Not Found" };
 
     const logs = await getLoggedMoviesForUser(profileUser.id);
     const review = logs.find((item) => item.id === reviewId);
-    if (!review) return { title: 'Review Not Found' };
+    if (!review) return { title: "Review Not Found" };
 
     const showInfo = await resolveShowForLog(review.showId);
     const media = showInfo.media;
 
-    if (!media) return { title: 'Review Not Found' };
+    if (!media) return { title: "Review Not Found" };
 
     const posterUrl = media.posterPath
       ? `https://image.tmdb.org/t/p/w1280${media.posterPath}`
@@ -158,11 +158,11 @@ export async function generateMetadata({
       description,
       canonical: `${SITE_URL}/profile/${username}/review/${reviewId}`,
       ogImage: posterUrl,
-      ogType: 'article',
+      ogType: "article",
       authors: [username],
     });
   } catch (error) {
-    return { title: 'Review' };
+    return { title: "Review" };
   }
 }
 

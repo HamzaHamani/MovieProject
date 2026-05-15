@@ -153,7 +153,8 @@ export async function generateMetadata({
       }
     }
 
-    const description = list.description || 
+    const description =
+      list.description ||
       `Check out the "${list.bookmarkName}" list on ${SITE_NAME}. ${movies?.length || 0} movies and shows curated by ${owner?.name || "a cinephile"}.`;
 
     return generatePageMetadata({

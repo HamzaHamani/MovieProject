@@ -13,7 +13,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  
+
   async function fetchMovie(): Promise<TspecifiedMovie> {
     try {
       const data = await getSpecifiedMovie(id);
@@ -39,8 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return generatePageMetadata({
     title: movie.title || "Movie",
     description:
-      movie.overview ||
-      `Discover details about ${movie.title} on ${SITE_NAME}`,
+      movie.overview || `Discover details about ${movie.title} on ${SITE_NAME}`,
     canonical: `${SITE_URL}/movie/${id}`,
     ogImage: posterUrl,
     ogType: "website",
