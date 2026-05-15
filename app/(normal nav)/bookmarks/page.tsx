@@ -47,9 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     const profile = await getCurrentUserDbProfile();
 
-    const ogImage = profile?.image
-      ? profile.image
-      : `${SITE_URL}/authBG.webp`;
+    const ogImage = profile?.image ? profile.image : `${SITE_URL}/authBG.webp`;
 
     return generatePageMetadata({
       title: "Bookmarks",

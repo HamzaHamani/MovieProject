@@ -42,7 +42,9 @@ export function UserDropDown({ user }: Props) {
   const reviewsHref = user.username
     ? `/profile/${user.username}#reviews`
     : "/profile";
-  const bookmarksHref = user.username ? `/bookmarks/${user.username}` : "/bookmarks";
+  const bookmarksHref = user.username
+    ? `/bookmarks/${user.username}`
+    : "/bookmarks";
 
   const handleOpenChange = async (open: boolean) => {
     setIsOpen(open);

@@ -11,7 +11,7 @@ export const proxy = auth((req) => {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/public");
-  const isPublicPage = 
+  const isPublicPage =
     pathname === "/" ||
     pathname === "/explore" ||
     pathname === "/sign-in" ||
@@ -26,7 +26,8 @@ export const proxy = auth((req) => {
   }
 
   // For authenticated users on protected routes, check username
-  const hasUsername = typeof username === "string" && username.trim().length > 0;
+  const hasUsername =
+    typeof username === "string" && username.trim().length > 0;
   if (!hasUsername) {
     const redirectUrl = new URL("/explore", req.nextUrl.origin);
     return NextResponse.redirect(redirectUrl);
