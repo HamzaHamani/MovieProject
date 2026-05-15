@@ -60,7 +60,15 @@ export default function Image() {
           >
             BOOKMARKS
           </div>
-          <div style={{ fontSize: "58px", fontWeight: 700, lineHeight: 1.05, display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              fontSize: "58px",
+              fontWeight: 700,
+              lineHeight: 1.05,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             Save and organize your
             <br />
             movie universe
