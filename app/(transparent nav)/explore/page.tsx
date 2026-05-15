@@ -64,19 +64,10 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-type Props = {
-  searchParams?: Promise<{ setupUsername?: string }>;
-};
-
-export default async function ExplorePage({ searchParams }: Props) {
-  const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const setupFlag = resolvedSearchParams?.setupUsername === "1";
-
+export default async function ExplorePage() {
   const user = await getUser();
   const profile = user?.id ? await getCurrentUserDbProfile() : null;
-  const needsUsernameSetup = Boolean(
-    user?.id && !profile?.username && setupFlag,
-  );
+  const needsUsernameSetup = Boolean(user?.id && !profile?.username);
 
   return (
     <ExplorePageClient
