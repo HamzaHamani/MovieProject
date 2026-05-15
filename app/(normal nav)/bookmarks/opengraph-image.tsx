@@ -51,10 +51,16 @@ export default function Image() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div style={{ fontSize: "26px", letterSpacing: "0.35em", color: "#facc15" }}>
+          <div
+            style={{
+              fontSize: "26px",
+              letterSpacing: "0.35em",
+              color: "#facc15",
+            }}
+          >
             BOOKMARKS
           </div>
-          <div style={{ fontSize: "58px", fontWeight: 700, lineHeight: 1.05 }}>
+          <div style={{ fontSize: "58px", fontWeight: 700, lineHeight: 1.05, display: "flex", flexDirection: "column" }}>
             Save and organize your
             <br />
             movie universe

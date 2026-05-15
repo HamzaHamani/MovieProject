@@ -45,9 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ? `https://image.tmdb.org/t/p/w1280${imagePath}`
       : DEFAULT_OG_IMAGE;
 
-    const title = featured?.title
-      ? `${featured.title} and More`
-      : "Home";
+    const title = featured?.title ? `${featured.title} and More` : "Home";
     const description = featured?.overview?.trim()
       ? `${featured.overview.slice(0, 150)}${featured.overview.length > 150 ? "..." : ""}`
       : `Discover trending movies and TV shows on ${SITE_NAME}. Log what you watch and share reviews.`;

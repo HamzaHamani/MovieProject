@@ -43,9 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ? `https://image.tmdb.org/t/p/w1280${imagePath}`
       : DEFAULT_OG_IMAGE;
 
-    const title = featured?.name
-      ? `Explore with ${featured.name}`
-      : "Explore";
+    const title = featured?.name ? `Explore with ${featured.name}` : "Explore";
     const description = featured?.overview?.trim()
       ? `${featured.overview.slice(0, 150)}${featured.overview.length > 150 ? "..." : ""}`
       : `Explore popular and top-rated movies and TV shows on ${SITE_NAME}.`;
@@ -78,7 +76,9 @@ export default async function ExplorePage({ searchParams }: Props) {
 
   const user = await getUser();
   const profile = user?.id ? await getCurrentUserDbProfile() : null;
-  const needsUsernameSetup = Boolean(user?.id && !profile?.username && setupFlag);
+  const needsUsernameSetup = Boolean(
+    user?.id && !profile?.username && setupFlag,
+  );
 
   return (
     <ExplorePageClient

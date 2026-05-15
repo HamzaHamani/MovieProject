@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       getPersonDetails(personId),
       getPersonImages(personId),
     ]);
-      import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
+
     if (!person?.id) {
       return {
         title: "Person Not Found",
@@ -73,7 +73,8 @@ function formatBirthday(
   const born = new Date(birthday);
   const bornText = Number.isNaN(born.getTime())
     ? birthday
-            : DEFAULT_OG_IMAGE;
+    : born.toLocaleDateString("en-US", {
+        month: "short",
         day: "numeric",
         year: "numeric",
       });
