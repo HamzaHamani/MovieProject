@@ -95,17 +95,6 @@ export default function LandingBackdropCarouselClient({
         </div>
 
         {/* Info Box */}
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="absolute bottom-6 left-6 z-10 max-w-md rounded-lg border border-primaryM-500/20 bg-black/30 p-4 backdrop-blur-sm xmd:left-4 xmd:max-w-xs xmd:p-3 smd:bottom-4 smd:left-3 smd:max-w-[220px] smd:p-2"
-        >
-          <h3 className="line-clamp-1 font-sans text-base font-medium tracking-tight text-white xmd:text-base smd:text-sm">
-            {currentMovie.title || currentMovie.name}
-          </h3>
-        </motion.div>
       </div>
     </div>
   );

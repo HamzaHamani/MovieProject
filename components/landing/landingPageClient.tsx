@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Play, Sparkles } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { motion } from "framer-motion";
 import HeroWordTicker from "./heroWordTicker";
 
@@ -65,17 +65,6 @@ export default function LandingPageClient() {
         initial="hidden"
         animate={isLoaded ? "visible" : "hidden"}
       >
-        {/* Badge */}
-        <motion.div
-          variants={itemVariants}
-          className="mb-8 inline-flex items-center gap-2 rounded-full border border-primaryM-500/30 bg-primaryM-500/10 px-4 py-2 backdrop-blur-sm xl:mb-7 xl:px-3.5 xl:py-1.5 lg:mb-6 lg:px-3 lg:py-1.5 md:mb-5 md:px-2.5 md:py-1.5 sm:mb-4 sm:px-2 sm:py-1"
-        >
-          <Sparkles className="h-4 w-4 text-primaryM-400 xl:h-3.5 xl:w-3.5 lg:h-3 lg:w-3 md:h-3 md:w-3 sm:h-2.5 sm:w-2.5" />
-          <span className="text-sm font-medium text-primaryM-300 xl:text-xs lg:text-[11px] md:text-[10px] sm:text-[9px]">
-            Welcome to the ultimate movie platform
-          </span>
-        </motion.div>
-
         {/* Title */}
         <motion.div
           variants={itemVariants}

@@ -447,7 +447,7 @@ export default function ProfileBackdropPicker({
       </button>
 
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerContent className="no-popup-shell border-0 bg-transparent bg-none backdrop-blur-none">
+        <DrawerContent className="border-0 bg-transparent bg-none">
           <div className="max-h-[70vh] overflow-hidden px-4 pb-6">
             {contentProps.children}
           </div>

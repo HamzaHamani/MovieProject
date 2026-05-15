@@ -135,7 +135,7 @@ export default function LogTheMT({
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="popup-gradient-shell max-h-[88svh] w-[min(1120px,96vw)] overflow-y-auto p-6 pt-6 xl:w-[min(1180px,96vw)] smd:w-[min(100vw-1rem,100vw)]">
+        <DialogContent className="max-h-[88svh] w-[min(1120px,96vw)] overflow-y-auto p-6 pt-6 xl:w-[min(1180px,96vw)] smd:w-[min(100vw-1rem,100vw)]">
           <DialogHeader className="sr-only">
             <DialogTitle>
               Log The {typeM === "movie" ? "Movie" : "TV Show"}
@@ -193,7 +193,7 @@ export default function LogTheMT({
           )}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="popup-gradient-shell max-h-[88svh] overflow-hidden px-4 pt-4">
+      <DrawerContent className="max-h-[88svh] overflow-hidden px-4 pt-4">
         <DrawerHeader className="sr-only">
           <DrawerTitle>
             Log The {typeM === "movie" ? "Movie" : "TV Show"}

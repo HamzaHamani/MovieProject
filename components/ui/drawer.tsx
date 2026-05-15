@@ -41,8 +41,8 @@ const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
-  const disableShell =
-    typeof className === "string" && className.includes("no-popup-shell");
+  const enableShell =
+    typeof className === "string" && className.includes("with-popup-shell");
 
   return (
     <DrawerPortal>
@@ -51,9 +51,9 @@ const DrawerContent = React.forwardRef<
         ref={ref}
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col overflow-hidden rounded-t-2xl text-textMain",
-          disableShell
-            ? "border-0 bg-transparent shadow-none backdrop-blur-none"
-            : "popup-gradient-shell border border-white/10 shadow-[0_-24px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl",
+          enableShell
+            ? "popup-gradient-shell border border-white/10 shadow-[0_-24px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl"
+            : "border-0 bg-transparent shadow-none backdrop-blur-none",
           className,
         )}
         {...props}

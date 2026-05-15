@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
       return generatePageMetadata({
         title: "Explore",
         description:
-          "Explore popular and top-rated movies and TV shows. Find your next watch on Cinesphere.",
+          "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.",
         canonical: `${SITE_URL}/explore`,
         ogImage: DEFAULT_OG_IMAGE,
       });
@@ -43,13 +43,10 @@ export async function generateMetadata(): Promise<Metadata> {
       ? `https://image.tmdb.org/t/p/w1280${imagePath}`
       : DEFAULT_OG_IMAGE;
 
-    const title = featured?.name ? `Explore with ${featured.name}` : "Explore";
-    const description = featured?.overview?.trim()
-      ? `${featured.overview.slice(0, 150)}${featured.overview.length > 150 ? "..." : ""}`
-      : `Explore popular and top-rated movies and TV shows on ${SITE_NAME}.`;
+    const description = "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.";
 
     return generatePageMetadata({
-      title,
+      title: "Explore",
       description,
       canonical: `${SITE_URL}/explore`,
       ogImage,
@@ -59,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
     return generatePageMetadata({
       title: "Explore",
       description:
-        "Explore popular and top-rated movies and TV shows. Find your next watch on Cinesphere.",
+        "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.",
       canonical: `${SITE_URL}/explore`,
       ogImage: DEFAULT_OG_IMAGE,
     });

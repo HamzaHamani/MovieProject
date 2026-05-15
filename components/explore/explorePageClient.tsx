@@ -412,6 +412,8 @@ export default function ExplorePageClient({
         />
       ) : null}
 
+      {/* (Hero removed - OG image/metadata handled server-side only) */}
+
       {featured.isPending && <FeaturedSkeleton />}
       {featuredCards.length > 0 && (
         <FeaturedRecentSection cards={featuredCards} />

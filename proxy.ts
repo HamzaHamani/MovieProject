@@ -18,10 +18,9 @@ export const proxy = auth((req) => {
 
   const hasUsername =
     typeof username === "string" && username.trim().length > 0;
-  const isUsernameRoute = pathname.startsWith("/username");
 
-  if (!hasUsername && !isUsernameRoute) {
-    const redirectUrl = new URL("/username", req.nextUrl.origin);
+  if (!hasUsername) {
+    const redirectUrl = new URL("/explore?setupUsername=1", req.nextUrl.origin);
     return NextResponse.redirect(redirectUrl);
   }
 

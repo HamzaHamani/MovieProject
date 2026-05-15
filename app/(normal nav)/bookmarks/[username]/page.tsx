@@ -1,5 +1,4 @@
-﻿import { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { Metadata } from "next";
 import Link from "next/link";
 
 import ListAddMovies from "@/components/bookmarks/listAddMovies";
@@ -19,11 +18,12 @@ import {
   getSpecifiedMovie,
   getSpecifiedTV,
   getUser,
-  getCurrentUserDbProfile,
+  getUserDbProfileByUsername,
 } from "@/lib/actions";
 import { decodeStoredMediaId } from "@/lib/utils";
 import { SITE_URL } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
+import { notFound } from "next/navigation";
 
 const systemLikesKeywords = ["likes", "like", "liked", "love", "loved"];
 const systemFavoritesKeywords = ["favorite", "favourite", "fav"];
@@ -43,16 +43,27 @@ function isSystemListName(name: string) {
   );
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  const profile = await getCurrentUserDbProfile();
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
+  const userProfile = await getUserDbProfileByUsername(username);
 
-  const ogImage = profile?.image ? profile.image : `${SITE_URL}/bookmarks/opengraph-image`;
+  if (!userProfile) {
+    return generatePageMetadata({
+      title: "Bookmarks",
+      description: "Bookmarks not found",
+      canonical: `${SITE_URL}/bookmarks/${username}`,
+    });
+  }
 
   return generatePageMetadata({
-    title: "Bookmarks",
-    description: "Save, organize, and manage your favorite movies and TV shows in custom lists.",
-    canonical: `${SITE_URL}/bookmarks`,
-    ogImage,
+    title: `${userProfile.username}'s Bookmarks`,
+    description: `Explore ${userProfile.username}'s curated movie and TV show lists on Cinesphere.`,
+    canonical: `${SITE_URL}/bookmarks/${username}`,
+    ogImage: userProfile.image || `${SITE_URL}/authBG.webp`,
     ogType: "website",
   });
 }
@@ -137,53 +148,25 @@ async function resolveSavedItem(
   }
 }
 
-export default async function Saved() {
-  const user = await getUser();
+export default async function UserBookmarksPage({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
+  const { username } = await params;
+  const userProfile = await getUserDbProfileByUsername(username);
 
-  if (!user?.id) {
-    return (
-      <div className="container mt-8">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-textMain lg:p-5 sm:p-4">
-          <h1 className="text-3xl font-semibold text-white lg:text-2xl sm:text-xl">
-            Your Lists
-          </h1>
-          <p className="mt-2 text-sm text-gray-300">
-            Sign in to view and manage your bookmarks.
-          </p>
-          <Button
-            asChild
-            className="mt-5 bg-primaryM-500 text-black hover:bg-primaryM-600"
-          >
-            <Link href="/sign-in">Go to Sign In</Link>
-          </Button>
-        </div>
-      </div>
-    );
+  if (!userProfile) {
+    notFound();
   }
 
-  const profile = await getCurrentUserDbProfile();
-  if (profile?.username) {
-    // Prefer canonical username URL for shareability
-    redirect(`/bookmarks/${profile.username}`);
-  }
-
-  if (!profile?.id) {
-    return (
-      <div className="container mt-8">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-textMain lg:p-5 sm:p-4">
-          <h1 className="text-3xl font-semibold text-white lg:text-2xl sm:text-xl">
-            Your Lists
-          </h1>
-          <p className="mt-2 text-sm text-gray-300">Profile not found.</p>
-        </div>
-      </div>
-    );
-  }
+  const currentUser = await getUser();
+  const isOwnBookmarks = currentUser?.id === userProfile.id;
 
   const [ownedLists, collaborativeLists, likedLists] = await Promise.all([
-    getBookmarks(profile.id),
-    getCollaborativeBookmarksForCurrentUser(),
-    getLikedBookmarksForCurrentUser(),
+    getBookmarks(userProfile.id),
+    isOwnBookmarks ? getCollaborativeBookmarksForCurrentUser() : Promise.resolve([]),
+    isOwnBookmarks ? getLikedBookmarksForCurrentUser() : Promise.resolve([]),
   ]);
 
   const normalizedCollaborativeLists = collaborativeLists.map((list) => ({
@@ -301,11 +284,12 @@ export default async function Saved() {
     <div className="container mt-5 space-y-6 pb-10 text-textMain">
       <section className="rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(234,179,8,0.13),transparent_42%),theme(colors.backgroundM)] p-7 lg:p-6 md:p-5 sm:p-4">
         <h1 className="text-6xl font-semibold text-white lg:text-5xl md:text-4xl s:text-3xl">
-          Your Lists
+          {isOwnBookmarks ? "Your Lists" : `${userProfile.username}'s Lists`}
         </h1>
         <p className="mt-2 max-w-2xl text-base text-gray-300 md:text-sm">
-          Keep track of the movies and TV shows you save, organized by your own
-          custom lists.
+          {isOwnBookmarks
+            ? "Keep track of the movies and TV shows you save, organized by your own custom lists."
+            : `Explore ${userProfile.username}'s curated collection of movies and TV shows.`}
         </p>
 
         <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-1">
@@ -345,22 +329,24 @@ export default async function Saved() {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          <CreateListQuick />
-          <Button
-            asChild
-            className="bg-primaryM-500 text-black hover:bg-primaryM-600"
-          >
-            <Link href="/explore">Discover More</Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-          >
-            <Link href="/search">Search Titles</Link>
-          </Button>
-        </div>
+        {isOwnBookmarks && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            <CreateListQuick />
+            <Button
+              asChild
+              className="bg-primaryM-500 text-black hover:bg-primaryM-600"
+            >
+              <Link href="/explore">Discover More</Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+            >
+              <Link href="/search">Search Titles</Link>
+            </Button>
+          </div>
+        )}
       </section>
 
       <Separator className="bg-white/10" />
@@ -368,18 +354,21 @@ export default async function Saved() {
       {customListsWithMovies.length === 0 && (
         <section className="rounded-2xl border border-dashed border-white/20 bg-white/[0.02] p-8 text-center lg:p-6 sm:p-5">
           <h2 className="text-2xl font-semibold text-white lg:text-xl">
-            No lists yet
+            {isOwnBookmarks ? "No lists yet" : "No lists available"}
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-sm text-gray-300">
-            Start from any movie or TV detail page and use the Add List button
-            to create your first list.
+            {isOwnBookmarks
+              ? "Start from any movie or TV detail page and use the Add List button to create your first list."
+              : "This user hasn't created any lists yet."}
           </p>
-          <Button
-            asChild
-            className="mt-5 bg-primaryM-500 text-black hover:bg-primaryM-600"
-          >
-            <Link href="/explore">Explore Movies and TV</Link>
-          </Button>
+          {isOwnBookmarks && (
+            <Button
+              asChild
+              className="mt-5 bg-primaryM-500 text-black hover:bg-primaryM-600"
+            >
+              <Link href="/explore">Explore Movies and TV</Link>
+            </Button>
+          )}
         </section>
       )}
 
@@ -419,7 +408,9 @@ export default async function Saved() {
                 )}
 
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1">
-                  {listRole.get(list.id) === "owner" ? "You own this list" : "You collaborate on this list"}
+                  {listRole.get(list.id) === "owner" && isOwnBookmarks
+                    ? "You own this list"
+                    : "You collaborate on this list"}
                 </span>
 
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1">
@@ -458,7 +449,8 @@ export default async function Saved() {
 
           {movies.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/20 bg-white/[0.02] p-5 text-sm text-gray-300">
-              This list is empty. Add titles from any movie or TV details page.
+              This list is empty.
+              {isOwnBookmarks && " Add titles from any movie or TV details page."}
             </div>
           ) : (
             <div className="grid grid-cols-5 gap-3 xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 s:grid-cols-1">
@@ -505,7 +497,7 @@ export default async function Saved() {
         </section>
       ))}
 
-      {customLikedListsWithMovies.length > 0 ? (
+      {isOwnBookmarks && customLikedListsWithMovies.length > 0 ? (
         <>
           <Separator className="bg-white/10" />
           <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 md:p-4 sm:p-3">

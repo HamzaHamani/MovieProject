@@ -57,7 +57,7 @@ export function DrawerDialogButtonList({
             <span className="sss:hidden">Add List</span>
           </Button>
         </DialogTrigger>
-        <DialogContent className="popup-gradient-shell max-h-[88svh] w-[min(920px,96vw)] overflow-hidden p-6">
+        <DialogContent className="max-h-[88svh] w-[min(920px,96vw)] overflow-hidden p-6">
           <DialogHeader className="border-b border-white/10 pb-4">
             <DialogTitle className="flex items-center gap-2 text-white">
               <ListPlus className="h-5 w-5 text-primaryM-500" /> Add to your
@@ -91,7 +91,7 @@ export function DrawerDialogButtonList({
           <span className="sss:hidden">Add List</span>
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="popup-gradient-shell max-h-[88svh] w-full overflow-hidden px-4">
+      <DrawerContent className="max-h-[88svh] w-full overflow-hidden px-4">
         <DrawerHeader className="px-0 pb-2 pt-2 text-left">
           <DrawerTitle className="flex items-center gap-2 text-white">
             <ListPlus className="h-5 w-5 text-primaryM-500" /> Add to your lists
