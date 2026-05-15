@@ -44,20 +44,31 @@ function isSystemListName(name: string) {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const profile = await getCurrentUserDbProfile();
+  try {
+    const profile = await getCurrentUserDbProfile();
 
-  const ogImage = profile?.image
-    ? profile.image
-    : `${SITE_URL}/bookmarks/opengraph-image`;
+    const ogImage = profile?.image
+      ? profile.image
+      : `${SITE_URL}/authBG.webp`;
 
-  return generatePageMetadata({
-    title: "Bookmarks",
-    description:
-      "Save, organize, and manage your favorite movies and TV shows in custom lists.",
-    canonical: `${SITE_URL}/bookmarks`,
-    ogImage,
-    ogType: "website",
-  });
+    return generatePageMetadata({
+      title: "Bookmarks",
+      description:
+        "Save, organize, and manage your favorite movies and TV shows in custom lists.",
+      canonical: `${SITE_URL}/bookmarks`,
+      ogImage,
+      ogType: "website",
+    });
+  } catch {
+    // Fallback if profile fetch fails
+    return generatePageMetadata({
+      title: "Bookmarks",
+      description:
+        "Save, organize, and manage your favorite movies and TV shows in custom lists.",
+      canonical: `${SITE_URL}/bookmarks`,
+      ogType: "website",
+    });
+  }
 }
 
 type TResolvedSavedItem = {

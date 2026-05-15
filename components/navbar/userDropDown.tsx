@@ -42,6 +42,7 @@ export function UserDropDown({ user }: Props) {
   const reviewsHref = user.username
     ? `/profile/${user.username}#reviews`
     : "/profile";
+  const bookmarksHref = user.username ? `/bookmarks/${user.username}` : "/bookmarks";
 
   const handleOpenChange = async (open: boolean) => {
     setIsOpen(open);
@@ -168,7 +169,7 @@ export function UserDropDown({ user }: Props) {
             asChild
             className="rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none transition hover:bg-white/[0.06] hover:text-white focus:bg-white/[0.06]"
           >
-            <Link href="/bookmarks">
+            <Link href={bookmarksHref}>
               <CreditCard className="mr-2 h-4 w-4 text-primaryM-500" />
               <span>Your Lists</span>
             </Link>

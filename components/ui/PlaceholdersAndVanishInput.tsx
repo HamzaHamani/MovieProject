@@ -32,6 +32,11 @@ export function PlaceholdersAndVanishInput({
   const [value, setValue] = useState("");
   const [animating, setAnimating] = useState(false);
 
+  useEffect(() => {
+    // Auto-focus on mount
+    inputRef.current?.focus();
+  }, []);
+
   const draw = useCallback(() => {
     if (!inputRef.current) return;
     const canvas = canvasRef.current;
