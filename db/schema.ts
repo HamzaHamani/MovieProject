@@ -297,7 +297,12 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   sourceNotifications: many(notifications, {
     relationName: "notificationSourceUser",
   }),
-  listCollaborations: many(listCollaborators),
+  listCollaborations: many(listCollaborators, {
+    relationName: "listCollaboratorMember",
+  }),
+  addedCollaborations: many(listCollaborators, {
+    relationName: "listCollaboratorAddedBy",
+  }),
 }));
 
 // Define relationships for bookmarks
@@ -391,10 +396,12 @@ export const listCollaboratorsRelations = relations(
     user: one(users, {
       fields: [listCollaborators.userId],
       references: [users.id],
+      relationName: "listCollaboratorMember",
     }),
     addedByUser: one(users, {
       fields: [listCollaborators.addedBy],
       references: [users.id],
+      relationName: "listCollaboratorAddedBy",
     }),
   }),
 );
