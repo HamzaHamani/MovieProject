@@ -457,10 +457,7 @@ export async function completeUsernameSetup(
 
     if (!isMissingShowNsfwColumn) throw error;
 
-    await db
-      .update(users)
-      .set({ username })
-      .where(eq(users.id, user.id));
+    await db.update(users).set({ username }).where(eq(users.id, user.id));
   }
 
   return { ok: true as const, username };
