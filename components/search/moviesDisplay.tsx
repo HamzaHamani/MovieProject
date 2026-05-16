@@ -9,9 +9,11 @@ import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import type { SearchResult, TsearchApiResponse } from "@/types/api";
 
 import MovieTvCard from "../general/movieTvCard";
+import { Eye, EyeOff } from "lucide-react";
 
 type Props = {
   data: TsearchApiResponse;
+  showNSFW?: boolean;
 };
 
 function getInitials(name: string) {
@@ -21,6 +23,76 @@ function getInitials(name: string) {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
 
   return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
+
+function BlurredAdultCard({
+  result,
+  onReveal,
+}: {
+  result: SearchResult;
+  onReveal: () => void;
+}) {
+  const [revealed, setRevealed] = useState(false);
+
+  const handleReveal = () => {
+    setRevealed(true);
+    onReveal();
+  };
+
+  return (
+    <div className="w-full">
+      {!revealed ? (
+        <div className="group relative w-full max-w-[340px] self-center xl:max-w-[310px] lg:max-w-[280px] h1text8:max-w-[250px] smd:max-w-[220px] sss:max-w-[200px] s:max-w-[210px]">
+          <div className="relative h-[550px] overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] transition xl:h-[430px] lg:h-[390px] h1text8:h-[400px] xsmd:h-[450px] smd:h-[350px] sss:h-[330px] s:h-[370px]">
+            {result.imagePath ? (
+              <LazyBlurImage
+                src={`https://image.tmdb.org/t/p/w500${result.imagePath}`}
+                alt={result.title}
+                className="h-full w-full object-cover blur-2xl"
+                placeholderClassName="bg-zinc-800/70"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-white/5 to-black/20 blur-2xl">
+                No image
+              </div>
+            )}
+
+            <div className="absolute inset-0 bg-black/60" />
+
+            <button
+              onClick={handleReveal}
+              className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            >
+              <Eye className="h-8 w-8 text-white" />
+              <span className="text-sm font-semibold text-white">
+                Show Content
+              </span>
+            </button>
+          </div>
+          <div className="mt-2">
+            <p className="line-clamp-2 text-xs font-semibold text-gray-300">
+              {result.title}
+            </p>
+            <div className="mt-1 flex items-center justify-between">
+              <span className="text-xs text-gray-400">{result.mediaLabel}</span>
+              <span className="text-xs font-semibold text-red-400">NSFW</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <MovieTvCard
+          href={result.href}
+          posterPath={result.imagePath}
+          title={result.title}
+          voteAverage={result.voteAverage}
+          mediaTypeLabel={result.mediaLabel as "Film" | "TV Show" | "TV"}
+          year={result.year || "----"}
+          className="w-full max-w-[340px] self-center xl:max-w-[310px] lg:max-w-[280px] h1text8:max-w-[250px] smd:max-w-[220px] sss:max-w-[200px] s:max-w-[210px]"
+          imageClassName="h-[550px] xl:h-[430px] lg:h-[390px] h1text8:h-[400px] xsmd:h-[450px] smd:h-[350px] sss:h-[330px] s:h-[370px]"
+        />
+      )}
+    </div>
+  );
 }
 
 function PersonCard({ result }: { result: SearchResult }) {
@@ -103,16 +175,29 @@ function UserCard({ result }: { result: SearchResult }) {
   );
 }
 
-export default function SearchMoviesDisplay({ data }: Props) {
+export default function SearchMoviesDisplay({ data, showNSFW = false }: Props) {
   const [displayedResults, setDisplayedResults] = useState<SearchResult[]>(
     data.results,
+  );
+  const [revealedAdultCards, setRevealedAdultCards] = useState<Set<string>>(
+    new Set(),
   );
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
   const mountedRef = useRef(false);
   const transitionRef = useRef<gsap.core.Timeline | null>(null);
   const animatingRef = useRef(false);
 
-  const resultSignature = data.results
+  // Filter results based on NSFW setting
+  const filteredResults = showNSFW
+    ? data.results
+    : data.results.filter((result) => {
+        // Keep non-media results (users, persons)
+        if (result.kind === "user" || result.kind === "person") return true;
+        // Filter out adult media when NSFW is off
+        return !(result as any).adult;
+      });
+
+  const resultSignature = filteredResults
     .map((result) => `${result.kind}-${result.id}`)
     .join("|");
 
@@ -122,7 +207,7 @@ export default function SearchMoviesDisplay({ data }: Props) {
       return;
     }
 
-    const newSignature = data.results
+    const newSignature = filteredResults
       .map((result) => `${result.kind}-${result.id}`)
       .join("|");
     const oldSignature = displayedResults
@@ -139,14 +224,14 @@ export default function SearchMoviesDisplay({ data }: Props) {
     );
 
     if (outgoingCards.length === 0) {
-      setDisplayedResults(data.results);
+      setDisplayedResults(filteredResults);
       return;
     }
 
     animatingRef.current = true;
     transitionRef.current = gsap.timeline({
       onComplete: () => {
-        setDisplayedResults(data.results);
+        setDisplayedResults(filteredResults);
       },
     });
 
@@ -162,7 +247,7 @@ export default function SearchMoviesDisplay({ data }: Props) {
     return () => {
       transitionRef.current?.kill();
     };
-  }, [resultSignature, data.results, displayedResults]);
+  }, [resultSignature, filteredResults, displayedResults, showNSFW]);
 
   useLayoutEffect(() => {
     if (!animatingRef.current) return;
@@ -197,6 +282,10 @@ export default function SearchMoviesDisplay({ data }: Props) {
     };
   }, [displayedResults]);
 
+  const handleRevealAdult = (id: string) => {
+    setRevealedAdultCards((prev) => new Set([...prev, id]));
+  };
+
   return (
     <div className="relative mt-10 grid w-full grid-cols-5 items-start justify-items-center gap-5 xxl:grid-cols-4 ds:grid-cols-3 lg:grid-cols-3 xssmd:grid-cols-2 smd:grid-cols-2 s:grid-cols-1">
       {displayedResults.map((result, index) => {
@@ -228,6 +317,10 @@ export default function SearchMoviesDisplay({ data }: Props) {
           );
         }
 
+        const isAdult = (result as any).adult && !showNSFW;
+        const cardId = `${result.kind}-${result.id}`;
+        const isRevealed = revealedAdultCards.has(cardId);
+
         return (
           <div
             key={result.id}
@@ -236,16 +329,23 @@ export default function SearchMoviesDisplay({ data }: Props) {
             }}
             className="w-full"
           >
-            <MovieTvCard
-              href={result.href}
-              posterPath={result.imagePath}
-              title={result.title}
-              voteAverage={result.voteAverage}
-              mediaTypeLabel={result.mediaLabel as "Film" | "TV Show" | "TV"}
-              year={result.year || "----"}
-              className="w-full max-w-[340px] self-center xl:max-w-[310px] lg:max-w-[280px] h1text8:max-w-[250px] smd:max-w-[220px] sss:max-w-[200px] s:max-w-[210px]"
-              imageClassName="h-[550px] xl:h-[430px] lg:h-[390px] h1text8:h-[400px] xsmd:h-[450px] smd:h-[350px] sss:h-[330px] s:h-[370px]"
-            />
+            {isAdult && !isRevealed ? (
+              <BlurredAdultCard
+                result={result}
+                onReveal={() => handleRevealAdult(cardId)}
+              />
+            ) : (
+              <MovieTvCard
+                href={result.href}
+                posterPath={result.imagePath}
+                title={result.title}
+                voteAverage={result.voteAverage}
+                mediaTypeLabel={result.mediaLabel as "Film" | "TV Show" | "TV"}
+                year={result.year || "----"}
+                className="w-full max-w-[340px] self-center xl:max-w-[310px] lg:max-w-[280px] h1text8:max-w-[250px] smd:max-w-[220px] sss:max-w-[200px] s:max-w-[210px]"
+                imageClassName="h-[550px] xl:h-[430px] lg:h-[390px] h1text8:h-[400px] xsmd:h-[450px] smd:h-[350px] sss:h-[330px] s:h-[370px]"
+              />
+            )}
           </div>
         );
       })}

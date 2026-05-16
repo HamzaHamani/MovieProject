@@ -82,6 +82,7 @@ export default function EditProfileDialog({
   const [bio, setBio] = useState(currentBio ?? "");
   const [imageUrl, setImageUrl] = useState(currentImage ?? "");
   const [backdropPath, setBackdropPath] = useState(currentBackdropPath ?? "");
+  const [showNsfw, setShowNsfw] = useState(false);
   const [backdropQuery, setBackdropQuery] = useState("");
   const [backdropResults, setBackdropResults] = useState<
     BackdropSearchResult[]
@@ -97,6 +98,18 @@ export default function EditProfileDialog({
     if (!open) {
       return;
     }
+
+    // initialize showNsfw from server
+    (async () => {
+      try {
+        const res = await fetch(`/api/profile/nsfw`, { cache: "no-store" });
+        if (!res.ok) return;
+        const json = await res.json();
+        setShowNsfw(Boolean(json?.show_nsfw));
+      } catch {
+        // ignore
+      }
+    })();
 
     const trimmed = backdropQuery.trim();
     if (selectedBackdropMovie) {
@@ -199,6 +212,7 @@ export default function EditProfileDialog({
           bio,
           image: imageUrl || null,
           backdropPath: backdropPath || null,
+          show_nsfw: showNsfw,
         }),
       });
 
@@ -335,6 +349,19 @@ export default function EditProfileDialog({
           className="min-h-[110px] border-white/15 bg-black/30 text-white placeholder:text-gray-500"
         />
         <p className="text-right text-xs text-gray-500">{bio.length}/240</p>
+      </div>
+
+      <div className="space-y-2 rounded-xl border border-white/10 bg-black/25 p-3">
+        <label className="text-sm text-gray-300">Content preferences</label>
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={showNsfw}
+            onChange={(e) => setShowNsfw(e.target.checked)}
+            className="h-4 w-4"
+          />
+          <span className="text-sm text-gray-300">Show NSFW content</span>
+        </label>
       </div>
 
       <div className="space-y-3 rounded-2xl border border-white/10 bg-black/40 p-4 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.9)]">

@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { CirclePlus, Pencil } from "lucide-react";
+import { CirclePlus, Pencil, Trash2 } from "lucide-react";
 import { TspecifiedMovie } from "@/types/api";
 import { TspecifiedTv } from "@/types/apiTv";
 import ModeleLog from "../ModeleLog";
-import { getLoggedMovieTv, type TExistingLog } from "@/lib/actions";
+import { getLoggedMovieTv, type TExistingLog, deleteLoggedMovieTv } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -53,16 +53,38 @@ export default function LogTheMT({
   const [currentLog, setCurrentLog] = useState<TExistingLog | null>(
     initialLog ?? null,
   );
+  const [isDeleting, setIsDeleting] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   useEffect(() => {
     if (!showCard || !userId) return;
+
+    // If the parent passed an initialLog (editing existing review), prefer that
+    if (initialLog) {
+      setCurrentLog(initialLog);
+      return;
+    }
 
     (async () => {
       const freshLog = await getLoggedMovieTv(show.id);
       setCurrentLog(freshLog);
     })();
   }, [showCard, userId, show.id]);
+
+  const handleDelete = async () => {
+    if (!currentLog?.id) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteLoggedMovieTv(currentLog.id);
+      setCurrentLog(null);
+      setShowCard(false);
+    } catch (error) {
+      console.error("Failed to delete log:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const loginRequiredContent = (
     <div className="space-y-5 py-3">
@@ -117,23 +139,49 @@ export default function LogTheMT({
   if (isDesktop) {
     return (
       <Dialog open={showCard} onOpenChange={setShowCard}>
-        <DialogTrigger asChild>
-          <Button
-            className={cn(
-              "flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs",
-              triggerClassName,
-            )}
-          >
-            <span className="xsmd:text-xs">
-              <TriggerIcon className="h-4 w-4" />
-            </span>
-            {iconOnly ? (
-              <span className="sr-only">{triggerText}</span>
-            ) : (
-              triggerText
-            )}
-          </Button>
-        </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <DialogTrigger asChild>
+            <Button
+              className={cn(
+                "flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs",
+                triggerClassName,
+              )}
+            >
+              <span className="xsmd:text-xs">
+                <TriggerIcon className="h-4 w-4" />
+              </span>
+              {iconOnly ? (
+                <span className="sr-only">{triggerText}</span>
+              ) : (
+                triggerText
+              )}
+            </Button>
+          </DialogTrigger>
+
+          {currentLog && (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowCard(true)}
+                className="h-10 w-10 border-primaryM-500/50 hover:border-primaryM-500 hover:bg-primaryM-500/10"
+                title="Edit this log entry"
+              >
+                <Pencil className="h-4 w-4 text-primaryM-500" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="h-10 w-10 border-red-500/50 hover:border-red-500 hover:bg-red-500/10"
+                title="Delete this log entry"
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </>
+          )}
+        </div>
 
         <DialogContent className="max-h-[88svh] w-[min(1120px,96vw)] overflow-y-auto p-6 pt-6 xl:w-[min(1180px,96vw)] smd:w-[min(100vw-1rem,100vw)]">
           <DialogHeader className="sr-only">
@@ -176,23 +224,49 @@ export default function LogTheMT({
 
   return (
     <Drawer open={showCard} onOpenChange={setShowCard}>
-      <DrawerTrigger asChild>
-        <Button
-          className={cn(
-            "flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs",
-            triggerClassName,
-          )}
-        >
-          <span className="xsmd:text-xs">
-            <TriggerIcon className="h-4 w-4" />
-          </span>
-          {iconOnly ? (
-            <span className="sr-only">{triggerText}</span>
-          ) : (
-            triggerText
-          )}
-        </Button>
-      </DrawerTrigger>
+      <div className="flex items-center gap-2">
+        <DrawerTrigger asChild>
+          <Button
+            className={cn(
+              "flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs",
+              triggerClassName,
+            )}
+          >
+            <span className="xsmd:text-xs">
+              <TriggerIcon className="h-4 w-4" />
+            </span>
+            {iconOnly ? (
+              <span className="sr-only">{triggerText}</span>
+            ) : (
+              triggerText
+            )}
+          </Button>
+        </DrawerTrigger>
+
+        {currentLog && (
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowCard(true)}
+              className="h-10 w-10 border-primaryM-500/50 hover:border-primaryM-500 hover:bg-primaryM-500/10"
+              title="Edit this log entry"
+            >
+              <Pencil className="h-4 w-4 text-primaryM-500" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="h-10 w-10 border-red-500/50 hover:border-red-500 hover:bg-red-500/10"
+              title="Delete this log entry"
+            >
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
+          </>
+        )}
+      </div>
       <DrawerContent className="max-h-[88svh] overflow-hidden px-4 pt-4">
         <DrawerHeader className="sr-only">
           <DrawerTitle>

@@ -72,21 +72,52 @@ export async function tmdbFetch<T>(
   context: string = "TMDB Request",
   opts: TMDBRequestOptions = {},
 ): Promise<T> {
-  try {
-    const apiKey = getEnvVariable("TMDB_API_KEY");
+  const apiKey = getEnvVariable("TMDB_API_KEY");
 
-    // Use headers instead of URL params for sensitive data
-    const response = await axios.get<T>(`${TMDB_BASE_URL}${endpoint}`, {
-      params: {
-        ...params,
-        api_key: apiKey, // Keep in params for TMDB compatibility
-      },
-      timeout: opts.timeout || 10000,
-    });
+  const retries = typeof opts.retries === "number" ? opts.retries : 2;
 
-    return response.data;
-  } catch (error) {
-    throw new TMDBApiError(error, context);
+  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+  let attempt = 0;
+  while (true) {
+    try {
+      const response = await axios.get<T>(`${TMDB_BASE_URL}${endpoint}`, {
+        params: {
+          ...params,
+          api_key: apiKey,
+        },
+        timeout: opts.timeout || 10000,
+      });
+
+      return response.data;
+    } catch (error) {
+      attempt += 1;
+
+      // If we've exhausted retries, throw sanitized error
+      if (attempt > retries) {
+        throw new TMDBApiError(error, context);
+      }
+
+      // For transient network errors, wait and retry
+      const axiosErr = error as AxiosError | undefined;
+      const retryableCodes = [
+        "ENOTFOUND",
+        "ECONNRESET",
+        "ETIMEDOUT",
+        "EAI_AGAIN",
+      ];
+      const isRetryable =
+        axiosErr?.code && retryableCodes.includes(axiosErr.code);
+
+      if (isRetryable) {
+        // exponential backoff
+        await delay(200 * attempt);
+        continue;
+      }
+
+      // Non-retryable — rethrow sanitized
+      throw new TMDBApiError(error, context);
+    }
   }
 }
 

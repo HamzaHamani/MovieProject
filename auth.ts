@@ -88,6 +88,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         premium: boolean | null;
         image: string | null;
         bio: string | null;
+        showNsfw?: boolean | null;
       }>;
 
       try {
@@ -97,6 +98,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             premium: users.premium,
             image: users.image,
             bio: users.bio,
+            showNsfw: users.showNsfw,
           })
           .from(users)
           .where(eq(users.id, user.id))
@@ -124,6 +126,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           ...item,
           premium: false,
           bio: null,
+          showNsfw: false,
         }));
       }
 
@@ -135,6 +138,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.premium = dbUser?.premium ?? false;
         session.user.image = dbUser?.image ?? session.user.image;
         session.user.bio = dbUser?.bio ?? null;
+        // attach NSFW preference if available
+        if (typeof dbUser?.showNsfw !== "undefined") {
+          (session.user as any).showNsfw = Boolean(dbUser.showNsfw);
+        }
       }
 
       return session;

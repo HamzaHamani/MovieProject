@@ -32,6 +32,7 @@ export const users = pgTable(
     image: text("image"),
     bio: text("bio"),
     backdropPath: text("backdrop_path"),
+    showNsfw: boolean("show_nsfw").default(false),
     premium: boolean("premium").default(false),
   },
   (user) => ({

@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
       bio?: string | null;
       image?: string | null;
       backdropPath?: string | null;
+      show_nsfw?: boolean;
     };
 
     const result = await updateMyProfile({
@@ -31,6 +32,8 @@ export async function POST(request: NextRequest) {
       bio: body?.bio ?? null,
       image: body?.image ?? null,
       backdropPath: body?.backdropPath ?? null,
+      showNsfw:
+        typeof body?.show_nsfw === "boolean" ? body.show_nsfw : undefined,
     });
 
     if (!result.ok) {

@@ -69,30 +69,33 @@ export default function Page() {
         Recent activity from people you follow.
       </p>
 
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <input
           value={usernameFilter}
           onChange={(e) => setUsernameFilter(e.target.value)}
           placeholder="Filter by username"
-          className="rounded-md bg-white/5 px-3 py-2 text-sm text-white"
+          className="rounded-md bg-white/10 px-3 py-2 text-sm text-white placeholder-gray-400 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-primaryM-500"
         />
         <input
           type="date"
           value={since}
           onChange={(e) => setSince(e.target.value)}
-          className="rounded-md bg-white/5 px-3 py-2 text-sm text-white"
+          title="Filter from date"
+          className="rounded-md bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-primaryM-500"
         />
         <input
           type="date"
           value={until}
           onChange={(e) => setUntil(e.target.value)}
-          className="rounded-md bg-white/5 px-3 py-2 text-sm text-white"
+          title="Filter until date"
+          className="rounded-md bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-primaryM-500"
         />
         <button
           onClick={() => void applyFilters()}
-          className="rounded-md bg-primaryM-500 px-3 py-2 text-sm text-black"
+          disabled={loading}
+          className="rounded-md bg-primaryM-500 px-3 py-2 text-sm text-black font-medium hover:bg-primaryM-600 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity"
         >
-          Apply
+          {loading ? "Applying..." : "Apply"}
         </button>
       </div>
 

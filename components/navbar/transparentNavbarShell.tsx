@@ -10,11 +10,15 @@ type Props = {
 
 export default function TransparentNavbarShell({ left, right, mobile }: Props) {
   const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
   const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+
+      // Apply blur and shadow when scrolled down
+      setIsScrolled(currentScrollY > 12);
 
       if (currentScrollY <= 12) {
         setIsVisible(true);
@@ -39,12 +43,11 @@ export default function TransparentNavbarShell({ left, right, mobile }: Props) {
 
   return (
     <nav
-      className={`fixed left-0 right-0 top-0 z-50 mx-auto flex w-full items-center justify-between bg-transparent p-4 px-16 text-textMain transition-transform duration-300 ease-out xmd:p-3 xmd:px-10 xmd:text-sm ${
+      className={`fixed left-0 right-0 top-0 z-50 mx-auto flex w-full items-center justify-between p-4 px-16 text-textMain transition-all duration-300 ease-out xmd:p-3 xmd:px-10 xmd:text-sm ${
         isVisible
           ? "pointer-events-auto translate-y-0"
           : "pointer-events-none -translate-y-full"
-      }`}
-      style={{ backgroundColor: "transparent" }}
+      } ${isScrolled ? "bg-black/30 shadow-lg backdrop-blur-lg" : "bg-transparent"}`}
     >
       <div className="flex items-center gap-8">{left}</div>
       {right}

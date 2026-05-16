@@ -46,6 +46,7 @@ export default function UsernameSetupModal({
     toUsernameSuggestion(suggestedName) || "",
   );
   const [isPending, startTransition] = useTransition();
+  const [showNsfw, setShowNsfw] = useState(false);
 
   const isValidLength = useMemo(() => {
     const trimmed = username.trim();
@@ -58,7 +59,7 @@ export default function UsernameSetupModal({
 
     startTransition(async () => {
       try {
-        const result = await completeUsernameSetup(value);
+        const result = await completeUsernameSetup(value, showNsfw);
 
         if (!result.ok) {
           showErrorNotification("Username", result.error);
@@ -97,6 +98,16 @@ export default function UsernameSetupModal({
             autoFocus
             className="border-white/15 bg-black/40 text-white placeholder:text-gray-500"
           />
+
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={showNsfw}
+              onChange={(e) => setShowNsfw(e.target.checked)}
+              className="h-4 w-4"
+            />
+            <span className="text-sm text-gray-300">Show NSFW content</span>
+          </label>
 
           <Button
             type="button"

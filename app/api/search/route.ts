@@ -20,6 +20,7 @@ type TmdbItem = {
   release_date?: string;
   first_air_date?: string;
   vote_average?: number;
+  adult?: boolean;
   known_for_department?: string;
   known_for?: Array<{ title?: string; name?: string }>;
 };
@@ -80,6 +81,7 @@ function buildTmdbResult(
     voteAverage:
       typeof item.vote_average === "number" ? item.vote_average : null,
     year,
+    adult: Boolean(item.adult),
   };
 }
 
@@ -104,7 +106,12 @@ function buildUserResult(user: {
   };
 }
 
-async function searchTmdb(query: string, mode: SearchMode, page: number) {
+async function searchTmdb(
+  query: string,
+  mode: SearchMode,
+  page: number,
+  includeAdult: boolean,
+) {
   if (mode === "film") {
     const data = await tmdbFetch<{
       results: TmdbItem[];
@@ -114,7 +121,7 @@ async function searchTmdb(query: string, mode: SearchMode, page: number) {
       "/search/movie",
       {
         query,
-        include_adult: true,
+        include_adult: includeAdult,
         language: "en-US",
         page,
       },
@@ -139,7 +146,7 @@ async function searchTmdb(query: string, mode: SearchMode, page: number) {
       "/search/tv",
       {
         query,
-        include_adult: true,
+        include_adult: includeAdult,
         language: "en-US",
         page,
       },
@@ -163,7 +170,7 @@ async function searchTmdb(query: string, mode: SearchMode, page: number) {
         "/search/person",
         {
           query,
-          include_adult: true,
+          include_adult: includeAdult,
           language: "en-US",
           page,
         },
@@ -219,7 +226,7 @@ async function searchTmdb(query: string, mode: SearchMode, page: number) {
     "/search/multi",
     {
       query,
-      include_adult: true,
+      include_adult: includeAdult,
       language: "en-US",
       page,
     },
@@ -256,6 +263,8 @@ export async function GET(request: NextRequest) {
   const query = (searchParams.get("q") ?? "").trim();
   const mode = normalizeMode(searchParams.get("type"));
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
+  const includeAdult =
+    String(searchParams.get("include_adult") ?? "false") === "true";
 
   if (query.length < 2) {
     return NextResponse.json({
@@ -267,7 +276,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const data = await searchTmdb(query, mode, page);
+    const data = await searchTmdb(query, mode, page, includeAdult);
 
     return NextResponse.json({
       page,

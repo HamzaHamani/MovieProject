@@ -10,6 +10,8 @@ type Props = {
   activeType: SearchMode;
   onTypeChange: (type: SearchMode) => void;
   isLoading?: boolean;
+  showNSFW?: boolean;
+  onNSFWChange?: (show: boolean) => void;
 };
 
 const filters: Array<{ label: string; value: SearchMode }> = [
@@ -25,8 +27,18 @@ export default function SearcMovieNavigation({
   activeType,
   onTypeChange,
   isLoading = false,
+  showNSFW = false,
+  onNSFWChange,
 }: Props) {
   const { setPage } = usePage();
+
+  const decodedQuery = React.useMemo(() => {
+    try {
+      return decodeURIComponent(query || "");
+    } catch {
+      return query;
+    }
+  }, [query]);
 
   return (
     <>
@@ -51,6 +63,21 @@ export default function SearcMovieNavigation({
               {filter.label}
             </Button>
           ))}
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              type="button"
+              onClick={() => onNSFWChange?.(!showNSFW)}
+              variant={showNSFW ? "default" : "outline"}
+              className={`h-9 rounded-full px-4 text-sm font-medium transition ${
+                showNSFW
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "border-white/15 bg-white/5 text-white hover:bg-white/10"
+              }`}
+              disabled={isLoading}
+            >
+              {showNSFW ? "NSFW On" : "NSFW Off"}
+            </Button>
+          </div>
         </div>
 
         {!isLoading && data && (
@@ -60,7 +87,7 @@ export default function SearcMovieNavigation({
               <span className="font-bold text-primaryM-500">
                 {data.total_results}
               </span>{" "}
-              results for <span className="text-white">{query}</span>
+              results for <span className="text-white">{decodedQuery}</span>
             </h2>
             <div className="flex items-center justify-center gap-3">
               <NavigationPage data={data} />

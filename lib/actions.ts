@@ -101,6 +101,7 @@ export async function getCurrentUserDbProfile() {
         bio: users.bio,
         backdropPath: users.backdropPath,
         premium: users.premium,
+        showNsfw: users.showNsfw,
       })
       .from(users)
       .where(eq(users.id, user.id))
@@ -130,6 +131,7 @@ export async function getCurrentUserDbProfile() {
       bio: null,
       backdropPath: null,
       premium: false,
+      showNsfw: false,
     };
   }
 }
@@ -378,6 +380,7 @@ const profileUpdateSchema = z.object({
   bio: z.string().trim().max(240).optional().nullable(),
   image: z.string().url().optional().nullable(),
   backdropPath: z.string().trim().max(255).optional().nullable(),
+  showNsfw: z.boolean().optional(),
 });
 
 function isAllowedProfileImageUrl(url: string) {
@@ -418,7 +421,10 @@ export async function isUsernameAvailable(
   };
 }
 
-export async function completeUsernameSetup(usernameInput: string) {
+export async function completeUsernameSetup(
+  usernameInput: string,
+  showNsfw?: boolean,
+) {
   const user = await getUser();
 
   if (!user?.id) {
@@ -438,7 +444,10 @@ export async function completeUsernameSetup(usernameInput: string) {
     };
   }
 
-  await db.update(users).set({ username }).where(eq(users.id, user.id));
+  const updateObj: any = { username };
+  if (typeof showNsfw === "boolean") updateObj.showNsfw = showNsfw;
+
+  await db.update(users).set(updateObj).where(eq(users.id, user.id));
 
   return { ok: true as const, username };
 }
@@ -448,6 +457,7 @@ export async function updateMyProfile(input: {
   bio?: string | null;
   image?: string | null;
   backdropPath?: string | null;
+  showNsfw?: boolean;
 }) {
   const user = await getUser();
 
@@ -460,6 +470,7 @@ export async function updateMyProfile(input: {
     bio: input.bio ?? null,
     image: input.image ?? null,
     backdropPath: input.backdropPath ?? null,
+    showNsfw: input.showNsfw ?? false,
   });
 
   if (!parsed.success) {
@@ -486,6 +497,7 @@ export async function updateMyProfile(input: {
   const nextBio = parsed.data.bio?.trim() || null;
   const nextImage = parsed.data.image?.trim() || null;
   const nextBackdropPath = parsed.data.backdropPath?.trim() || null;
+  const nextShowNsfw = Boolean((parsed.data as any).showNsfw);
 
   const currentProfile = await db
     .select({ image: users.image })
@@ -510,6 +522,7 @@ export async function updateMyProfile(input: {
       bio: nextBio,
       image: nextImage,
       backdropPath: nextBackdropPath,
+      showNsfw: nextShowNsfw,
     })
     .where(eq(users.id, user.id));
 
@@ -2825,6 +2838,31 @@ export async function sendLoggedMovieTv({
   }
 
   return { already: false as const, updated: false as const };
+}
+
+export async function deleteLoggedMovieTv(logId: string) {
+  const user = await getUser();
+
+  if (!user?.id) throw new Error("User not authenticated");
+
+  // Security check: ensure the log belongs to the current user
+  const logEntry = await db
+    .select({ userId: loggedMovies.userId, showId: loggedMovies.showId })
+    .from(loggedMovies)
+    .where(eq(loggedMovies.id, logId))
+    .limit(1);
+
+  if (!logEntry.length || logEntry[0].userId !== user.id) {
+    throw new Error("Unauthorized to delete this log entry");
+  }
+
+  try {
+    await db.delete(loggedMovies).where(eq(loggedMovies.id, logId));
+  } catch (error) {
+    throw new Error("Failed to delete log entry");
+  }
+
+  return { deleted: true };
 }
 
 //---------------------------

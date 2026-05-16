@@ -6,6 +6,8 @@ import {
   type WatchedMediaItem,
 } from "@/hooks/useWatchedMedia";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
+import MovieSkeleton from "@/components/general/movieSkeleton";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Star, Film, Tv, Play } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -32,6 +34,9 @@ export function WatchedMediaGrid({
   initialFilter = "all",
 }: WatchedMediaGridProps) {
   const [filter, setFilter] = useState<FilterType>(initialFilter);
+  // Keep a transient local list for animated transitions so counts update instantly
+  const [localFilteredItems, setLocalFilteredItems] = useState<WatchedMediaItem[] | null>(null);
+  const [isFiltering, setIsFiltering] = useState(false);
   const { data: watchedItems, isLoading } = useWatchedMedia(userId);
 
   // Fetch media details via API
@@ -60,6 +65,24 @@ export function WatchedMediaGrid({
     });
   }, [watchedItems, filter]);
 
+  // update localFilteredItems when the remote list or filter changes so UI updates immediately
+  useMemo(() => {
+    setLocalFilteredItems(filteredItems);
+  }, [filteredItems]);
+
+  useEffect(() => {
+    if (!isFiltering) return;
+    const t = setTimeout(() => setIsFiltering(false), 180);
+    return () => clearTimeout(t);
+  }, [isFiltering]);
+
+  function handleSetFilter(next: FilterType) {
+    if (next === filter) return;
+    setIsFiltering(true);
+    // small delay so we can show a clean exit animation if desired
+    setTimeout(() => setFilter(next), 120);
+  }
+
   const movieCount =
     watchedItems?.filter((item) => item.mediaType === "movie").length ?? 0;
   const tvCount =
@@ -68,8 +91,12 @@ export function WatchedMediaGrid({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-sm text-gray-400">Loading watched media...</div>
+      <div className="grid grid-cols-6 gap-3 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
+        {Array.from({ length: 10 }).map((_, idx) => (
+          <div key={idx} className="w-full">
+            <MovieSkeleton />
+          </div>
+        ))}
       </div>
     );
   }
@@ -77,9 +104,9 @@ export function WatchedMediaGrid({
   return (
     <div className="space-y-6">
       {/* Filter Tabs */}
-      <div className="flex gap-2">
+        <div className="flex gap-2">
         <button
-          onClick={() => setFilter("all")}
+          onClick={() => handleSetFilter("all")}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
             filter === "all"
               ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
@@ -93,7 +120,7 @@ export function WatchedMediaGrid({
         </button>
 
         <button
-          onClick={() => setFilter("movie")}
+          onClick={() => handleSetFilter("movie")}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
             filter === "movie"
               ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
@@ -108,7 +135,7 @@ export function WatchedMediaGrid({
         </button>
 
         <button
-          onClick={() => setFilter("tv")}
+          onClick={() => handleSetFilter("tv")}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
             filter === "tv"
               ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
@@ -146,7 +173,7 @@ export function WatchedMediaGrid({
         </div>
       ) : (
         <div className="grid grid-cols-6 gap-3 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
-          {filteredItems.map((item) => {
+          {(localFilteredItems ?? filteredItems).map((item) => {
             const media = mediaMap?.[item.showId];
 
             if (!media) {

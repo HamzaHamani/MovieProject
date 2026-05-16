@@ -4,39 +4,14 @@ import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
 
 export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const firstPage = await fetchUpcoming(1);
-    const featured = firstPage.results?.[0];
-
-    const imagePath = featured?.backdrop_path || featured?.poster_path;
-    const ogImage = imagePath
-      ? `https://image.tmdb.org/t/p/w1280${imagePath}`
-      : DEFAULT_OG_IMAGE;
-
-    const title = featured?.title
-      ? `Upcoming: ${featured.title}`
-      : "Upcoming Movies & TV Shows";
-    const description = featured?.overview?.trim()
-      ? `${featured.overview.slice(0, 150)}${featured.overview.length > 150 ? "..." : ""}`
-      : `Discover what's coming soon to theaters and streaming platforms on ${SITE_NAME}.`;
-
-    return generatePageMetadata({
-      title,
-      description,
-      canonical: `${SITE_URL}/upcoming`,
-      ogImage,
-      ogType: "website",
-    });
-  } catch {
-    return generatePageMetadata({
-      title: "Upcoming Movies & TV Shows",
-      description:
-        "Discover what's coming soon to theaters and streaming platforms. Stay updated with the latest upcoming movies and TV shows on Cinesphere.",
-      canonical: `${SITE_URL}/upcoming`,
-      ogImage: DEFAULT_OG_IMAGE,
-      ogType: "website",
-    });
-  }
+  return generatePageMetadata({
+    title: "Upcoming Movies & TV Shows",
+    description:
+      "Discover what's coming soon to theaters and streaming platforms. Stay updated with the latest upcoming movies and TV shows on Cinesphere.",
+    canonical: `${SITE_URL}/upcoming`,
+    ogImage: DEFAULT_OG_IMAGE,
+    ogType: "website",
+  });
 }
 
 type UpcomingMovie = {

@@ -171,6 +171,7 @@ export const searchResultSchema = z.object({
   year: z.string().optional(),
   username: z.string().optional(),
   bio: z.string().optional(),
+  adult: z.boolean().optional(),
 });
 
 export type SearchResult = z.infer<typeof searchResultSchema>;

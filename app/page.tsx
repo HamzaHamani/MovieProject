@@ -15,55 +15,14 @@ type TMDBResult = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const apiKey = process.env.TMDB_API_KEY;
-
-    if (!apiKey) {
-      return generatePageMetadata({
-        title: "Home",
-        description:
-          "Discover trending movies and TV shows, log what you watch, and share reviews with cinephiles.",
-        canonical: SITE_URL,
-        ogImage: DEFAULT_OG_IMAGE,
-      });
-    }
-
-    const response = await fetch(
-      `https://api.themoviedb.org/3/movie/popular?language=en-US&page=1&api_key=${apiKey}`,
-      { next: { revalidate: 3600 } },
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch popular movies for metadata");
-    }
-
-    const data = (await response.json()) as { results?: TMDBResult[] };
-    const featured = data.results?.[0];
-
-    const imagePath = featured?.backdrop_path || featured?.poster_path;
-    const ogImage = imagePath
-      ? `https://image.tmdb.org/t/p/w1280${imagePath}`
-      : DEFAULT_OG_IMAGE;
-
-    const title = "Home";
-    const description = `Discover trending movies and TV shows on ${SITE_NAME}. Log what you watch and share reviews.`;
-
-    return generatePageMetadata({
-      title,
-      description,
-      canonical: SITE_URL,
-      ogImage,
-      ogType: "website",
-    });
-  } catch {
-    return generatePageMetadata({
-      title: "Home",
-      description:
-        "Discover trending movies and TV shows, log what you watch, and share reviews with cinephiles.",
-      canonical: SITE_URL,
-      ogImage: DEFAULT_OG_IMAGE,
-    });
-  }
+  return generatePageMetadata({
+    title: SITE_NAME,
+    description:
+      "Discover trending movies and TV shows, log what you watch, and share reviews with cinephiles.",
+    canonical: SITE_URL,
+    ogImage: DEFAULT_OG_IMAGE,
+    ogType: "website",
+  });
 }
 
 export default function LandingPage() {
