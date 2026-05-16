@@ -93,7 +93,7 @@ export default function Page() {
         <button
           onClick={() => void applyFilters()}
           disabled={loading}
-          className="rounded-md bg-primaryM-500 px-3 py-2 text-sm text-black font-medium hover:bg-primaryM-600 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity"
+          className="rounded-md bg-primaryM-500 px-3 py-2 text-sm font-medium text-black transition-opacity hover:bg-primaryM-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Applying..." : "Apply"}
         </button>

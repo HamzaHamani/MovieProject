@@ -35,7 +35,9 @@ export function WatchedMediaGrid({
 }: WatchedMediaGridProps) {
   const [filter, setFilter] = useState<FilterType>(initialFilter);
   // Keep a transient local list for animated transitions so counts update instantly
-  const [localFilteredItems, setLocalFilteredItems] = useState<WatchedMediaItem[] | null>(null);
+  const [localFilteredItems, setLocalFilteredItems] = useState<
+    WatchedMediaItem[] | null
+  >(null);
   const [isFiltering, setIsFiltering] = useState(false);
   const { data: watchedItems, isLoading } = useWatchedMedia(userId);
 
@@ -104,7 +106,7 @@ export function WatchedMediaGrid({
   return (
     <div className="space-y-6">
       {/* Filter Tabs */}
-        <div className="flex gap-2">
+      <div className="flex gap-2">
         <button
           onClick={() => handleSetFilter("all")}
           className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${

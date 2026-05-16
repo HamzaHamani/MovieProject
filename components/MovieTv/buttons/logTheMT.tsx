@@ -6,7 +6,11 @@ import { CirclePlus, Pencil, Trash2 } from "lucide-react";
 import { TspecifiedMovie } from "@/types/api";
 import { TspecifiedTv } from "@/types/apiTv";
 import ModeleLog from "../ModeleLog";
-import { getLoggedMovieTv, type TExistingLog, deleteLoggedMovieTv } from "@/lib/actions";
+import {
+  getLoggedMovieTv,
+  type TExistingLog,
+  deleteLoggedMovieTv,
+} from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -73,7 +77,7 @@ export default function LogTheMT({
 
   const handleDelete = async () => {
     if (!currentLog?.id) return;
-    
+
     setIsDeleting(true);
     try {
       await deleteLoggedMovieTv(currentLog.id);
