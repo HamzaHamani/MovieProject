@@ -101,7 +101,7 @@ function mapTrendingCards(items: ExploreTrendingItem[]): ExploreCard[] {
       (item): item is ExploreTrendingItem & { media_type: "movie" | "tv" } =>
         item.media_type === "movie" || item.media_type === "tv",
     )
-    .slice(0, 12)
+    .slice(0, 21)
     .map((item) => ({
       id: item.id,
       media_type: item.media_type,
@@ -205,7 +205,7 @@ function FeaturedSkeleton() {
     <section className="relative mb-16 min-h-[62vh] overflow-hidden rounded-xl">
       <Skeleton className="absolute inset-0" />
       <div className="relative z-10 flex min-h-[62vh] flex-col justify-between p-5">
-        <div className="ml-auto">
+        <div className="ml-auto mt-36">
           <Skeleton className="h-5 w-20" />
         </div>
         <div className="mb-6 flex items-end gap-6 smd:flex-col smd:items-start">
@@ -219,10 +219,10 @@ function FeaturedSkeleton() {
           </div>
         </div>
         <div className="flex gap-3 overflow-hidden">
-          {Array.from({ length: 7 }).map((_, index) => (
+          {Array.from({ length: 13 }).map((_, index) => (
             <Skeleton
               key={`featured-thumb-${index}`}
-              className="h-[130px] w-[90px] rounded-md"
+              className="h-[202px] w-[136px] rounded-md xl:h-[186px] xl:w-[125px] smd:h-[167px] smd:w-[113px] s:h-[151px] s:w-[102px]"
             />
           ))}
         </div>
@@ -313,11 +313,13 @@ function JustReleaseSection({ cards }: { cards: ExploreCard[] }) {
 }
 
 type ExplorePageClientProps = {
+  userId?: string | null;
   showUsernameSetup?: boolean;
   suggestedName?: string | null;
 };
 
 export default function ExplorePageClient({
+  userId = null,
   showUsernameSetup = false,
   suggestedName = null,
 }: ExplorePageClientProps) {
@@ -336,22 +338,33 @@ export default function ExplorePageClient({
   const genreSpotlight = useQuery({
     queryKey: ["explore", "genre-spotlight"],
     queryFn: async () => {
-      const groups = await Promise.all(
-        genreConfigs.map(async (config) => {
-          const movies = await fetchExploreGenreMovies(config.withGenres);
-          return {
-            ...config,
-            movies: movies.slice(0, 5).map((movie) => ({
-              id: movie.id,
-              title: movie.title,
-              poster_path: movie.poster_path,
-              backdrop_path: movie.backdrop_path,
-              release_date: movie.release_date,
-              vote_average: movie.vote_average,
-            })),
-          } satisfies GenreSpotlightGroup;
-        }),
-      );
+      const seenMovieIds = new Set<number>();
+
+      const groups: GenreSpotlightGroup[] = [];
+
+      for (const config of genreConfigs) {
+        const movies = await fetchExploreGenreMovies(config.withGenres);
+        const uniqueMovies = movies.filter((movie) => {
+          if (seenMovieIds.has(movie.id)) {
+            return false;
+          }
+
+          seenMovieIds.add(movie.id);
+          return true;
+        });
+
+        groups.push({
+          ...config,
+          movies: uniqueMovies.slice(0, 5).map((movie) => ({
+            id: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path,
+            backdrop_path: movie.backdrop_path,
+            release_date: movie.release_date,
+            vote_average: movie.vote_average,
+          })),
+        });
+      }
 
       return groups;
     },
@@ -452,7 +465,10 @@ export default function ExplorePageClient({
           {(genreSpotlight.isPending || !genreSpotlight.data) &&
             isGenreNear && <GenreSpotlightSkeleton />}
           {genreSpotlight.data && genreSpotlight.data.length > 0 && (
-            <GenreSpotlightSection groups={genreSpotlight.data} />
+            <GenreSpotlightSection
+              groups={genreSpotlight.data}
+              userId={userId}
+            />
           )}
           {genreSpotlight.isError && isGenreNear && (
             <p className="mt-4 text-sm text-red-300">

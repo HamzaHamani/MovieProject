@@ -71,6 +71,7 @@ export default async function ExplorePage() {
 
   return (
     <ExplorePageClient
+      userId={user?.id ?? null}
       showUsernameSetup={needsUsernameSetup}
       suggestedName={user?.name ?? null}
     />

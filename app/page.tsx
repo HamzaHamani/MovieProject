@@ -4,7 +4,7 @@ import LandingBackdropCarousel from "@/components/landing/landingBackdropCarouse
 import { Metadata } from "next";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/config/site";
 import { generatePageMetadata } from "@/lib/seo-utils";
-
+export const logo = "/logo.png";
 export const dynamic = "force-dynamic";
 
 type TMDBResult = {
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       "Discover trending movies and TV shows, log what you watch, and share reviews with cinephiles.",
     canonical: SITE_URL,
-    ogImage: DEFAULT_OG_IMAGE,
+    ogImage: logo,
     ogType: "website",
   });
 }

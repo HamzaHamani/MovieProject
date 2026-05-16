@@ -121,9 +121,9 @@ export function UserDropDown({ user }: Props) {
           </Avatar>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[20rem] overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.12),transparent_40%),linear-gradient(180deg,rgba(12,12,12,0.98)_0%,rgba(8,8,8,0.98)_100%)] p-0 text-textMain shadow-[0_24px_90px_rgba(0,0,0,0.45)]">
-        <div className="p-3">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+      <DropdownMenuContent className="w-[20rem] overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(234,179,8,0.12),transparent_40%),linear-gradient(180deg,rgba(12,12,12,0.98)_0%,rgba(8,8,8,0.98)_100%)] p-0 text-textMain shadow-[0_24px_90px_rgba(0,0,0,0.45)]">
+        <div className="p-">
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] p-2">
             <div className="flex items-center gap-3">
               <Avatar className="h-11 w-11 ring-1 ring-white/10">
                 <AvatarImage src={user.image ?? undefined} />
@@ -155,12 +155,12 @@ export function UserDropDown({ user }: Props) {
           </div>
         </div>
 
-        <DropdownMenuSeparator className="bg-white/10" />
+        {/* <DropdownMenuSeparator className="bg-white/10" /> */}
 
-        <DropdownMenuGroup className="px-2 pb-2">
+        <DropdownMenuGroup className="p-3 px-2 pb-2">
           <DropdownMenuItem
             asChild
-            className="rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none transition hover:bg-white/[0.06] hover:text-white focus:bg-white/[0.06]"
+            className="cursor-pointer rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none transition hover:bg-white/[0.06] hover:text-white focus:bg-white/[0.06]"
           >
             <Link href={reviewsHref}>
               <MessageSquareQuote className="mr-2 h-4 w-4 text-primaryM-500" />
@@ -169,7 +169,7 @@ export function UserDropDown({ user }: Props) {
           </DropdownMenuItem>
           <DropdownMenuItem
             asChild
-            className="rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none transition hover:bg-white/[0.06] hover:text-white focus:bg-white/[0.06]"
+            className="cursor-pointer rounded-xl px-3 py-2.5 text-sm text-gray-200 outline-none transition hover:bg-white/[0.06] hover:text-white focus:bg-white/[0.06]"
           >
             <Link href={bookmarksHref}>
               <CreditCard className="mr-2 h-4 w-4 text-primaryM-500" />
@@ -178,9 +178,9 @@ export function UserDropDown({ user }: Props) {
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
-        <DropdownMenuSeparator className="bg-white/10" />
+        {/* <DropdownMenuSeparator className="bg-white/10" /> */}
 
-        <div className="px-2 pb-2">
+        <div className="px- pb-">
           <div className="rounded-xl border border-red-500/15 bg-red-500/5 p-1.5">
             <DropdownMenuItem
               onClick={handleSignOut}

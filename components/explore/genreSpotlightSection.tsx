@@ -8,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { DrawerDialogButtonList } from "@/components/MovieTv/buttons/draweDialogButtonList";
 import { fetchExploreMovieDetails } from "@/lib/exploreClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -32,6 +33,7 @@ type GenreGroup = {
 
 type Props = {
   groups: GenreGroup[];
+  userId?: string | null;
 };
 
 function formatRuntime(runtime: number | null): string {
@@ -44,7 +46,7 @@ function formatRuntime(runtime: number | null): string {
   return `${hours}h${mins}m`;
 }
 
-export default function GenreSpotlightSection({ groups }: Props) {
+export default function GenreSpotlightSection({ groups, userId }: Props) {
   const queryClient = useQueryClient();
   const validGroups = groups.filter((group) => group.movies.length > 0);
   const [activeGenre, setActiveGenre] = useState(0);
@@ -210,13 +212,15 @@ export default function GenreSpotlightSection({ groups }: Props) {
                 Check it out
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              className="border-white/40 bg-black/30 px-5 text-white hover:bg-black/45 smd:h-8 smd:px-3 smd:text-xs"
-            >
-              <Bookmark className="h-4 w-4" />
-              Add Watchlist
-            </Button>
+            <DrawerDialogButtonList
+              userId={userId ?? undefined}
+              movieId={movie.id}
+              itemTitle={movie.title}
+              itemPosterPath={movie.poster_path}
+              triggerLabel="Bookmark"
+              triggerIcon={<Bookmark className="h-4 w-4" />}
+              triggerClassName="border-white/40 bg-black/30 px-5 text-white hover:bg-black/45 smd:h-8 smd:px-3 smd:text-xs"
+            />
           </div>
         </div>
 

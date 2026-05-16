@@ -128,9 +128,9 @@ export default function FeaturedRecentSection({ cards }: Props) {
           </Link>
         </div>
 
-        <div className="mb-6 flex items-end gap-6 lg:gap-4 smd:flex-col smd:items-start">
+        <div className="mb-4 flex items-end gap-4 lg:gap-3 smd:flex-col smd:items-start">
           <div
-            className={`group relative flex h-[280px] w-[200px] cursor-pointer overflow-hidden rounded lg:h-[255px] lg:w-[185px] h1text8:h-[235px] h1text8:w-[170px] smd:h-[210px] smd:w-[150px] s:h-[190px] s:w-[135px] ${selectedItem.poster_path ? "" : "items-center justify-center bg-gray-600"}`}
+            className={`group relative flex h-[252px] w-[180px] cursor-pointer overflow-hidden rounded lg:h-[230px] lg:w-[166px] h1text8:h-[212px] h1text8:w-[153px] smd:h-[189px] smd:w-[135px] s:h-[171px] s:w-[122px] ${selectedItem.poster_path ? "" : "items-center justify-center bg-gray-600"}`}
           >
             {selectedItem.poster_path ? (
               <LazyBlurImage
@@ -200,19 +200,20 @@ export default function FeaturedRecentSection({ cards }: Props) {
 
         <Carousel
           opts={{
-            align: "start",
+            align: "center",
+            loop: true,
           }}
-          className="w-full"
+          className="mx-auto w-full"
         >
           <CarouselContent>
             {cards.map((item) => (
               <CarouselItem
                 key={`${item.media_type}-${item.id}`}
-                className="basis-[110px] pl-4 h1text8:basis-[100px] smd:basis-[90px] smd:pl-3 s:basis-[82px]"
+                className="basis-[155px] pl-3 h1text8:basis-[142px] smd:basis-[128px] smd:pl-2 s:basis-[112px]"
               >
                 <button
                   type="button"
-                  className={`relative h-[150px] w-[100px] overflow-hidden rounded border-2 transition-all h1text8:h-[138px] h1text8:w-[95px] smd:h-[122px] smd:w-[84px] s:h-[110px] s:w-[75px] ${
+                  className={`relative h-[202px] w-[136px] overflow-hidden rounded border-2 transition-all h1text8:h-[186px] h1text8:w-[125px] smd:h-[167px] smd:w-[113px] s:h-[151px] s:w-[102px] ${
                     selectedItem.id === item.id
                       ? "border-primaryM-500"
                       : "border-transparent opacity-90 hover:opacity-100"
@@ -247,7 +248,7 @@ export default function FeaturedRecentSection({ cards }: Props) {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <div className="mt-4 flex justify-end gap-2">
+          <div className="mt-3 flex justify-end gap-2">
             <CarouselPrevious />
             <CarouselNext />
           </div>

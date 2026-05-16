@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      const endpoint = `discover/movie?include_adult=false&include_video=false&sort_by=vote_average.desc&vote_count.gte=1200&with_genres=${withGenres}`;
+      const endpoint = `discover/movie?include_adult=false&include_video=false&sort_by=popularity.desc&vote_count.gte=1200&with_genres=${withGenres}`;
 
       const tmdbData = await tmdbList(endpoint, appPage);
       const results = tmdbData?.results ?? [];

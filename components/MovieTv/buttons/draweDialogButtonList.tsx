@@ -34,11 +34,17 @@ export function DrawerDialogButtonList({
   movieId,
   itemTitle,
   itemPosterPath,
+  triggerLabel = "Add List",
+  triggerIcon,
+  triggerClassName,
 }: {
   userId?: string;
   movieId: string | number;
   itemTitle: string;
   itemPosterPath: string | null;
+  triggerLabel?: string;
+  triggerIcon?: React.ReactNode;
+  triggerClassName?: string;
 }) {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -49,12 +55,13 @@ export function DrawerDialogButtonList({
         <DialogTrigger asChild>
           <Button
             variant={"outline"}
-            className="flex items-center gap-2 border-gray-300/70 bg-transparent text-white hover:bg-white/10 xsmd:text-xs"
+            className={cn(
+              "flex items-center gap-2 border-gray-300/70 bg-transparent text-white hover:bg-white/10 xsmd:text-xs",
+              triggerClassName,
+            )}
           >
-            <span>
-              <PlusCircle />
-            </span>{" "}
-            <span className="sss:hidden">Add List</span>
+            <span>{triggerIcon ?? <PlusCircle />}</span>{" "}
+            <span className="sss:hidden">{triggerLabel}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-h-[88svh] w-[min(920px,96vw)] overflow-hidden p-6">
@@ -83,12 +90,13 @@ export function DrawerDialogButtonList({
       <DrawerTrigger asChild>
         <Button
           variant={"outline"}
-          className="flex items-center gap-2 border-gray-300/70 bg-transparent text-white hover:bg-white/10 xsmd:text-xs"
+          className={cn(
+            "flex items-center gap-2 border-gray-300/70 bg-transparent text-white hover:bg-white/10 xsmd:text-xs",
+            triggerClassName,
+          )}
         >
-          <span>
-            <PlusCircle />
-          </span>{" "}
-          <span className="sss:hidden">Add List</span>
+          <span>{triggerIcon ?? <PlusCircle />}</span>{" "}
+          <span className="sss:hidden">{triggerLabel}</span>
         </Button>
       </DrawerTrigger>
       <DrawerContent className="max-h-[88svh] w-full overflow-hidden px-4">
