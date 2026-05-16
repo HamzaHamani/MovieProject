@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import usePage from "@/hooks/usePage";
 import type { SearchMode, TsearchApiResponse } from "@/types/api";
@@ -32,7 +33,7 @@ export default function SearcMovieNavigation({
 }: Props) {
   const { setPage } = usePage();
 
-  const decodedQuery = React.useMemo(() => {
+  const decodedQuery = useMemo(() => {
     try {
       return decodeURIComponent(query || "");
     } catch {
