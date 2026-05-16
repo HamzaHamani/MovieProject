@@ -36,7 +36,7 @@ export default function WholeDisplay({
   const imageUrl = `https://image.tmdb.org/t/p/original${response.backdrop_path}`;
   return (
     <div className="relative min-h-screen pb-20">
-      <div className="relative h-[56vh] w-full s:h-[46vh]">
+      <div className="relative h-[66vh] w-full s:h-[46vh]">
         {response.backdrop_path && (
           <div
             className="absolute inset-0 h-full w-full bg-cover bg-center opacity-65 md:bg-top"

@@ -205,7 +205,7 @@ export default function GenreSpotlightSection({ groups }: Props) {
 
           <div className="mt-6 flex items-center gap-3 smd:mt-4 smd:gap-2">
             <Link href={`/movie/${movie.id}`}>
-              <Button className="bg-emerald-500 px-5 text-white hover:bg-emerald-400 smd:h-8 smd:px-3 smd:text-xs">
+              <Button className="bg-primaryM-500 px-5 text-black hover:bg-primaryM-600 smd:h-8 smd:px-3 smd:text-xs">
                 <Play className="h-4 w-4" />
                 Check it out
               </Button>
@@ -288,10 +288,10 @@ export default function GenreSpotlightSection({ groups }: Props) {
                     <button
                       type="button"
                       onClick={() => handleGenre(index)}
-                      className={`group relative h-[110px] w-full overflow-hidden rounded-lg border-2 text-left transition lg:h-[102px] h1text8:h-[95px] smd:h-[88px] s:h-[82px] ${
+                      className={`group relative h-[110px] w-full overflow-hidden rounded-lg border-2 text-left transition-all lg:h-[102px] h1text8:h-[95px] smd:h-[88px] s:h-[82px] ${
                         activeGenre === index
-                          ? "border-emerald-400"
-                          : "border-white/20 hover:border-white/40"
+                          ? "border-primaryM-600"
+                          : "border-white/20 hover:border-primaryM-400"
                       }`}
                     >
                       <div

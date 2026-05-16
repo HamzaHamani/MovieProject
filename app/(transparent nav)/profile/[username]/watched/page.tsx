@@ -61,7 +61,7 @@ export default async function WatchedPage({ params, searchParams }: Props) {
           <div className="space-y-4">
             <Link
               href={`/profile/${usernameParam}`}
-              className="inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-gray-300"
+              className="mt-8 inline-flex items-center gap-2 text-sm text-gray-400 transition hover:text-gray-300"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to profile

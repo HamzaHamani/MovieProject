@@ -93,13 +93,63 @@ export function WatchedMediaGrid({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-6 gap-3 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
-        {Array.from({ length: 10 }).map((_, idx) => (
-          <div key={idx} className="w-full">
-            <MovieSkeleton />
-          </div>
-        ))}
-      </div>
+      <section>
+        <div className="mb-5 flex gap-2">
+          <button
+            disabled
+            onClick={() => handleSetFilter("all")}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+              filter === "all"
+                ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
+                : "border border-white/10 bg-white/[0.05] text-gray-300 hover:bg-white/10"
+            }`}
+          >
+            <span>All</span>
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
+              {totalCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleSetFilter("movie")}
+            disabled
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+              filter === "movie"
+                ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
+                : "border border-white/10 bg-white/[0.05] text-gray-300 hover:bg-white/10"
+            }`}
+          >
+            <Film className="h-4 w-4" />
+            <span>Movies</span>
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
+              {movieCount}
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleSetFilter("tv")}
+            disabled
+            className={`grayscale-1 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+              filter === "tv"
+                ? "border border-primaryM-500/40 bg-primaryM-500/20 text-primaryM-400"
+                : "border border-white/10 bg-white/[0.05] text-gray-300 hover:bg-white/10"
+            }`}
+          >
+            <Tv className="h-4 w-4" />
+            <span>TV Shows</span>
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">
+              {tvCount}
+            </span>
+          </button>
+        </div>
+        <div className="grid grid-cols-4 gap-20 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
+          {Array.from({ length: 10 }).map((_, idx) => (
+            <div key={idx} className="w-full">
+              <MovieSkeleton />
+            </div>
+          ))}
+        </div>
+      </section>
     );
   }
 
