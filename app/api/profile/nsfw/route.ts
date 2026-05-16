@@ -31,10 +31,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const show_nsfw = Boolean(body.show_nsfw);
 
-    await db
-      .update(users)
-      .set({ showNsfw: show_nsfw })
-      .where(eq(users.id, session.user.id));
+    try {
+      await db
+        .update(users)
+        .set({ showNsfw: show_nsfw })
+        .where(eq(users.id, session.user.id));
+    } catch (error) {
+      const dbError = error as { code?: string; message?: string };
+      const isMissingShowNsfwColumn =
+        dbError?.code === "42703" &&
+        (dbError?.message ?? "").toLowerCase().includes("show_nsfw");
+
+      if (!isMissingShowNsfwColumn) throw error;
+    }
 
     return NextResponse.json({ ok: true, show_nsfw });
   } catch (err) {

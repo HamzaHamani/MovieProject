@@ -447,7 +447,21 @@ export async function completeUsernameSetup(
   const updateObj: any = { username };
   if (typeof showNsfw === "boolean") updateObj.showNsfw = showNsfw;
 
-  await db.update(users).set(updateObj).where(eq(users.id, user.id));
+  try {
+    await db.update(users).set(updateObj).where(eq(users.id, user.id));
+  } catch (error) {
+    const dbError = error as { code?: string; message?: string };
+    const isMissingShowNsfwColumn =
+      dbError?.code === "42703" &&
+      (dbError?.message ?? "").toLowerCase().includes("show_nsfw");
+
+    if (!isMissingShowNsfwColumn) throw error;
+
+    await db
+      .update(users)
+      .set({ username })
+      .where(eq(users.id, user.id));
+  }
 
   return { ok: true as const, username };
 }
@@ -515,16 +529,35 @@ export async function updateMyProfile(input: {
     };
   }
 
-  await db
-    .update(users)
-    .set({
-      username: normalizedUsername,
-      bio: nextBio,
-      image: nextImage,
-      backdropPath: nextBackdropPath,
-      showNsfw: nextShowNsfw,
-    })
-    .where(eq(users.id, user.id));
+  try {
+    await db
+      .update(users)
+      .set({
+        username: normalizedUsername,
+        bio: nextBio,
+        image: nextImage,
+        backdropPath: nextBackdropPath,
+        showNsfw: nextShowNsfw,
+      })
+      .where(eq(users.id, user.id));
+  } catch (error) {
+    const dbError = error as { code?: string; message?: string };
+    const isMissingShowNsfwColumn =
+      dbError?.code === "42703" &&
+      (dbError?.message ?? "").toLowerCase().includes("show_nsfw");
+
+    if (!isMissingShowNsfwColumn) throw error;
+
+    await db
+      .update(users)
+      .set({
+        username: normalizedUsername,
+        bio: nextBio,
+        image: nextImage,
+        backdropPath: nextBackdropPath,
+      })
+      .where(eq(users.id, user.id));
+  }
 
   return {
     ok: true as const,

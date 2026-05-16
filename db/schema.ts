@@ -293,7 +293,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   reviewLikes: many(reviewLikes),
   reviewReplies: many(reviewReplies),
   listLikes: many(listLikes),
-  notifications: many(notifications),
+  notifications: many(notifications, { relationName: "notificationOwner" }),
+  sourceNotifications: many(notifications, {
+    relationName: "notificationSourceUser",
+  }),
   listCollaborations: many(listCollaborators),
 }));
 
@@ -369,10 +372,12 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
     references: [users.id],
+    relationName: "notificationOwner",
   }),
   sourceUser: one(users, {
     fields: [notifications.sourceUserId],
     references: [users.id],
+    relationName: "notificationSourceUser",
   }),
 }));
 

@@ -19,6 +19,7 @@ if (githubId && githubSecret) {
     GitHub({
       clientId: githubId,
       clientSecret: githubSecret,
+      allowDangerousEmailAccountLinking: true,
     }),
   );
 }
@@ -30,6 +31,7 @@ if (googleId && googleSecret) {
     Google({
       clientId: googleId,
       clientSecret: googleSecret,
+      allowDangerousEmailAccountLinking: true,
     }),
   );
 }
@@ -41,6 +43,7 @@ if (twitterId && twitterSecret) {
     Twitter({
       clientId: twitterId,
       clientSecret: twitterSecret,
+      allowDangerousEmailAccountLinking: true,
     }),
   );
 }
@@ -52,6 +55,7 @@ if (redditId && redditSecret) {
     Reddit({
       clientId: redditId,
       clientSecret: redditSecret,
+      allowDangerousEmailAccountLinking: true,
     }),
   );
 }
@@ -107,7 +111,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const dbError = error as { code?: string; message?: string };
         const isMissingColumn =
           dbError?.code === "42703" &&
-          ["premium", "bio"].some((column) =>
+          ["premium", "bio", "show_nsfw"].some((column) =>
             (dbError?.message ?? "").toLowerCase().includes(column),
           );
 
