@@ -101,7 +101,7 @@ export default function FeaturedRecentSection({ cards }: Props) {
   }
 
   return (
-    <section className="relative mb-16 min-h-[82vh] overflow-hidden lg:min-h-[74vh] h1text8:min-h-[68vh] smd:min-h-[62vh] s:min-h-[58vh]">
+    <section className="relative mb-16 min-h-[82vh] overflow-visible lg:min-h-[74vh] h1text8:min-h-[68vh] smd:min-h-[62vh] s:min-h-[58vh]">
       <div
         className="absolute inset-0 -z-10"
         style={{
@@ -209,14 +209,14 @@ export default function FeaturedRecentSection({ cards }: Props) {
             {cards.map((item) => (
               <CarouselItem
                 key={`${item.media_type}-${item.id}`}
-                className="basis-[155px] pl-3 h1text8:basis-[142px] smd:basis-[128px] smd:pl-2 s:basis-[112px]"
+                className="basis-[155px] pl-4 h1text8:basis-[142px] smd:basis-[128px] smd:pl-3 s:basis-[112px]"
               >
                 <button
                   type="button"
-                  className={`relative h-[202px] w-[136px] overflow-hidden rounded border-2 transition-all h1text8:h-[186px] h1text8:w-[125px] smd:h-[167px] smd:w-[113px] s:h-[151px] s:w-[102px] ${
+                  className={`relative h-[202px] w-[136px] transform-gpu overflow-hidden rounded border-2 ring-0 transition-all duration-300 ease-out h1text8:h-[186px] h1text8:w-[125px] smd:h-[167px] smd:w-[113px] s:h-[151px] s:w-[102px] ${
                     selectedItem.id === item.id
-                      ? "border-primaryM-500"
-                      : "border-transparent opacity-90 hover:opacity-100"
+                      ? "z-10 border-primaryM-500 ring-4 ring-primaryM-500/70 ring-offset-2 ring-offset-black/25"
+                      : "border-transparent opacity-90 hover:scale-[1.03] hover:opacity-100"
                   } ${item.poster_path ? "" : "bg-gray-600"}`}
                   onClick={() => setSelectedId(item.id)}
                   onMouseEnter={() => {

@@ -257,25 +257,6 @@ export default async function Page({
                   <MessageSquareQuote className="h-3.5 w-3.5 text-primaryM-500" />
                   <span>Review</span>
                 </div>
-
-                {isOwner && showInfo.show ? (
-                  <LogTheMT
-                    show={showInfo.show}
-                    typeM={showInfo.typeM}
-                    userId={viewer?.id}
-                    buttonLabel="Edit review"
-                    iconOnly
-                    useEditIcon
-                    triggerClassName="h-9 w-9 rounded-full border border-white/15 bg-[rgba(13,12,15,0.9)] p-0 text-white hover:bg-[rgba(23,23,28,0.9)]"
-                    initialLog={{
-                      id: review.id,
-                      rating: review.rating ?? 0,
-                      review: review.review ?? "",
-                      watchedAt: review.watchedAt.toISOString(),
-                      watchType: review.watchType,
-                    }}
-                  />
-                ) : null}
               </div>
 
               <div className="hidden items-start justify-between gap-3 sm:flex">

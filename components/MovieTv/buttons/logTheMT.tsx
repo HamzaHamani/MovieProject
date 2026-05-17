@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useState } from "react";
-
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { CirclePlus, Pencil, Trash2 } from "lucide-react";
+import { CirclePlus, Pencil, Trash2, X } from "lucide-react";
 import { TspecifiedMovie } from "@/types/api";
 import { TspecifiedTv } from "@/types/apiTv";
 import ModeleLog from "../ModeleLog";
@@ -12,14 +12,6 @@ import {
   deleteLoggedMovieTv,
 } from "@/lib/actions";
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import Link from "next/link";
 import { LogIn } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -33,7 +25,7 @@ import {
 } from "@/components/ui/drawer";
 
 type Props = {
-  show: TspecifiedMovie | TspecifiedTv; // Adjust the type according to your needs
+  show: TspecifiedMovie | TspecifiedTv;
   typeM?: "movie" | "tv";
   userId?: string;
   initialLog?: TExistingLog | null;
@@ -42,6 +34,65 @@ type Props = {
   useEditIcon?: boolean;
   triggerClassName?: string;
 };
+
+function CustomModal({
+  open,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (open) document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return createPortal(
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.7)" }}
+      onMouseDown={(e) => {
+        if (e.target === overlayRef.current) onClose();
+      }}
+    >
+      <div
+        className="relative max-h-[88svh] w-full max-w-[500px] overflow-y-auto rounded-2xl border border-white/10 bg-[#1a1a1a]"
+        style={{ scrollbarWidth: "none" }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition hover:bg-white/10 hover:text-white"
+          aria-label="Close"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        {children}
+      </div>
+    </div>,
+    document.body,
+  );
+}
 
 export default function LogTheMT({
   show,
@@ -62,22 +113,18 @@ export default function LogTheMT({
 
   useEffect(() => {
     if (!showCard || !userId) return;
-
-    // If the parent passed an initialLog (editing existing review), prefer that
     if (initialLog) {
       setCurrentLog(initialLog);
       return;
     }
-
     (async () => {
-      const freshLog = await getLoggedMovieTv(show.id);
+      const freshLog = await getLoggedMovieTv(show.id, typeM);
       setCurrentLog(freshLog);
     })();
   }, [showCard, userId, show.id]);
 
   const handleDelete = async () => {
     if (!currentLog?.id) return;
-
     setIsDeleting(true);
     try {
       await deleteLoggedMovieTv(currentLog.id);
@@ -91,23 +138,26 @@ export default function LogTheMT({
   };
 
   const loginRequiredContent = (
-    <div className="space-y-5 py-3">
-      <div className="space-y-2">
-        <h3 className="flex items-center gap-2 text-xl font-semibold text-white">
-          <LogIn className="h-5 w-5 text-primaryM-500" /> Login Required
-        </h3>
-        <p className="text-sm text-gray-300">
-          You need to login first to log this{" "}
+    <div className="flex flex-col items-center gap-6 px-6 py-8 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/5">
+        <LogIn className="h-7 w-7 text-amber-400" />
+      </div>
+      <div className="space-y-1.5">
+        <h3 className="text-lg font-medium text-white">Login required</h3>
+        <p className="text-sm text-white/45">
+          You need to be signed in to log this{" "}
           {typeM === "movie" ? "movie" : "TV show"}.
         </p>
       </div>
-
-      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-4">
         <Button
           asChild
-          className="w-full bg-primaryM-500 text-black hover:bg-primaryM-600"
+          className="w-full bg-amber-500 font-medium text-black hover:bg-amber-400"
         >
-          <Link href="/sign-in">Go to Sign In</Link>
+          <Link href="/sign-in">
+            <LogIn className="mr-2 h-4 w-4" />
+            Go to sign in
+          </Link>
         </Button>
       </div>
     </div>
@@ -140,92 +190,35 @@ export default function LogTheMT({
 
   const TriggerIcon = useEditIcon ? Pencil : CirclePlus;
 
+  // ── Desktop — Custom Modal ────────────────────────────────────────
   if (isDesktop) {
     return (
-      <Dialog open={showCard} onOpenChange={setShowCard}>
+      <>
         <div className="flex items-center gap-2">
-          <DialogTrigger asChild>
-            <Button
-              className={cn(
-                "flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs",
-                triggerClassName,
-              )}
-            >
-              <span className="xsmd:text-xs">
-                <TriggerIcon className="h-4 w-4" />
-              </span>
-              {iconOnly ? (
-                <span className="sr-only">{triggerText}</span>
-              ) : (
-                triggerText
-              )}
-            </Button>
-          </DialogTrigger>
-
-          {currentLog && (
-            <>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setShowCard(true)}
-                className="h-10 w-10 border-primaryM-500/50 hover:border-primaryM-500 hover:bg-primaryM-500/10"
-                title="Edit this log entry"
-              >
-                <Pencil className="h-4 w-4 text-primaryM-500" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="h-10 w-10 border-red-500/50 hover:border-red-500 hover:bg-red-500/10"
-                title="Delete this log entry"
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-            </>
-          )}
+          <Button
+            onClick={() => setShowCard(true)}
+            className={cn(
+              "flex items-center gap-2 bg-primaryM-500 text-black hover:bg-primaryM-600 xsmd:text-xs",
+              triggerClassName,
+            )}
+          >
+            <TriggerIcon className="h-4 w-4" />
+            {iconOnly ? (
+              <span className="sr-only">{triggerText}</span>
+            ) : (
+              triggerText
+            )}
+          </Button>
         </div>
 
-        <DialogContent className="max-h-[88svh] w-[min(1120px,96vw)] overflow-y-auto p-6 pt-6 xl:w-[min(1180px,96vw)] smd:w-[min(100vw-1rem,100vw)]">
-          <DialogHeader className="sr-only">
-            <DialogTitle>
-              Log The {typeM === "movie" ? "Movie" : "TV Show"}
-            </DialogTitle>
-            <DialogDescription>
-              Log your rating, watch date, and optional review.
-            </DialogDescription>
-          </DialogHeader>
-
-          {!userId ? (
-            <div className="space-y-5 py-3">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-white">
-                  <LogIn className="h-5 w-5 text-primaryM-500" /> Login Required
-                </DialogTitle>
-                <DialogDescription className="text-gray-300">
-                  You need to login first to log this{" "}
-                  {typeM === "movie" ? "movie" : "TV show"}.
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <Button
-                  asChild
-                  className="w-full bg-primaryM-500 text-black hover:bg-primaryM-600"
-                >
-                  <Link href="/sign-in">Go to Sign In</Link>
-                </Button>
-              </div>
-            </div>
-          ) : (
-            content
-          )}
-        </DialogContent>
-      </Dialog>
+        <CustomModal open={showCard} onClose={() => setShowCard(false)}>
+          {content}
+        </CustomModal>
+      </>
     );
   }
 
+  // ── Mobile — Drawer (unchanged) ───────────────────────────────────
   return (
     <Drawer open={showCard} onOpenChange={setShowCard}>
       <div className="flex items-center gap-2">
@@ -253,25 +246,26 @@ export default function LogTheMT({
               variant="outline"
               size="icon"
               onClick={() => setShowCard(true)}
-              className="h-10 w-10 border-primaryM-500/50 hover:border-primaryM-500 hover:bg-primaryM-500/10"
+              className="h-10 w-10 rounded-full border border-white/15 bg-[rgba(13,12,15,0.9)] hover:bg-[rgba(23,23,28,0.9)]"
               title="Edit this log entry"
             >
-              <Pencil className="h-4 w-4 text-primaryM-500" />
+              <Pencil className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
               size="icon"
               onClick={handleDelete}
               disabled={isDeleting}
-              className="h-10 w-10 border-red-500/50 hover:border-red-500 hover:bg-red-500/10"
+              className="h-10 w-10"
               title="Delete this log entry"
             >
-              <Trash2 className="h-4 w-4 text-red-500" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </>
         )}
       </div>
-      <DrawerContent className="max-h-[88svh] overflow-hidden px-4 pt-4">
+
+      <DrawerContent className="max-h-[88svh] overflow-hidden rounded-t-2xl border-t border-white/10 bg-[#1a1a1a] px-0 pt-0">
         <DrawerHeader className="sr-only">
           <DrawerTitle>
             Log The {typeM === "movie" ? "Movie" : "TV Show"}
@@ -280,15 +274,6 @@ export default function LogTheMT({
             Log your rating, watch date, and optional review.
           </DrawerDescription>
         </DrawerHeader>
-
-        {!userId && (
-          <DrawerHeader className="px-0 pb-2 pt-2 text-left">
-            <DrawerTitle className="text-white">Login Required</DrawerTitle>
-            <DrawerDescription className="text-gray-300">
-              Sign in to log your movie or TV show.
-            </DrawerDescription>
-          </DrawerHeader>
-        )}
         <div className="min-h-0 overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           {content}
         </div>

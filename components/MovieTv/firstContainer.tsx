@@ -7,7 +7,13 @@ import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
 import WatchListButton from "./buttons/watchListButton";
 import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
-import { getLoggedMovieTv, getUser, getWatchedByForShow } from "@/lib/actions";
+import {
+  getLoggedMovieTv,
+  getUser,
+  getWatchedByForShow,
+  getReviewStats,
+} from "@/lib/actions";
+import UserReviewPreview from "./userReviewPreview";
 import { Separator } from "../ui/separator";
 import BWCard from "./bwCard";
 import LogTheMT from "./buttons/logTheMT";
@@ -47,11 +53,16 @@ export default async function FirstContainer({ response, typeM }: Props) {
     const runtime = convertRuntime(movieRes.runtime);
     const [existingLog, watchedBy] = user?.id
       ? await Promise.all([
-          getLoggedMovieTv(movieRes.id),
+          getLoggedMovieTv(movieRes.id, "movie"),
           getWatchedByForShow(String(movieRes.id)),
         ])
       : [null, []];
+
+    const reviewStats = existingLog
+      ? await getReviewStats(existingLog.id)
+      : { likesCount: 0, repliesCount: 0 };
     // TODO FIX WACHLIST BUTTON AND ADD LIST SIZE IN MOBILE , AND CATEGORIES IN CERTAIN MOBILES THEY COLAPSE AND ALSO THE TOAST LOOKS BIG ON THE MOBILE
+    console.log(user.username);
 
     return (
       <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
@@ -102,6 +113,14 @@ export default async function FirstContainer({ response, typeM }: Props) {
             />
             <ShareButton typeSearch="Movie" />
           </div>
+
+          <UserReviewPreview
+            log={existingLog}
+            username={user?.username}
+            mediaType="movie"
+            likesCount={reviewStats.likesCount}
+            repliesCount={reviewStats.repliesCount}
+          />
 
           {watchedBy.length > 0 ? (
             <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
@@ -176,7 +195,13 @@ export default async function FirstContainer({ response, typeM }: Props) {
       typeof tvRes.vote_average === "number"
         ? tvRes.vote_average.toFixed(1)
         : "--";
-    const existingLog = user?.id ? await getLoggedMovieTv(tvRes.id) : null;
+    const existingLog = user?.id
+      ? await getLoggedMovieTv(tvRes.id, "tv")
+      : null;
+
+    const reviewStats = existingLog
+      ? await getReviewStats(existingLog.id)
+      : { likesCount: 0, repliesCount: 0 };
 
     return (
       <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
@@ -222,6 +247,14 @@ export default async function FirstContainer({ response, typeM }: Props) {
 
             <ShareButton typeSearch="Movie" />
           </div>
+
+          <UserReviewPreview
+            log={existingLog}
+            username={user?.username}
+            mediaType="tv"
+            likesCount={reviewStats.likesCount}
+            repliesCount={reviewStats.repliesCount}
+          />
         </div>
         <div className="shareR self-end">
           <ButtonAnimation

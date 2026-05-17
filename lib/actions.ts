@@ -50,6 +50,10 @@ export const getUser = cache(async () => {
     return null;
   }
 });
+export async function getUserUsername() {
+  const user = await getUser();
+  return user?.username ?? null; // ← username not name
+}
 
 export async function createActivity(activity: {
   userId?: string | null;
@@ -2655,12 +2659,19 @@ function isMissingUserProfileColumns(error: unknown): boolean {
 
 export async function getLoggedMovieTv(
   showId: string | number,
+  mediaType?: "movie" | "tv",
 ): Promise<TExistingLog | null> {
   const user = await getUser();
 
   if (!user?.id) return null;
 
   const normalizedShowId = String(showId);
+  const possibleShowIds = Array.from(
+    new Set([
+      normalizedShowId,
+      ...(mediaType ? [`${mediaType}:${normalizedShowId}`] : []),
+    ]),
+  );
 
   let existingLog:
     | Array<{
@@ -2693,7 +2704,7 @@ export async function getLoggedMovieTv(
       .where(
         and(
           eq(loggedMovies.userId, user.id as string),
-          eq(loggedMovies.showId, normalizedShowId),
+          inArray(loggedMovies.showId, possibleShowIds),
         ),
       )
       .orderBy(desc(loggedMovies.createdAt))
@@ -2713,7 +2724,7 @@ export async function getLoggedMovieTv(
       .where(
         and(
           eq(loggedMovies.userId, user.id as string),
-          eq(loggedMovies.showId, normalizedShowId),
+          inArray(loggedMovies.showId, possibleShowIds),
         ),
       )
       .orderBy(desc(loggedMovies.createdAt))
@@ -2736,6 +2747,30 @@ export async function getLoggedMovieTv(
     watchType:
       "watchType" in row && row.watchType === "rewatch" ? "rewatch" : "first",
   };
+}
+
+export async function getReviewStats(reviewId: string) {
+  try {
+    const likes = await db
+      .select({ count: count() })
+      .from(reviewLikes)
+      .where(eq(reviewLikes.reviewId, reviewId));
+
+    const replies = await db
+      .select({ count: count() })
+      .from(reviewReplies)
+      .where(eq(reviewReplies.reviewId, reviewId));
+
+    return {
+      likesCount: likes[0]?.count ?? 0,
+      repliesCount: replies[0]?.count ?? 0,
+    };
+  } catch (error) {
+    return {
+      likesCount: 0,
+      repliesCount: 0,
+    };
+  }
 }
 
 export async function sendLoggedMovieTv({
