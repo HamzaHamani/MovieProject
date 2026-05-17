@@ -22,16 +22,7 @@ export default async function Page({
   const user = await getUser();
   if (user) redirect("/explore");
   return (
-    <div className="relative grid min-h-screen w-full grid-cols-2 bg-[#111111] text-white xl:grid-cols-1">
-      <div
-        className="pointer-events-none absolute inset-0 z-0 hidden md:block"
-        style={{
-          backgroundImage: `url('/authBG.webp')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
+    <div className="relative grid min-h-screen w-full grid-cols-2 bg-[#111111] text-white lg:grid-cols-1">
       {/* Left Side (Form + Visuals) */}
       <div className="relative z-10 flex w-full flex-col items-center justify-center overflow-hidden bg-transparent px-4 py-12 xl:bg-[#111111] xl:px-8 lg:px-12">
         {/* Dithered Overlay Layers */}
@@ -74,10 +65,15 @@ export default async function Page({
           opacity="bg-white/3"
           maskPx={3}
         />
-
+        <div
+          className="absolute inset-0 hidden bg-cover bg-center opacity-60 brightness-50 lg:block"
+          style={{
+            backgroundImage: `url('/authBG.webp')`,
+          }}
+        />
         {/* Main Form Container */}
         <div className="relative z-10 mx-auto grid w-[400px] max-w-[90%] gap-8">
-          <div className="grid gap-3 text-center">
+          <div className="grid gap-3 text-center lg:mt-5">
             <h2 className="text-2xl font-semibold">Welcome back</h2>
             <p className="text-sm text-gray-400">
               Sign in to your account to continue your cinematic journey
