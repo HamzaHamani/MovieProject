@@ -36,10 +36,7 @@ export async function GET(request: NextRequest) {
 
     const queryPattern = `%${query}%`;
     const matchClause = query
-      ? or(
-          ilike(users.username, queryPattern),
-          ilike(users.name, queryPattern),
-        )
+      ? or(ilike(users.username, queryPattern), ilike(users.name, queryPattern))
       : undefined;
 
     const rows = await db

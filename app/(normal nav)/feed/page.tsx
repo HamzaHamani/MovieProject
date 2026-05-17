@@ -161,7 +161,10 @@ export default function Page() {
                 >
                   <Avatar className="h-8 w-8">
                     {user.image ? (
-                      <AvatarImage src={user.image} alt={user.username ?? "user"} />
+                      <AvatarImage
+                        src={user.image}
+                        alt={user.username ?? "user"}
+                      />
                     ) : (
                       <AvatarFallback>
                         {(user.username ?? "U").slice(0, 2).toUpperCase()}
