@@ -134,10 +134,10 @@ export default function ModeleLog({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col">
+    <form onSubmit={handleSubmit} className="flex flex-col bg-backgroundM">
       {/* Header */}
       <div className="px-6 pb-5 pt-6">
-        <span className="mb-3 inline-block rounded-full bg-amber-500 px-3 py-0.5 text-[10px] font-medium uppercase tracking-widest text-black">
+        <span className="mb-3 inline-block rounded-full bg-primaryM-600 px-3 py-0.5 text-[10px] font-medium uppercase tracking-widest text-black">
           {typeM === "movie" ? "Movie log" : "TV show log"}
         </span>
         <h2 className="text-xl font-medium text-white">Log {showTitle}</h2>
@@ -200,14 +200,14 @@ export default function ModeleLog({
             >
               {displayRating ? `${displayRating.toFixed(1)} / 5` : "— / 5"}
             </span>
-          </div>
+          </div>{" "}
           {errors.rating && (
             <p className="mt-1.5 text-xs text-red-400">{errors.rating}</p>
           )}
         </div>
 
         {/* Date + Watch Type */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex justify-between gap-3">
           <div>
             <p className="mb-2 text-[11px] font-medium uppercase tracking-widest text-white/40">
               Date watched
@@ -216,7 +216,7 @@ export default function ModeleLog({
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="flex h-11 w-full items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-left text-sm transition hover:bg-white/[0.07]"
+                  className="text- flex h-11 w-44 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-center text-sm transition hover:bg-white/[0.07]"
                 >
                   <CalendarIcon className="h-4 w-4 shrink-0 text-white/40" />
                   <span className={date ? "text-white/80" : "text-white/30"}>
@@ -245,7 +245,7 @@ export default function ModeleLog({
             <p className="mb-2 text-[11px] font-medium uppercase tracking-widest text-white/40">
               Watch type
             </p>
-            <div className="flex h-11 gap-1.5">
+            <div className="flex h-11 w-56 gap-1.5">
               {(["first", "rewatch"] as const).map((type) => (
                 <button
                   key={type}
@@ -291,7 +291,7 @@ export default function ModeleLog({
       </div>
 
       {/* Footer */}
-      <div className="sticky bottom-0 z-10 flex gap-2.5 border-t border-white/10 bg-[#1a1a1a] px-6 py-4">
+      <div className="sticky bottom-0 z-10 flex gap-2.5 border-t border-white/10 bg-backgroundM px-6 py-4">
         <button
           type="button"
           disabled={submitting}

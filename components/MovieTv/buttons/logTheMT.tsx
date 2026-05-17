@@ -35,6 +35,8 @@ type Props = {
   triggerClassName?: string;
 };
 
+// ─── Animated portal modal ────────────────────────────────────────────────────
+
 function CustomModal({
   open,
   onClose,
@@ -45,11 +47,19 @@ function CustomModal({
   children: React.ReactNode;
 }) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
+  // Mount first, then trigger visible on next frame so CSS transition fires
   useEffect(() => {
     if (open) {
+      setMounted(true);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => setVisible(true)),
+      );
       document.body.style.overflow = "hidden";
     } else {
+      setVisible(false);
       document.body.style.overflow = "";
     }
     return () => {
@@ -57,6 +67,15 @@ function CustomModal({
     };
   }, [open]);
 
+  // Unmount after exit transition completes
+  useEffect(() => {
+    if (!visible && mounted && !open) {
+      const t = setTimeout(() => setMounted(false), 220);
+      return () => clearTimeout(t);
+    }
+  }, [visible, mounted, open]);
+
+  // Escape key
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -65,20 +84,32 @@ function CustomModal({
     return () => document.removeEventListener("keydown", handleKey);
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return createPortal(
     <div
       ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.7)" }}
+      style={{
+        background: visible ? "rgba(0,0,0,0.72)" : "rgba(0,0,0,0)",
+        backdropFilter: visible ? "blur(10px)" : "blur(0px)",
+        WebkitBackdropFilter: visible ? "blur(10px)" : "blur(0px)",
+        transition: "background 0.22s ease, backdrop-filter 0.22s ease",
+      }}
       onMouseDown={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
     >
       <div
         className="relative max-h-[88svh] w-full max-w-[500px] overflow-y-auto rounded-2xl border border-white/10 bg-[#1a1a1a]"
-        style={{ scrollbarWidth: "none" }}
+        style={{
+          scrollbarWidth: "none",
+          opacity: visible ? 1 : 0,
+          transform: visible
+            ? "scale(1) translateY(0)"
+            : "scale(0.96) translateY(10px)",
+          transition: "opacity 0.22s ease, transform 0.22s ease",
+        }}
       >
         <button
           onClick={onClose}
@@ -93,6 +124,8 @@ function CustomModal({
     document.body,
   );
 }
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function LogTheMT({
   show,
@@ -190,7 +223,7 @@ export default function LogTheMT({
 
   const TriggerIcon = useEditIcon ? Pencil : CirclePlus;
 
-  // ── Desktop — Custom Modal ────────────────────────────────────────
+  // ── Desktop — animated custom modal ──────────────────────────────
   if (isDesktop) {
     return (
       <>
