@@ -101,7 +101,7 @@ export default function FeaturedRecentSection({ cards }: Props) {
   }
 
   return (
-    <section className="relative mb-16 min-h-[82vh] overflow-visible lg:min-h-[74vh] h1text8:min-h-[68vh] smd:min-h-[62vh] s:min-h-[58vh]">
+    <section className="relative mb-16 min-h-[100vh] overflow-visible lg:min-h-[100vh] h1text8:min-h-[100vh] smd:min-h-[100vh] s:min-h-[100vh]">
       <div
         className="absolute inset-0 -z-10"
         style={{
@@ -116,7 +116,7 @@ export default function FeaturedRecentSection({ cards }: Props) {
       <div className="absolute inset-0 -z-10 bg-black/65" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/35 to-black/30" />
 
-      <div className="mt-14 flex min-h-[82vh] flex-col justify-between px-5 pb-6 pt-5 lg:min-h-[74vh] h1text8:min-h-[68vh] smd:min-h-[62vh] smd:px-4 s:px-3">
+      <div className="flex min-h-[100vh] flex-col justify-between px-5 pb-6 pt-5 lg:min-h-[100vh] h1text8:min-h-[100vh] smd:min-h-[100vh] smd:px-4 s:px-3">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex items-center gap-3"></div>
           <Link
@@ -198,61 +198,63 @@ export default function FeaturedRecentSection({ cards }: Props) {
           </div>
         </div>
 
-        <Carousel
-          opts={{
-            align: "center",
-            loop: true,
-          }}
-          className="mx-auto w-full"
-        >
-          <CarouselContent>
-            {cards.map((item) => (
-              <CarouselItem
-                key={`${item.media_type}-${item.id}`}
-                className="basis-[155px] pl-4 h1text8:basis-[142px] smd:basis-[128px] smd:pl-3 s:basis-[112px]"
-              >
-                <button
-                  type="button"
-                  className={`relative h-[202px] w-[136px] transform-gpu overflow-hidden rounded border-2 ring-0 transition-all duration-300 ease-out h1text8:h-[186px] h1text8:w-[125px] smd:h-[167px] smd:w-[113px] s:h-[151px] s:w-[102px] ${
-                    selectedItem.id === item.id
-                      ? "z-10 border-primaryM-500 ring-4 ring-primaryM-500/70 ring-offset-2 ring-offset-black/25"
-                      : "border-transparent opacity-90 hover:scale-[1.03] hover:opacity-100"
-                  } ${item.poster_path ? "" : "bg-gray-600"}`}
-                  onClick={() => setSelectedId(item.id)}
-                  onMouseEnter={() => {
-                    queryClient.prefetchQuery({
-                      queryKey: [
-                        "explore",
-                        "featured-details",
-                        item.media_type,
-                        item.id,
-                      ],
-                      queryFn: () =>
-                        fetchExploreMediaDetails(item.media_type, item.id),
-                    });
-                  }}
+        <div className="overflow-x-hidden overflow-y-visible">
+          <Carousel
+            opts={{
+              align: "center",
+              loop: true,
+            }}
+            className="mx-auto w-full"
+          >
+            <CarouselContent>
+              {cards.map((item) => (
+                <CarouselItem
+                  key={`${item.media_type}-${item.id}`}
+                  className="basis-[155px] pl-4 h1text8:basis-[142px] smd:basis-[128px] smd:pl-3 s:basis-[112px]"
                 >
-                  {item.poster_path ? (
-                    <LazyBlurImage
-                      src={`https://image.tmdb.org/t/p/w500/${item.poster_path}`}
-                      alt={`${item.title} poster`}
-                      className="h-full w-full object-cover"
-                      placeholderClassName="bg-zinc-700/50"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center">
-                      <GrDocumentMissing className="text-2xl" />
-                    </div>
-                  )}
-                </button>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <div className="mt-3 flex justify-end gap-2">
-            <CarouselPrevious />
-            <CarouselNext />
-          </div>
-        </Carousel>
+                  <button
+                    type="button"
+                    className={`relative h-[202px] w-[136px] transform-gpu overflow-hidden rounded transition-all duration-300 ease-out h1text8:h-[186px] h1text8:w-[125px] smd:h-[167px] smd:w-[113px] s:h-[151px] s:w-[102px] ${
+                      selectedItem.id === item.id
+                        ? "z-10 border-4 border-primaryM-500"
+                        : "border-2 border-transparent opacity-90 hover:scale-[1.03] hover:opacity-100"
+                    } ${item.poster_path ? "" : "bg-gray-600"}`}
+                    onClick={() => setSelectedId(item.id)}
+                    onMouseEnter={() => {
+                      queryClient.prefetchQuery({
+                        queryKey: [
+                          "explore",
+                          "featured-details",
+                          item.media_type,
+                          item.id,
+                        ],
+                        queryFn: () =>
+                          fetchExploreMediaDetails(item.media_type, item.id),
+                      });
+                    }}
+                  >
+                    {item.poster_path ? (
+                      <LazyBlurImage
+                        src={`https://image.tmdb.org/t/p/w500/${item.poster_path}`}
+                        alt={`${item.title} poster`}
+                        className="h-full w-full object-cover"
+                        placeholderClassName="bg-zinc-700/50"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <GrDocumentMissing className="text-2xl" />
+                      </div>
+                    )}
+                  </button>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="mt-3 flex justify-end gap-2">
+              <CarouselPrevious />
+              <CarouselNext />
+            </div>
+          </Carousel>
+        </div>
       </div>
     </section>
   );

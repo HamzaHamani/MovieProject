@@ -202,9 +202,9 @@ function SectionCarouselSkeleton() {
 
 function FeaturedSkeleton() {
   return (
-    <section className="relative mb-16 min-h-[62vh] overflow-hidden rounded-xl">
+    <section className="relative mb-16 min-h-[100vh] overflow-hidden rounded-xl">
       <Skeleton className="absolute inset-0" />
-      <div className="relative z-10 flex min-h-[62vh] flex-col justify-between p-5">
+      <div className="relative z-10 flex min-h-[100vh] flex-col justify-between p-5">
         <div className="ml-auto mt-36">
           <Skeleton className="h-5 w-20" />
         </div>
