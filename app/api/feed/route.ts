@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { activities, userFollows, users } from "@/db/schema";
 import { getUser } from "@/lib/actions";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, lte } from "drizzle-orm";
 import { decodeStoredMediaId } from "@/lib/utils";
 import { getSpecifiedMovie, getSpecifiedTV } from "@/lib/actions";
 
@@ -59,16 +59,30 @@ export async function GET(request: NextRequest) {
 
     const whereClauses: any[] = [inArray(activities.userId, followingIds)];
     if (userFilter) {
-      const matchedUser = await db
-        .select({ id: users.id })
+      const matchedUsers = await db
+        .select({ id: users.id, username: users.username })
         .from(users)
-        .where(eq(users.username, userFilter))
-        .limit(1);
-      const resolvedUserId = matchedUser[0]?.id ?? userFilter;
-      whereClauses.push(eq(activities.userId, resolvedUserId));
+        .where(ilike(users.username, `%${userFilter.trim()}%`));
+
+      if (matchedUsers.length > 0) {
+        whereClauses.push(
+          inArray(
+            activities.userId,
+            matchedUsers.map((user) => user.id),
+          ),
+        );
+      } else {
+        return NextResponse.json({ items: [], page, perPage });
+      }
     }
-    if (since) whereClauses.push((activities as any).createdAt.gte(since));
-    if (until) whereClauses.push((activities as any).createdAt.lte(until));
+    if (since && !Number.isNaN(since.getTime())) {
+      whereClauses.push(gte(activities.createdAt, since));
+    }
+    if (until && !Number.isNaN(until.getTime())) {
+      const endOfDay = new Date(until);
+      endOfDay.setHours(23, 59, 59, 999);
+      whereClauses.push(lte(activities.createdAt, endOfDay));
+    }
 
     const rows = await db
       .select({

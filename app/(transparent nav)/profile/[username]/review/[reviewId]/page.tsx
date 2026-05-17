@@ -398,7 +398,7 @@ export default async function Page({
                   {review.review?.trim().length ? (
                     <MentionText text={review.review} />
                   ) : (
-                    <span className="text-white/35 italic">
+                    <span className="italic text-white/35">
                       No written review
                     </span>
                   )}
@@ -456,7 +456,7 @@ export default async function Page({
                 {engagement.replies.map((reply) => (
                   <div
                     key={reply.id}
-                    className="rounded-lg border border-white/10 bg-[rgba(23,23,28,0.9)] p-3 text-sm text-gray-200"
+                    className="rounded-lg border border-white/10 bg-[rgba(13,12,15,0.92)] p-3 text-sm text-gray-200"
                   >
                     <p className="text-xs text-gray-400">
                       @{reply.username ?? "user"}

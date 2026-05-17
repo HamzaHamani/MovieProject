@@ -135,7 +135,7 @@ export default async function Page({
           </Link>
         </div>
 
-        <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <article className="rounded-2xl border border-white/10 bg-[rgba(13,12,15,0.9)] p-5">
           <div className="flex gap-4 sm:flex-col">
             <Link
               href={media?.href ?? "/explore"}
@@ -194,7 +194,9 @@ export default async function Page({
                 {log.review?.trim().length ? (
                   log.review
                 ) : (
-                  <span className="text-white/35 italic">No written review</span>
+                  <span className="italic text-white/35">
+                    No written review
+                  </span>
                 )}
               </p>
             </div>

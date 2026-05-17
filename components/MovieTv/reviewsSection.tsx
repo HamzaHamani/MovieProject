@@ -148,7 +148,7 @@ export default function ReviewsSection({ items, mediaId, mediaType }: Props) {
                       disableLinks={isLocalSocialReview}
                     />
                   ) : (
-                    <span className="text-white/35 italic">
+                    <span className="italic text-white/35">
                       No written review
                     </span>
                   )}

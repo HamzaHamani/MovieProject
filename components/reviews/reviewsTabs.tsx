@@ -143,7 +143,7 @@ export default function ReviewsTabs({
       </div>
 
       {currentFeed.items.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-[#101018] p-4 text-sm text-gray-300">
+        <div className="rounded-xl border border-white/10 bg-[rgba(13,12,15,0.92)] p-4 text-sm text-gray-300">
           {activeCategory === "social"
             ? "No social reviews yet for this title."
             : "No critic reviews available for this title."}
@@ -179,7 +179,7 @@ export default function ReviewsTabs({
                       disableLinks={Boolean(href)}
                     />
                   ) : (
-                    <span className="text-white/35 italic">
+                    <span className="italic text-white/35">
                       No written review
                     </span>
                   )}
@@ -197,14 +197,14 @@ export default function ReviewsTabs({
               <Link
                 key={review.id}
                 href={href}
-                className="block rounded-xl border border-white/10 bg-[#101018] p-4 transition hover:border-primaryM-500/50 hover:bg-[#141420]"
+                className="block rounded-xl border border-white/10 bg-[rgba(13,12,15,0.92)] p-4 transition hover:border-primaryM-500/50 hover:bg-[rgba(23,23,28,0.96)]"
               >
                 {content}
               </Link>
             ) : (
               <article
                 key={review.id}
-                className="rounded-xl border border-white/10 bg-[#101018] p-4"
+                className="rounded-xl border border-white/10 bg-[rgba(13,12,15,0.92)] p-4"
               >
                 {content}
               </article>
