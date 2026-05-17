@@ -44,12 +44,6 @@ function socialReviewHref(review: TReviewItem) {
   return null;
 }
 
-function reviewText(review: TReviewItem) {
-  return review.content.trim().length > 0
-    ? review.content
-    : "No written review";
-}
-
 export default function ReviewsTabs({
   typeM,
   id,
@@ -178,11 +172,17 @@ export default function ReviewsTabs({
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-300">
-                  <MentionText
-                    text={reviewText(review)}
-                    disableLinks={Boolean(href)}
-                  />
+                <p className="text-sm leading-7 text-gray-300">
+                  {review.content.trim().length > 0 ? (
+                    <MentionText
+                      text={review.content}
+                      disableLinks={Boolean(href)}
+                    />
+                  ) : (
+                    <span className="text-white/35 italic">
+                      No written review
+                    </span>
+                  )}
                 </p>
 
                 {typeof review.author_details?.rating === "number" && (

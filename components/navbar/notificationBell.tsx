@@ -187,18 +187,18 @@ export default function NotificationBell() {
             </div>
           </div>
         ) : (
-          <div className="max-h-[420px] overflow-y-auto p-2">
+          <div className="max-h-[420px] cursor-pointer overflow-y-auto border-0 p-2">
             {notifications.map((notif, idx) => (
               <div key={notif.id} className="mb-2 last:mb-0">
                 <div
-                  className={`rounded-2xl border p-3 transition-all hover:-translate-y-[1px] hover:border-white/20 hover:bg-white/[0.06] ${
+                  className={`rounded-2xl border border-white/20 p-3 transition-all hover:-translate-y-[1px] hover:border-white/20 hover:bg-white/[0.06] ${
                     !notif.isRead
                       ? "border-white/15 bg-white/[0.05]"
                       : "border-white/8 bg-black/20"
                   }`}
                   onClick={() => !notif.isRead && handleMarkAsRead(notif.id)}
                 >
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 border-0">
                     <Avatar className="h-10 w-10 shrink-0 ring-1 ring-white/10">
                       <AvatarImage src={notif.sourceUserImage ?? undefined} />
                       <AvatarFallback className="bg-white/10 text-xs text-white">

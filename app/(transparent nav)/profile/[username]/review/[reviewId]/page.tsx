@@ -395,13 +395,13 @@ export default async function Page({
                 ) : null}
 
                 <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-gray-200">
-                  <MentionText
-                    text={
-                      review.review?.trim().length
-                        ? review.review
-                        : "No written review"
-                    }
-                  />
+                  {review.review?.trim().length ? (
+                    <MentionText text={review.review} />
+                  ) : (
+                    <span className="text-white/35 italic">
+                      No written review
+                    </span>
+                  )}
                 </p>
 
                 <div className="mt-4 flex items-center gap-4 text-xs text-gray-400">

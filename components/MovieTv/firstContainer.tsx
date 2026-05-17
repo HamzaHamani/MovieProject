@@ -1,11 +1,9 @@
 import { convertRuntime } from "@/lib/utils";
 import { TspecifiedMovie } from "@/types/api";
-import { Bookmark, Heart, Share2, Star, StarIcon } from "lucide-react";
+import { StarIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { ButtonAnimation } from "../ui/ButtonAnimation";
 import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
-import WatchListButton from "./buttons/watchListButton";
 import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
 import {
   getLoggedMovieTv,
@@ -14,28 +12,73 @@ import {
   getReviewStats,
 } from "@/lib/actions";
 import UserReviewPreview from "./userReviewPreview";
-import { Separator } from "../ui/separator";
-import BWCard from "./bwCard";
 import LogTheMT from "./buttons/logTheMT";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Link from "next/link";
 
 type TspecifiedMedia = TspecifiedMovie | TspecifiedTv;
+type Props = { response: TspecifiedMedia; typeM: "movie" | "tv" };
 
-type Props = {
-  response: TspecifiedMedia;
-  typeM: "movie" | "tv";
+const getInitials = (label: string) => {
+  const parts = label.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "U";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
 };
+
+function WatchedByRow({
+  watchedBy,
+}: {
+  watchedBy: Awaited<ReturnType<typeof getWatchedByForShow>>;
+}) {
+  if (!watchedBy.length) return null;
+  const visible = watchedBy.slice(0, 4);
+  const extra = watchedBy.length - 4;
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="mt-0 text-[12.5px] uppercase tracking-[0.18em] text-white/30">
+        Watched by
+      </span>
+      <div className="flex -space-x-2">
+        {visible.map((item) => {
+          const display = item.username || item.name || "User";
+          const avatar = (
+            <Avatar className="h-6 w-6 border-2 border-[#0d0c0f] ring-1 ring-white/10 transition duration-200 hover:scale-110 hover:ring-primaryM-500/40">
+              <AvatarImage src={item.image ?? undefined} alt={display} />
+              <AvatarFallback className="bg-white/10 text-[8px] text-white">
+                {getInitials(display)}
+              </AvatarFallback>
+            </Avatar>
+          );
+          return item.username ? (
+            <Link
+              key={item.userId}
+              href={`/profile/${item.username}/review/${item.reviewId}`}
+              className="group relative"
+              aria-label={`Open ${display}'s review`}
+            >
+              {avatar}
+              <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 whitespace-nowrap rounded-full border border-white/10 bg-[#111114] px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition group-hover:opacity-100">
+                @{display}
+              </span>
+            </Link>
+          ) : (
+            <span key={item.userId}>{avatar}</span>
+          );
+        })}
+        {extra > 0 && (
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#0d0c0f] bg-white/10 text-[8px] font-medium text-white/50">
+            +{extra}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default async function FirstContainer({ response, typeM }: Props) {
   const user = await getUser();
-
-  const getInitials = (label: string) => {
-    const parts = label.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return "U";
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
-  };
 
   if (typeM === "movie") {
     const movieRes = response as TspecifiedMovie;
@@ -47,10 +90,10 @@ export default async function FirstContainer({ response, typeM }: Props) {
         : "--";
     const revenueLabel =
       typeof movieRes.revenue === "number"
-        ? `${movieRes.revenue.toLocaleString()}$`
+        ? `$${(movieRes.revenue / 1_000_000).toFixed(0)}M`
         : "--";
-
     const runtime = convertRuntime(movieRes.runtime);
+
     const [existingLog, watchedBy] = user?.id
       ? await Promise.all([
           getLoggedMovieTv(movieRes.id, "movie"),
@@ -61,132 +104,90 @@ export default async function FirstContainer({ response, typeM }: Props) {
     const reviewStats = existingLog
       ? await getReviewStats(existingLog.id)
       : { likesCount: 0, repliesCount: 0 };
-    // TODO FIX WACHLIST BUTTON AND ADD LIST SIZE IN MOBILE , AND CATEGORIES IN CERTAIN MOBILES THEY COLAPSE AND ALSO THE TOAST LOOKS BIG ON THE MOBILE
-    console.log(user.username);
 
     return (
-      <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
-        <div className="flex flex-col gap-3">
-          <Badge className="mb-3 w-fit bg-backgroundM px-4 text-base font-normal sm:px-2 sm:text-xs">
-            Movie
-          </Badge>
-          <h2 className="text-5xl font-extrabold tracking-tighter text-textMain">
-            {movieRes.title}
-          </h2>
-          {/* TODO, IN CASE OF USING UL LIST, JUST NORMAL P TAG, WITH SPANS INSIDE IT THEN SPERATE WITH GAP FLEX AND ADD DOTS UR SLEF WITHOUT ANY STYLING */}
-          <div className="flex w-fit gap-2 text-sm text-gray-300 smd:gap-1 smd:text-xs s:text-[10px] xss:text-[8px]">
-            <span>{runtime}</span>
-            <span>•</span>
-            {/* <li className="circle">{}</li> */}
-            {typeM === "movie" ? (
-              <p>{movieRes.release_date}</p>
-            ) : (
-              <p>{movieRes.first_air_date}</p>
-            )}
-            <span>•</span>
-            <p>{primaryGenre}</p>
-
-            <span>•</span>
-            {secondaryGenre && <p>{secondaryGenre}</p>}
-            <span>•</span>
-
-            <div className="flex items-center gap-1">
-              <StarIcon className="inline h-4 w-4 text-yellow-400" />
-              <span className="">{rating}</span>
+      <div className="mt-[32vh] flex w-[90vw] flex-col gap-4 md:mb-0 md:mt-0 md:w-full">
+        <div className="flex flex-row items-start justify-between gap-8 md:flex-col md:gap-4">
+          {/* ── Left: movie info — full width when stacked on mobile ── */}
+          <div className="flex min-w-0 flex-1 flex-col gap-4 md:w-full md:gap-3">
+            <Badge className="w-fit bg-backgroundM px-4 text-base font-normal sm:px-2 sm:text-xs">
+              Movie
+            </Badge>
+            <h2 className="text-5xl font-extrabold tracking-tighter text-textMain smd:text-3xl">
+              {movieRes.title}
+            </h2>
+            <div className="flex w-fit flex-wrap gap-2 text-sm text-gray-300 smd:gap-1 smd:text-xs s:text-[10px]">
+              <span>{runtime}</span>
+              <span>•</span>
+              <span>{movieRes.release_date}</span>
+              <span>•</span>
+              <span>{primaryGenre}</span>
+              {secondaryGenre && (
+                <>
+                  <span>•</span>
+                  <span>{secondaryGenre}</span>
+                </>
+              )}
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <StarIcon className="inline h-3.5 w-3.5 text-primaryM-400" />
+                {rating}
+              </span>
+              <span>•</span>
+              <span>{revenueLabel}</span>
             </div>
-            <span>•</span>
-            <p>{revenueLabel}</p>
-          </div>
-          <div className="button-left mt-3 flex gap-2">
-            <LogTheMT
-              show={response}
-              typeM={typeM}
-              userId={user?.id}
-              initialLog={existingLog}
-            />
 
-            <DrawerDialogButtonList
-              userId={user?.id}
-              movieId={movieRes.id}
-              itemTitle={movieRes.title}
-              itemPosterPath={movieRes.poster_path}
-            />
-            <ShareButton typeSearch="Movie" />
-          </div>
+            {/* ── Action buttons ── */}
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <LogTheMT
+                show={response}
+                typeM={typeM}
+                userId={user?.id}
+                initialLog={existingLog}
+              />
+              <DrawerDialogButtonList
+                userId={user?.id}
+                movieId={movieRes.id}
+                itemTitle={movieRes.title}
+                itemPosterPath={movieRes.poster_path}
+              />
+              <ShareButton typeSearch="Movie" />
+            </div>
 
-          <UserReviewPreview
-            log={existingLog}
-            username={user?.username}
-            mediaType="movie"
-            likesCount={reviewStats.likesCount}
-            repliesCount={reviewStats.repliesCount}
-          />
+            {/* ── Watched by ── */}
+            <WatchedByRow watchedBy={watchedBy} />
 
-          {watchedBy.length > 0 ? (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
-              <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
-                Watched by
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {watchedBy.slice(0, 8).map((item) => {
-                  const display = item.username || item.name || "User";
-                  const ratingLabel =
-                    typeof item.rating === "number"
-                      ? `${item.rating.toFixed(1)} ★`
-                      : "No rating";
-                  const relationLabel =
-                    item.source === "friend" ? "Friend" : "Following";
-
-                  const content = (
-                    <div className="min-w-[128px] rounded-xl border border-white/10 bg-black/30 p-2.5 transition hover:border-primaryM-500/35 hover:bg-black/40">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-7 w-7 border border-white/10">
-                          <AvatarImage
-                            src={item.image ?? undefined}
-                            alt={display}
-                          />
-                          <AvatarFallback className="bg-white/10 text-[10px] text-white">
-                            {getInitials(display)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <p className="line-clamp-1 text-sm font-medium text-white">
-                          @{display}
-                        </p>
-                      </div>
-                      <p className="mt-1 text-xs text-gray-300">
-                        {ratingLabel}
-                      </p>
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">
-                        {relationLabel}
-                      </p>
-                    </div>
-                  );
-
-                  return item.username ? (
-                    <Link key={item.userId} href={`/profile/${item.username}`}>
-                      {content}
-                    </Link>
-                  ) : (
-                    <div key={item.userId}>{content}</div>
-                  );
-                })}
+            {/* ── Review card: mobile only, truly full width ── */}
+            {existingLog && (
+              <div className="hidden md:mt-1 md:block md:w-full">
+                <UserReviewPreview
+                  log={existingLog}
+                  username={user?.username ?? null}
+                  likesCount={reviewStats.likesCount}
+                  repliesCount={reviewStats.repliesCount}
+                  className="w-full"
+                />
               </div>
+            )}
+          </div>
+
+          {/* ── Right column: desktop only, hidden on mobile ── */}
+          {existingLog && (
+            <div className="w-[400px] shrink-0 xxl:w-[380px] xl:w-[360px] lg:w-[320px] xmd:w-[280px] md:hidden">
+              <UserReviewPreview
+                log={existingLog}
+                username={user?.username ?? null}
+                likesCount={reviewStats.likesCount}
+                repliesCount={reviewStats.repliesCount}
+                className="w-full"
+              />
             </div>
-          ) : null}
-        </div>
-        <div className="shareR self-end">
-          {" "}
-          {/* add button animation from that  website */}
-          <ButtonAnimation
-            typeSearch="Movie"
-            text="Share"
-            icon={<Share2 className="h-4 w-4" />}
-            afterText="Shared"
-          />
+          )}
         </div>
       </div>
     );
   }
+
   if (typeM === "tv") {
     const tvRes = response as TspecifiedTv;
     const primaryGenre = tvRes.genres?.[0]?.name ?? "Unknown";
@@ -195,74 +196,96 @@ export default async function FirstContainer({ response, typeM }: Props) {
       typeof tvRes.vote_average === "number"
         ? tvRes.vote_average.toFixed(1)
         : "--";
-    const existingLog = user?.id
-      ? await getLoggedMovieTv(tvRes.id, "tv")
-      : null;
+
+    const [existingLog, watchedBy] = user?.id
+      ? await Promise.all([
+          getLoggedMovieTv(tvRes.id, "tv"),
+          getWatchedByForShow(String(tvRes.id)),
+        ])
+      : [null, []];
 
     const reviewStats = existingLog
       ? await getReviewStats(existingLog.id)
       : { likesCount: 0, repliesCount: 0 };
 
     return (
-      <div className="mb-2 flex w-[90vw] justify-between md:mb-0">
-        <div className="flex flex-col gap-3">
-          <Badge className="mb-3 w-fit bg-backgroundM px-4 text-base font-normal sm:px-2 sm:text-xs">
-            TV show
-          </Badge>
-          <h2 className="text-5xl font-extrabold tracking-tighter text-textMain">
-            {tvRes.name}
-          </h2>
-          {/* TODO, IN CASE OF USING UL LIST, JUST NORMAL P TAG, WITH SPANS INSIDE IT THEN SPERATE WITH GAP FLEX AND ADD DOTS UR SLEF WITHOUT ANY STYLING */}
-          <div className="flex w-fit gap-2 text-sm text-gray-300 smd:gap-1 smd:text-xs s:text-[10px] xss:text-[8px]">
-            <p>
-              {tvRes.number_of_episodes} ep - {tvRes.number_of_seasons}{" "}
-              {tvRes.number_of_seasons > 1 ? "seasons" : "season"}
-            </p>
-            <span>•</span>
-            {/* <li className="circle">{}</li> */}
-            <p>{tvRes.first_air_date}</p>
-            <span>•</span>
-            <p>{primaryGenre}</p>
-            <span>•</span>
-            {secondaryGenre && <p>{secondaryGenre}</p>} <span>•</span>
-            <div className="flex items-center gap-1">
-              <StarIcon className="inline h-4 w-4 text-yellow-400" />
-              <span className="">{rating}</span>
+      <div className="mt-[32vh] flex w-[90vw] flex-col gap-4 md:mb-0 md:mt-0 md:w-full">
+        <div className="flex flex-row items-start justify-between gap-8 md:flex-col md:gap-4">
+          {/* ── Left: tv info ── */}
+          <div className="flex min-w-0 flex-1 flex-col gap-4 md:w-full md:gap-3">
+            <Badge className="w-fit bg-backgroundM px-4 text-base font-normal sm:px-2 sm:text-xs">
+              TV show
+            </Badge>
+            <h2 className="text-5xl font-extrabold tracking-tighter text-textMain smd:text-3xl">
+              {tvRes.name}
+            </h2>
+            <div className="flex w-fit flex-wrap gap-2 text-sm text-gray-300 smd:gap-1 smd:text-xs s:text-[10px]">
+              <span>
+                {tvRes.number_of_episodes} ep · {tvRes.number_of_seasons}{" "}
+                {tvRes.number_of_seasons > 1 ? "seasons" : "season"}
+              </span>
+              <span>•</span>
+              <span>{tvRes.first_air_date}</span>
+              <span>•</span>
+              <span>{primaryGenre}</span>
+              {secondaryGenre && (
+                <>
+                  <span>•</span>
+                  <span>{secondaryGenre}</span>
+                </>
+              )}
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <StarIcon className="inline h-3.5 w-3.5 text-primaryM-400" />
+                {rating}
+              </span>
             </div>
+
+            {/* ── Action buttons ── */}
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <LogTheMT
+                show={tvRes}
+                typeM={typeM}
+                userId={user?.id}
+                initialLog={existingLog}
+              />
+              <DrawerDialogButtonList
+                userId={user?.id}
+                movieId={tvRes.id}
+                itemTitle={tvRes.name}
+                itemPosterPath={tvRes.poster_path}
+              />
+              <ShareButton typeSearch="Movie" />
+            </div>
+
+            <WatchedByRow watchedBy={watchedBy} />
+
+            {/* ── Review card: mobile only, truly full width ── */}
+            {existingLog && (
+              <div className="hidden md:mt-1 md:block md:w-full">
+                <UserReviewPreview
+                  log={existingLog}
+                  username={user?.username ?? null}
+                  likesCount={reviewStats.likesCount}
+                  repliesCount={reviewStats.repliesCount}
+                  className="w-full"
+                />
+              </div>
+            )}
           </div>
-          <div className="button-left mt-3 flex gap-2">
-            <LogTheMT
-              show={tvRes}
-              typeM={typeM}
-              userId={user?.id}
-              initialLog={existingLog}
-            />
 
-            <DrawerDialogButtonList
-              userId={user?.id}
-              movieId={tvRes.id}
-              itemTitle={tvRes.name}
-              itemPosterPath={tvRes.poster_path}
-            />
-
-            <ShareButton typeSearch="Movie" />
-          </div>
-
-          <UserReviewPreview
-            log={existingLog}
-            username={user?.username}
-            mediaType="tv"
-            likesCount={reviewStats.likesCount}
-            repliesCount={reviewStats.repliesCount}
-          />
-        </div>
-        <div className="shareR self-end">
-          <ButtonAnimation
-            typeSearch="Movie"
-            text="Share"
-            icon={<Share2 className="h-4 w-4" />}
-            afterText="Shared"
-          />
+          {/* ── Right column: desktop only ── */}
+          {existingLog && (
+            <div className="w-[400px] shrink-0 xxl:w-[380px] xl:w-[360px] lg:w-[320px] xmd:w-[280px] md:hidden">
+              <UserReviewPreview
+                log={existingLog}
+                username={user?.username ?? null}
+                likesCount={reviewStats.likesCount}
+                repliesCount={reviewStats.repliesCount}
+                className="w-full"
+              />
+            </div>
+          )}
         </div>
       </div>
     );

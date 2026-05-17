@@ -71,7 +71,7 @@ export default function TvSeasonEpisodesSection({ tvId, season }: Props) {
       </div>
 
       {episodes.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-[#101018] p-4 text-sm text-gray-300">
+        <div className="rounded-xl border border-white/10 bg-[rgba(13,12,15,0.92)] p-4 text-sm text-gray-300">
           No episodes available for this season.
         </div>
       ) : (
@@ -92,7 +92,7 @@ export default function TvSeasonEpisodesSection({ tvId, season }: Props) {
                   onClick={() => onSelectEpisode(episode.episode_number)}
                   className="block w-full text-left"
                 >
-                  <article className="group overflow-hidden rounded-xl border border-white/5 bg-[#101018]">
+                  <article className="group overflow-hidden rounded-xl border border-white/10 bg-[rgba(13,12,15,0.92)]">
                     <div className="relative h-[360px] overflow-hidden rounded-xl xl:h-[330px] lg:h-[300px] h1text8:h-[280px] smd:h-[250px] sss:h-[230px] s:h-[250px]">
                       {episode.still_path ? (
                         <LazyBlurImage
@@ -102,14 +102,14 @@ export default function TvSeasonEpisodesSection({ tvId, season }: Props) {
                           placeholderClassName="bg-zinc-700/50"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center bg-gray-700">
+                        <div className="flex h-full items-center justify-center bg-[rgba(13,12,15,0.92)]">
                           <GrDocumentMissing className="text-4xl smd:text-3xl sss:text-2xl" />
                         </div>
                       )}
 
-                      <div className="absolute inset-0 bg-black/10" />
+                      <div className="absolute inset-0 bg-[rgba(13,12,15,0.22)]" />
 
-                      <div className="absolute inset-x-0 bottom-0 rounded-b-xl bg-gradient-to-t from-black via-black/80 to-transparent p-3 smd:p-2.5 sss:p-2">
+                      <div className="absolute inset-x-0 bottom-0 rounded-b-xl bg-gradient-to-t from-[rgba(13,12,15,0.92)] via-[rgba(13,12,15,0.8)] to-transparent p-3 smd:p-2.5 sss:p-2">
                         <h4 className="line-clamp-1 text-base font-semibold lg:text-sm smd:text-[13px] sss:text-xs">
                           E{episode.episode_number}. {episode.name}
                         </h4>

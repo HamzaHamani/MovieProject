@@ -2037,6 +2037,7 @@ async function getSocialReviewsByType(id: string): Promise<TReviewItem[]> {
 }
 
 export type TWatchedByItem = {
+  reviewId: string;
   userId: string;
   username: string | null;
   name: string | null;
@@ -2051,6 +2052,15 @@ export async function getWatchedByForShow(
 ): Promise<TWatchedByItem[]> {
   const viewer = await getUser();
   if (!viewer?.id) return [];
+
+  const normalizedShowId = String(showId).trim();
+  const encodedMovieId = encodeStoredMediaId(normalizedShowId, "movie");
+  const encodedTvId = encodeStoredMediaId(normalizedShowId, "tv");
+  const possibleShowIds = [
+    normalizedShowId,
+    encodedMovieId,
+    encodedTvId,
+  ].filter((value, index, array) => array.indexOf(value) === index);
 
   const [followingRows, followerRows] = await Promise.all([
     db
@@ -2076,6 +2086,7 @@ export async function getWatchedByForShow(
 
   const rows = await db
     .select({
+      reviewId: loggedMovies.id,
       userId: loggedMovies.userId,
       rating: loggedMovies.rating,
       watchedAt: loggedMovies.watchedAt,
@@ -2088,7 +2099,7 @@ export async function getWatchedByForShow(
     .leftJoin(users, eq(users.id, loggedMovies.userId))
     .where(
       and(
-        eq(loggedMovies.showId, showId),
+        inArray(loggedMovies.showId, possibleShowIds),
         inArray(loggedMovies.userId, targetIds),
       ),
     )
@@ -2108,6 +2119,7 @@ export async function getWatchedByForShow(
     if (!watchedAt) return;
 
     watchedBy.push({
+      reviewId: row.reviewId,
       userId: row.userId,
       username: row.username,
       name: row.name,

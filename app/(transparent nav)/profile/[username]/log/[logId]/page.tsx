@@ -191,7 +191,11 @@ export default async function Page({
               ) : null}
 
               <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-gray-200">
-                {log.review?.trim().length ? log.review : "No written review"}
+                {log.review?.trim().length ? (
+                  log.review
+                ) : (
+                  <span className="text-white/35 italic">No written review</span>
+                )}
               </p>
             </div>
           </div>

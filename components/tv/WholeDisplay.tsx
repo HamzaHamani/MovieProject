@@ -21,7 +21,7 @@ import WatchProvidersLoadingIndicator from "../MovieTv/watchProvidersLoadingIndi
 type Props = {
   response: TspecifiedTv;
   similar: TSimilarItem[];
-  activeTab: "seasons" | "videos" | "images" | "reviews" | "providers";
+  activeTab: "videos" | "images" | "providers";
   selectedSeason?: number | null;
   selectedEpisode?: number | null;
 };
@@ -59,22 +59,11 @@ export default function WholeDisplay({
         <section className="mx-auto mt-12 w-[90%]">
           <Story response={response} typeM="tv" />
 
-          <CastComponent typeM="tv" id={response.id} />
+          <Suspense fallback={<ReviewsLoadingIndicator />}>
+            <ReviewsSectionAsync id={response.id} typeM="tv" />
+          </Suspense>
 
-          <DetailTabs
-            items={[
-              { key: "seasons", label: "Seasons" },
-              { key: "reviews", label: "Reviews" },
-              { key: "videos", label: "Trailers / Videos" },
-              { key: "images", label: "Images" },
-              { key: "providers", label: "Watch Providers" },
-            ]}
-            active={activeTab}
-            typeM="tv"
-            id={response.id}
-          />
-
-          {activeTab === "seasons" && (
+          <section className="mb-14 mt-12 space-y-4 md:mb-12 sm:mb-10">
             <Suspense
               fallback={
                 <SeasonsLoadingIndicator
@@ -94,7 +83,20 @@ export default function WholeDisplay({
                 selectedEpisode={selectedEpisode}
               />
             </Suspense>
-          )}
+          </section>
+
+          <CastComponent typeM="tv" id={response.id} />
+
+          <DetailTabs
+            items={[
+              { key: "videos", label: "Trailers / Videos" },
+              { key: "images", label: "Images" },
+              { key: "providers", label: "Watch Providers" },
+            ]}
+            active={activeTab}
+            typeM="tv"
+            id={response.id}
+          />
 
           {activeTab === "videos" && (
             <Suspense fallback={<VideoLoadingIndicator />}>
@@ -105,12 +107,6 @@ export default function WholeDisplay({
           {activeTab === "images" && (
             <Suspense fallback={<ImagesLoadingIndicator />}>
               <ImagesSectionAsync id={response.id} typeM="tv" />
-            </Suspense>
-          )}
-
-          {activeTab === "reviews" && (
-            <Suspense fallback={<ReviewsLoadingIndicator />}>
-              <ReviewsSectionAsync id={response.id} typeM="tv" />
             </Suspense>
           )}
 

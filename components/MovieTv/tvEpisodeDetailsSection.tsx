@@ -43,7 +43,7 @@ export default function TvEpisodeDetailsSection({
       </div>
 
       <div className="grid grid-cols-5 gap-4 xl:grid-cols-1">
-        <article className="col-span-2 w-full overflow-hidden rounded-xl border border-white/10 bg-[#101018] xl:col-span-1">
+        <article className="col-span-2 w-full overflow-hidden rounded-xl border border-white/10 bg-[rgba(13,12,15,0.92)] xl:col-span-1">
           <div className="relative h-[420px] w-full overflow-hidden xl:h-[360px] lg:h-[320px] smd:h-[280px]">
             {episode.still_path ? (
               <LazyBlurImage
@@ -53,12 +53,13 @@ export default function TvEpisodeDetailsSection({
                 placeholderClassName="bg-zinc-700/50"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gray-700">
+              <div className="flex h-full w-full items-center justify-center bg-[rgba(13,12,15,0.92)]">
                 <GrDocumentMissing className="text-4xl smd:text-3xl" />
               </div>
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-[#14131b] via-[#14131b]/40 to-transparent" />
+            <div className="absolute inset-0 bg-[rgba(13,12,15,0.28)]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(13,12,15,0.92)] via-[rgba(13,12,15,0.48)] to-transparent" />
 
             <div className="absolute inset-x-0 bottom-0 p-4">
               <p className="text-sm font-medium text-gray-200">Episode still</p>
@@ -69,17 +70,17 @@ export default function TvEpisodeDetailsSection({
           </div>
         </article>
 
-        <article className="col-span-3 rounded-xl border border-white/10 bg-[#101018] p-4 xl:col-span-1">
+        <article className="col-span-3 rounded-xl border border-white/10 bg-[rgba(13,12,15,0.92)] p-4 xl:col-span-1">
           <h4 className="mb-2 text-xl font-semibold">{episode.name}</h4>
 
           <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-gray-300">
-            <span className="rounded border border-white/20 px-2 py-1">
+            <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-1">
               Air: {episode.air_date ?? "Unknown"}
             </span>
-            <span className="rounded border border-white/20 px-2 py-1">
+            <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-1">
               Runtime: {episode.runtime ? `${episode.runtime} min` : "--"}
             </span>
-            <span className="rounded border border-white/20 px-2 py-1">
+            <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-1">
               Vote: {episode.vote_average.toFixed(1)} ({episode.vote_count})
             </span>
           </div>
@@ -111,7 +112,7 @@ export default function TvEpisodeDetailsSection({
                   <Link
                     key={`crew-${person.id}-${person.job ?? person.department ?? ""}`}
                     href={`/crew/${person.id}`}
-                    className="rounded border border-white/15 px-2 py-1 text-xs text-gray-200 transition-colors hover:border-primaryM-500/60 hover:text-white"
+                    className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-xs text-gray-200 transition-colors hover:border-primaryM-500/60 hover:bg-white/[0.08] hover:text-white"
                   >
                     {person.name}
                     {person.job ? ` - ${person.job}` : ""}
@@ -144,7 +145,7 @@ export default function TvEpisodeDetailsSection({
                   <Link
                     key={`guest-${person.id}-${person.character ?? ""}`}
                     href={`/crew/${person.id}`}
-                    className="rounded border border-white/15 px-2 py-1 text-xs text-gray-200 transition-colors hover:border-primaryM-500/60 hover:text-white"
+                    className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 text-xs text-gray-200 transition-colors hover:border-primaryM-500/60 hover:bg-white/[0.08] hover:text-white"
                   >
                     {person.name}
                     {person.character ? ` as ${person.character}` : ""}

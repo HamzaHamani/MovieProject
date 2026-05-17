@@ -1,14 +1,34 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useState, useMemo } from "react";
+import LazyBlurImage from "@/components/ui/lazyBlurImage";
+import { useEffect, useMemo, useState } from "react";
 
 interface FilmCommitGraphProps {
   loggedMovies: Array<{
     createdAt: Date | string | null;
     id: string;
+    showId?: string;
+    title?: string;
+    posterPath?: string | null;
+    href?: string;
+    mediaTypeLabel?: "Movie" | "TV Show";
   }>;
 }
+
+type HoveredDay = {
+  dateKey: string;
+  label: string;
+  x: number;
+  y: number;
+  posters: Array<{
+    id: string;
+    title: string;
+    posterPath: string | null;
+    href: string;
+    mediaTypeLabel: "Movie" | "TV Show";
+  }>;
+};
 
 const getColor = (count: number): string => {
   if (count === 0) return "bg-white/10";
@@ -19,14 +39,17 @@ const getColor = (count: number): string => {
 };
 
 function getTooltipText(count: number, date: string): string {
-  if (count === 0) return `No films logged on ${date}`;
-  return `${count} film${count === 1 ? "" : "s"} logged on ${date}`;
+  if (count === 0) return `No titles logged on ${date}`;
+  return `${count} title${count === 1 ? "" : "s"} logged on ${date}`;
 }
 
 export default function FilmCommitGraph({
   loggedMovies,
 }: FilmCommitGraphProps) {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [hoveredDay, setHoveredDay] = useState<HoveredDay | null>(null);
+  const [panelVisible, setPanelVisible] = useState(false);
+  const [panelMounted, setPanelMounted] = useState(false);
 
   // Get all unique years from loggedMovies
   const availableYears = useMemo(() => {
@@ -56,6 +79,46 @@ export default function FilmCommitGraph({
       const dateStr = date.toISOString().split("T")[0];
       map.set(dateStr, (map.get(dateStr) ?? 0) + 1);
     });
+    return map;
+  }, [loggedMovies, selectedYear]);
+
+  const moviesByDate = useMemo(() => {
+    const map = new Map<
+      string,
+      Array<{
+        id: string;
+        title: string;
+        posterPath: string | null;
+        href: string;
+        mediaTypeLabel: "Movie" | "TV Show";
+      }>
+    >();
+
+    const filteredMovies = selectedYear
+      ? loggedMovies.filter((movie) => {
+          if (!movie.createdAt) return false;
+          const date = new Date(movie.createdAt);
+          return date.getFullYear() === selectedYear;
+        })
+      : loggedMovies;
+
+    filteredMovies.forEach((movie) => {
+      if (!movie.createdAt) return;
+      const date = new Date(movie.createdAt);
+      const dateStr = date.toISOString().split("T")[0];
+      const current = map.get(dateStr) ?? [];
+
+      current.push({
+        id: movie.id,
+        title: movie.title ?? "Title unavailable",
+        posterPath: movie.posterPath ?? null,
+        href: movie.href ?? "#",
+        mediaTypeLabel: movie.mediaTypeLabel ?? "Movie",
+      });
+
+      map.set(dateStr, current);
+    });
+
     return map;
   }, [loggedMovies, selectedYear]);
 
@@ -113,13 +176,27 @@ export default function FilmCommitGraph({
 
   const dayLabels = ["", "Mon", "", "Wed", "", "Fri", ""];
 
+  const hoveredCount = hoveredDay?.posters.length ?? 0;
+
+  useEffect(() => {
+    if (hoveredDay) {
+      setPanelMounted(true);
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => setPanelVisible(true)),
+      );
+      return;
+    }
+
+    setPanelVisible(false);
+    const timer = window.setTimeout(() => setPanelMounted(false), 180);
+    return () => window.clearTimeout(timer);
+  }, [hoveredDay]);
+
   return (
     <section className="w-full">
-      <div className="rounded-lg border border-white/10 bg-white/[0.03] p-6">
+      <div className="relative rounded-lg border border-white/10 bg-white/[0.03] p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white">
-            Film Logging Activity
-          </h3>
+          <h3 className="text-sm font-semibold text-white">Viewing Activity</h3>
           {availableYears.length > 1 && (
             <div className="flex flex-wrap gap-2">
               <button
@@ -197,12 +274,55 @@ export default function FilmCommitGraph({
                             "group/tooltip relative h-3 w-3 cursor-pointer rounded-sm transition-transform duration-200 hover:scale-110 md:h-4 md:w-4",
                             getColor(count),
                           )}
-                          title={getTooltipText(count, dateStr)}
-                        >
-                          <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-black/80 px-2 py-1 text-[10px] text-white opacity-0 transition-opacity duration-200 group-hover/tooltip:opacity-100">
-                            {getTooltipText(count, dateStr)}
-                          </div>
-                        </div>
+                          onMouseEnter={(event) => {
+                            const current =
+                              event.currentTarget.getBoundingClientRect();
+                            const container = event.currentTarget
+                              .closest("section")
+                              ?.getBoundingClientRect();
+                            const posters =
+                              moviesByDate.get(
+                                currentDay.toISOString().split("T")[0],
+                              ) ?? [];
+
+                            setHoveredDay({
+                              dateKey: currentDay.toISOString().split("T")[0],
+                              label: dateStr,
+                              x:
+                                current.left -
+                                (container?.left ?? 0) +
+                                current.width / 2,
+                              y: current.bottom - (container?.top ?? 0) + 12,
+                              posters,
+                            });
+                          }}
+                          onMouseMove={(event) => {
+                            const current =
+                              event.currentTarget.getBoundingClientRect();
+                            const container = event.currentTarget
+                              .closest("section")
+                              ?.getBoundingClientRect();
+
+                            setHoveredDay((previous) =>
+                              previous?.dateKey ===
+                              currentDay.toISOString().split("T")[0]
+                                ? {
+                                    ...previous,
+                                    x:
+                                      current.left -
+                                      (container?.left ?? 0) +
+                                      current.width / 2,
+                                    y:
+                                      current.bottom -
+                                      (container?.top ?? 0) +
+                                      12,
+                                  }
+                                : previous,
+                            );
+                          }}
+                          onMouseLeave={() => setHoveredDay(null)}
+                          aria-label={getTooltipText(count, dateStr)}
+                        ></div>
                       );
                     })}
                   </div>
@@ -211,6 +331,68 @@ export default function FilmCommitGraph({
             </div>
           </div>
         </div>
+
+        {panelMounted && hoveredDay ? (
+          <div
+            className={cn(
+              "duration-180 pointer-events-none absolute z-30 w-[240px] -translate-x-1/2 transition-all ease-out",
+              panelVisible
+                ? "scale-100 opacity-100"
+                : "translate-y-2 scale-[0.98] opacity-0",
+            )}
+            style={{
+              left: hoveredDay.x,
+              top: hoveredDay.y,
+            }}
+          >
+            <div className="rounded-2xl border border-white/10 bg-[#111114] p-3 shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">
+                  {hoveredDay.label}
+                </p>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/60">
+                  {hoveredCount} logged
+                </span>
+              </div>
+
+              {hoveredDay.posters.length > 0 ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {hoveredDay.posters.slice(0, 8).map((movie) => (
+                    <a
+                      key={movie.id}
+                      href={movie.href}
+                      className="group/movie block overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]"
+                    >
+                      <div className="relative aspect-[2/3]">
+                        {movie.posterPath ? (
+                          <LazyBlurImage
+                            src={`https://image.tmdb.org/t/p/w342/${movie.posterPath}`}
+                            alt={movie.title}
+                            className="h-full w-full object-cover transition-transform duration-200 group-hover/movie:scale-105"
+                            placeholderClassName="bg-zinc-700/50"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-white/[0.05] px-1 text-center text-[10px] text-gray-400">
+                            No poster
+                          </div>
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-1.5">
+                          <p className="line-clamp-2 text-[9px] font-medium text-white">
+                            {movie.title}
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">
+                  No films logged that day.
+                </p>
+              )}
+            </div>
+          </div>
+        ) : null}
 
         {/* Legend */}
         <div className="mt-4 flex items-center justify-end gap-2 text-xs text-gray-400">

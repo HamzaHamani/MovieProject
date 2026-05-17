@@ -76,12 +76,11 @@ export default async function Page({ params, searchParams }: Props) {
         ? "images"
         : tabValue;
   const tab =
-    normalizedTab === "reviews" ||
     normalizedTab === "videos" ||
     normalizedTab === "images" ||
     normalizedTab === "providers"
       ? normalizedTab
-      : "reviews";
+      : "videos";
 
   return (
     <WholeDisplay

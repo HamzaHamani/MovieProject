@@ -105,6 +105,16 @@ type ResolvedMedia = {
   href: string;
 };
 
+type ActivityGraphItem = {
+  id: string;
+  createdAt: Date | string | null;
+  showId: string;
+  title: string;
+  posterPath: string | null;
+  href: string;
+  mediaTypeLabel: "Movie" | "TV Show";
+};
+
 const favoriteKeywords = ["favorite", "favourite", "fav"];
 const likedKeywords = ["liked", "like", "love", "loved"];
 const watchlistKeywords = ["watchlist", "watch later", "to watch", "queue"];
@@ -660,6 +670,25 @@ export default async function Page({
     (a, b) => toTimestamp(b.addedAt) - toTimestamp(a.addedAt),
   );
 
+  const activityGraphItems: ActivityGraphItem[] = loggedMovies
+    .map((item) => {
+      const media = mediaMap.get(item.showId) ?? null;
+
+      return {
+        id: item.id,
+        createdAt: item.createdAt,
+        showId: item.showId,
+        title: media?.title ?? "Title unavailable",
+        posterPath: media?.posterPath ?? null,
+        href: media?.href ?? `/profile/${usernameParam}/log/${item.id}`,
+        mediaTypeLabel: media?.mediaTypeLabel ?? "Movie",
+      };
+    })
+    .sort(
+      (left, right) =>
+        toTimestamp(right.createdAt) - toTimestamp(left.createdAt),
+    );
+
   const totalSavedMovies = allSavedMovies.length;
   const reviewedCount = recentReviews.length;
   const moviesWatchedCount = loggedMoviesWatched.length;
@@ -742,149 +771,188 @@ export default async function Page({
 
       <div className="container relative z-10 pb-12 pt-96 lg:pt-64 sm:pt-48">
         <div className="space-y-8">
-          <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[rgba(13,12,15,0.88)] p-6 shadow-[0_24px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:p-5 sm:p-4">
-            <div className="grid grid-cols-[minmax(0,1fr)_560px] items-start gap-6 xl:grid-cols-[minmax(0,1fr)_500px] xmd:grid-cols-1">
-              <div className="flex items-start gap-5 sm:flex-col sm:items-center">
-                <Avatar className="h-28 w-28 border-2 border-white/20 bg-black/20 ring-4 ring-white/5 sm:h-20 sm:w-20">
+          {/* ─── PROFILE HEADER ─── */}
+          <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[rgba(13,12,15,0.88)] shadow-[0_24px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+            {/* ── Top row: avatar · identity · actions · stats ── */}
+            <div className="flex items-center justify-between gap-6 p-6 lg:p-5 xmd:flex-col xmd:items-center sm:p-4">
+              {/* Left: avatar + identity */}
+              <div className="flex items-center gap-5 sm:flex-col sm:items-start">
+                {/* Avatar */}
+                <Avatar className="h-[100px] w-[100px] shrink-0 border-[3px] border-[#0d0c0f] ring-1 ring-primaryM-500/30 sm:h-16 sm:w-16">
                   {profileUser.image ? (
                     <AvatarImage src={profileUser.image} alt={displayName} />
                   ) : null}
-                  <AvatarFallback className="bg-white/10 text-lg font-semibold text-white">
+                  <AvatarFallback className="bg-primaryM-500/10 text-base font-semibold text-primaryM-400">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="min-w-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-gray-400">
-                      <UserRound className="h-4 w-4 text-primaryM-500" />
-                      <span>Film Profile</span>
-                    </div>
-                    {isOwner && (
-                      <ProfileBackdropPicker
-                        currentBackdropPath={profileUser.backdropPath ?? ""}
-                        username={profileUser.username ?? ""}
-                        bio={profileUser.bio ?? null}
-                        image={profileUser.image ?? null}
-                      />
-                    )}
+                {/* Identity */}
+                <div className="min-w-0 pb-1">
+                  {/* role tag */}
+                  <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.28em] text-gray-400">
+                    <UserRound className="h-3.5 w-3.5 text-primaryM-500" />
+                    <span>Film profile</span>
                   </div>
-                  <h1 className="mt-2 text-5xl font-semibold text-white lg:text-4xl sm:text-3xl">
-                    {displayName}
-                  </h1>
-                  <p className="mt-2 text-sm text-gray-300">
+                  {/* name */}
+                  <h1 className="mt-1.5 text-[28px] font-semibold leading-tight text-white lg:text-2xl sm:text-xl">
+                    {displayName}{" "}
+                  </h1>{" "}
+                  {/* handle */}
+                  <p className="text-sm font-light text-primaryM-400/60">
                     {username
                       ? `@${username}`
                       : profileUser.email ?? "No email linked"}
                   </p>
-                  <p className="mt-1 text-sm text-gray-400">
+                  {/* bio */}
+                  <p className="mb-2.5 mt-1 text-sm font-light text-white/40">
                     <MentionText text={profileBio} />
                   </p>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {isOwner && username ? (
-                      <EditProfileDialog
-                        currentUsername={username}
-                        currentBio={profileUser.bio ?? ""}
-                        currentImage={profileUser.image ?? ""}
-                        currentBackdropPath={profileUser.backdropPath ?? ""}
-                      />
-                    ) : null}
-                    <Button
-                      asChild
-                      className="border border-white/10 bg-white/[0.06] text-white hover:bg-white/[0.1]"
-                    >
-                      <Link href="/explore">Explore Films</Link>
-                    </Button>
+                  <span className="">
+                    {" "}
                     {!isOwner && viewer?.id && username ? (
                       <div className="flex flex-wrap items-center gap-2">
                         <FollowToggleButton
                           username={username}
                           initialFollowing={socialStats.isFollowing}
                         />
-
                         {socialStats.followsViewer ? (
-                          <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-gray-300">
+                          <span className="rounded-lg border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs text-gray-300 hover:border-primaryM-500/40">
                             Follows you
                           </span>
                         ) : null}
                       </div>
                     ) : null}
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2 text-xs text-gray-300">
-                    <Link
-                      href={`/profile/${username ?? usernameParam}/watched?filter=movie`}
-                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 transition hover:border-primaryM-500/40 hover:bg-white/10"
-                    >
-                      {loggedMovies.length} film
-                      {loggedMovies.length === 1 ? "" : "s"}
-                    </Link>
-                    <Link
-                      href={`/profile/${username ?? usernameParam}/watched?filter=tv`}
-                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 transition hover:border-primaryM-500/40 hover:bg-white/10"
-                    >
-                      {tvShowsWatchedCount} show
-                      {tvShowsWatchedCount === 1 ? "" : "s"}
-                    </Link>
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                      {favoriteMovies.length} favorite
-                      {favoriteMovies.length === 1 ? "" : "s"}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                      {likedShelf.length} like
-                      {likedShelf.length === 1 ? "" : "s"}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                      {watchlistMovies.length} watchlist
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                      {recentActivity.length} activit
-                      {recentActivity.length === 1 ? "y" : "ies"}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                      {totalSavedMovies} saved
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                      {reviewedCount} review{reviewedCount === 1 ? "" : "s"}
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
-                      {customBookmarksWithMovies.length} list
-                      {customBookmarksWithMovies.length === 1 ? "" : "s"}
-                    </span>
-                    {isPremium ? (
-                      <span className="rounded-full border border-primaryM-500/40 bg-primaryM-500/10 px-3 py-1 text-primaryM-400">
-                        Premium
-                      </span>
-                    ) : null}
-                  </div>
+                  </span>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 px-2 py-2">
-                <div className="hide-scrollbar flex flex-nowrap items-stretch overflow-x-auto">
-                  {profileStats.map((stat, index) => (
-                    <Link
-                      key={stat.label}
-                      href={stat.href}
-                      className={`min-w-[86px] px-2 py-2 transition hover:bg-white/[0.06] ${
-                        index !== 0 ? "border-l border-white/10" : ""
-                      }`}
-                    >
-                      <p className="text-2xl font-semibold leading-none text-white sm:text-xl">
-                        {stat.value}
-                      </p>
-                      <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-gray-400">
-                        {stat.label}
-                      </p>
-                    </Link>
-                  ))}
-                </div>
+              {/* Right: social stats */}
+              <div className="flex shrink-0 items-stretch gap-5 pb-1 xmd:mt-2 xmd:w-full xmd:justify-center">
+                {profileStats.map((stat, index) => (
+                  <Link
+                    key={stat.label}
+                    href={stat.href}
+                    className={`group flex flex-col gap-1 text-center transition ${
+                      index !== 0 ? "border-l border-white/10 pl-5" : ""
+                    }`}
+                  >
+                    <span className="text-[30px] font-semibold leading-none text-white transition group-hover:text-primaryM-400">
+                      {stat.value}
+                    </span>
+                    <span className="text-[9px] uppercase tracking-[0.1em] text-white/30">
+                      {stat.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Divider ── */}
+            <div className="mx-6 h-px bg-white/[0.07] lg:mx-5 sm:mx-4" />
+
+            {/* ── Footer row: action buttons · activity chips ── */}
+            <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 lg:px-5 sm:px-4">
+              {/* Action buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                {isOwner && username ? (
+                  <EditProfileDialog
+                    currentUsername={username}
+                    currentBio={profileUser.bio ?? ""}
+                    currentImage={profileUser.image ?? ""}
+                    currentBackdropPath={profileUser.backdropPath ?? ""}
+                  />
+                ) : null}
+
+                {/* Backdrop picker icon — inline, subtle */}
+
+                <Button
+                  asChild
+                  className="rounded-lg border border-white/10 bg-white/[0.06] text-sm text-white hover:border-primaryM-500/40 hover:bg-white/[0.1]"
+                >
+                  <Link href="/explore">Explore films</Link>
+                </Button>
+                {isOwner && (
+                  <ProfileBackdropPicker
+                    currentBackdropPath={profileUser.backdropPath ?? ""}
+                    username={profileUser.username ?? ""}
+                    bio={profileUser.bio ?? null}
+                    image={profileUser.image ?? null}
+                  />
+                )}
+              </div>
+
+              {/* Activity chips */}
+              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                <Link
+                  href={`/profile/${username ?? usernameParam}/watched?filter=movie`}
+                  className="border-primaryM-500/18 inline-flex items-center gap-1.5 rounded-md border bg-primaryM-500/[0.08] px-2.5 py-1.5 text-[11px] font-normal text-primaryM-400/70 transition hover:bg-primaryM-500/[0.15] hover:text-primaryM-300"
+                >
+                  <span className="font-semibold">{loggedMovies.length}</span>
+                  films
+                </Link>
+
+                <Link
+                  href={`/profile/${username ?? usernameParam}/watched?filter=tv`}
+                  className="border-primaryM-500/18 inline-flex items-center gap-1.5 rounded-md border bg-primaryM-500/[0.08] px-2.5 py-1.5 text-[11px] font-normal text-primaryM-400/70 transition hover:bg-primaryM-500/[0.15] hover:text-primaryM-300"
+                >
+                  <span className="0 font-semibold">{tvShowsWatchedCount}</span>
+                  shows
+                </Link>
+
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.09] bg-white/[0.05] px-2.5 py-1.5 text-[11px] text-white/40">
+                  <span className="font-semibold text-white/60">
+                    {favoriteMovies.length}
+                  </span>
+                  favorites
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.09] bg-white/[0.05] px-2.5 py-1.5 text-[11px] text-white/40">
+                  <span className="font-semibold text-white/60">
+                    {likedShelf.length}
+                  </span>
+                  likes
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.09] bg-white/[0.05] px-2.5 py-1.5 text-[11px] text-white/40">
+                  <span className="font-semibold text-white/60">
+                    {watchlistMovies.length}
+                  </span>
+                  watchlist
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.09] bg-white/[0.05] px-2.5 py-1.5 text-[11px] text-white/40">
+                  <span className="font-semibold text-white/60">
+                    {reviewedCount}
+                  </span>
+                  reviews
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.09] bg-white/[0.05] px-2.5 py-1.5 text-[11px] text-white/40">
+                  <span className="font-semibold text-white/60">
+                    {totalSavedMovies}
+                  </span>
+                  saved
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.09] bg-white/[0.05] px-2.5 py-1.5 text-[11px] text-white/40">
+                  <span className="font-semibold text-white/60">
+                    {customBookmarksWithMovies.length}
+                  </span>
+                  lists
+                </span>
+
+                {isPremium ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-primaryM-500/40 bg-primaryM-500/10 px-2.5 py-1.5 text-[11px] font-medium text-primaryM-400">
+                    Premium
+                  </span>
+                ) : null}
               </div>
             </div>
           </section>
+          {/* ─── END PROFILE HEADER ─── */}
 
-          <FilmCommitGraph loggedMovies={loggedMovies} />
+          <FilmCommitGraph loggedMovies={activityGraphItems} />
 
           <UserStatisticsSection username={username ?? usernameParam} />
 

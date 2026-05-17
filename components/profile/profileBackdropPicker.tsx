@@ -412,10 +412,10 @@ export default function ProfileBackdropPicker({
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-gray-400 transition hover:border-primaryM-500/40 hover:bg-primaryM-500/10 hover:text-primaryM-400"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-gray-400 transition hover:border-primaryM-500/40 hover:bg-primaryM-500/10 hover:text-primaryM-400 xmd:h-10 xmd:w-10"
           title="Change profile backdrop"
         >
-          <ImagePlus className="h-4 w-4" />
+          <ImagePlus className="h-5 w-5" />
         </button>
 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -440,7 +440,7 @@ export default function ProfileBackdropPicker({
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-gray-400 transition hover:border-primaryM-500/40 hover:bg-primaryM-500/10 hover:text-primaryM-400"
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-gray-400 transition hover:border-primaryM-500/40 hover:bg-primaryM-500/10"
         title="Change profile backdrop"
       >
         <ImagePlus className="h-4 w-4" />

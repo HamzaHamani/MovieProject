@@ -33,6 +33,8 @@ type Props = {
   iconOnly?: boolean;
   useEditIcon?: boolean;
   triggerClassName?: string;
+  onLogSaved?: (log: TExistingLog) => void;
+  onLogDeleted?: () => void;
 };
 
 // ─── Animated portal modal ────────────────────────────────────────────────────
@@ -136,6 +138,8 @@ export default function LogTheMT({
   iconOnly = false,
   useEditIcon = false,
   triggerClassName,
+  onLogSaved,
+  onLogDeleted,
 }: Props) {
   const [showCard, setShowCard] = useState(false);
   const [currentLog, setCurrentLog] = useState<TExistingLog | null>(
@@ -163,6 +167,7 @@ export default function LogTheMT({
       await deleteLoggedMovieTv(currentLog.id);
       setCurrentLog(null);
       setShowCard(false);
+      onLogDeleted?.();
     } catch (error) {
       console.error("Failed to delete log:", error);
     } finally {
@@ -205,13 +210,15 @@ export default function LogTheMT({
       show={show}
       setShowCard={setShowCard}
       initialLog={currentLog}
-      onSaved={(savedLog) =>
-        setCurrentLog((previous) => ({
-          id: previous?.id ?? `temp-${show.id}`,
-          ...previous,
+      onSaved={(savedLog) => {
+        const nextLog = {
+          id: currentLog?.id ?? `temp-${show.id}`,
+          ...currentLog,
           ...savedLog,
-        }))
-      }
+        } as TExistingLog;
+        setCurrentLog(nextLog);
+        onLogSaved?.(nextLog);
+      }}
     />
   );
 
@@ -273,7 +280,7 @@ export default function LogTheMT({
           </Button>
         </DrawerTrigger>
 
-        {currentLog && (
+        {/* {currentLog && (
           <>
             <Button
               variant="outline"
@@ -295,7 +302,7 @@ export default function LogTheMT({
               <Trash2 className="h-4 w-4" />
             </Button>
           </>
-        )}
+        )} */}
       </div>
 
       <DrawerContent className="max-h-[88svh] overflow-hidden rounded-t-2xl border-t border-white/10 bg-[#1a1a1a] px-0 pt-0">

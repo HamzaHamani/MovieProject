@@ -70,18 +70,16 @@ export default async function page({ params, searchParams }: Props) {
   const tabValue = Array.isArray(rawTab) ? rawTab[0] : rawTab;
   const normalizedTab =
     tabValue === "universe"
-      ? "reviews"
+      ? "videos"
       : tabValue === "news"
         ? "images"
         : tabValue;
   const tab =
-    normalizedTab === "seasons" ||
-    normalizedTab === "reviews" ||
     normalizedTab === "videos" ||
     normalizedTab === "images" ||
     normalizedTab === "providers"
       ? normalizedTab
-      : "reviews";
+      : "videos";
 
   const rawSeason = resolvedSearchParams?.season;
   const seasonValue = Array.isArray(rawSeason) ? rawSeason[0] : rawSeason;
@@ -100,8 +98,8 @@ export default async function page({ params, searchParams }: Props) {
       response={response}
       similar={similar}
       activeTab={tab}
-      selectedSeason={tab === "seasons" ? selectedSeason : null}
-      selectedEpisode={tab === "seasons" ? selectedEpisode : null}
+      selectedSeason={selectedSeason}
+      selectedEpisode={selectedEpisode}
     />
   );
 }
