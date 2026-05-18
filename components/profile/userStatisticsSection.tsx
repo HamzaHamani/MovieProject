@@ -565,7 +565,9 @@ function ActivityAreaChart({
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-semibold text-white">Daily activity</h3>
-          <p className="mt-1 text-xs text-gray-400">Daily counts of movies and TV shows you've logged.</p>
+          <p className="mt-1 text-xs text-gray-400">
+            Daily counts of movies and TV shows you've logged.
+          </p>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[140px] rounded-lg border-white/10 bg-white/[0.04] text-xs text-white">
