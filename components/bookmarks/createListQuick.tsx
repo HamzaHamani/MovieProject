@@ -186,51 +186,56 @@ export default function CreateListQuick() {
         </label>
 
         <div>
-          <p className="mb-1 text-xs uppercase tracking-[0.2em] text-gray-400">
-            Invite collaborators (friends)
-          </p>
-          {friends.length === 0 ? (
-            <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-gray-400">
-              No friends available to invite yet.
-            </p>
-          ) : (
-            <div className="max-h-36 space-y-2 overflow-y-auto rounded-lg border border-white/10 bg-white/[0.03] p-2">
-              {friends.map((friend) => {
-                const selected = selectedCollaborators.includes(friend.id);
-                return (
-                  <label
-                    key={friend.id}
-                    className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 hover:bg-white/[0.04]"
-                  >
-                    <span className="text-sm text-gray-200">
-                      {friend.name ?? friend.username ?? "User"}
-                      {friend.username ? (
-                        <span className="ml-1 text-xs text-gray-400">
-                          @{friend.username}
-                        </span>
-                      ) : null}
-                    </span>
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={(event) => {
-                        if (event.target.checked) {
-                          setSelectedCollaborators((prev) => [
-                            ...prev,
-                            friend.id,
-                          ]);
-                        } else {
-                          setSelectedCollaborators((prev) =>
-                            prev.filter((id) => id !== friend.id),
-                          );
-                        }
-                      }}
-                    />
-                  </label>
-                );
-              })}
-            </div>
-          )}
+          <div className="mb-2 flex items-center justify-between">
+            <span className="inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
+              Invite collaborators
+            </span>
+          </div>
+
+          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+            {friends.length === 0 ? (
+              <div className="rounded-lg border-dashed border-white/15 bg-transparent p-6 text-center text-xs text-gray-300">
+                No friends available to invite yet.
+              </div>
+            ) : (
+              <div className="max-h-36 space-y-2 overflow-y-auto rounded-md p-1">
+                {friends.map((friend) => {
+                  const selected = selectedCollaborators.includes(friend.id);
+                  return (
+                    <label
+                      key={friend.id}
+                      className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 hover:bg-white/[0.04]"
+                    >
+                      <span className="text-sm text-gray-200">
+                        {friend.name ?? friend.username ?? "User"}
+                        {friend.username ? (
+                          <span className="ml-1 text-xs text-gray-400">
+                            @{friend.username}
+                          </span>
+                        ) : null}
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={(event) => {
+                          if (event.target.checked) {
+                            setSelectedCollaborators((prev) => [
+                              ...prev,
+                              friend.id,
+                            ]);
+                          } else {
+                            setSelectedCollaborators((prev) =>
+                              prev.filter((id) => id !== friend.id),
+                            );
+                          }
+                        }}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

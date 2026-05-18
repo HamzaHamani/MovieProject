@@ -2,29 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { AnimatedModal } from "@/components/ui/animated-modal";
 
 import { showErrorNotification } from "@/components/notificationSystem";
 import { showProfileMovieToast } from "@/components/profile/profileToasts";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { useMediaQuery } from "@/hooks/use-media-query";
 
 type SearchResultItem = {
   id: string;
@@ -42,12 +28,23 @@ export default function ListAddMovies({
   listName: string;
 }) {
   const [open, setOpen] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
   const router = useRouter();
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -136,7 +133,7 @@ export default function ListAddMovies({
   };
 
   const panelContent = (
-    <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+    <>
       <div className="relative">
         <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
         <Input
@@ -195,58 +192,105 @@ export default function ListAddMovies({
           ))
         )}
       </div>
-    </div>
+    </>
   );
 
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-8 border-white/20 bg-white/[0.04] px-3 text-xs text-white hover:bg-white/10"
-          >
-            <Plus className="mr-1 h-3.5 w-3.5" />
-            Add movies
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-y-auto p-5">
-          <DialogHeader className="pb-1">
-            <DialogTitle className="text-white">Add movies</DialogTitle>
-            <DialogDescription className="text-gray-300">
-              Find a movie or TV show and add it to this list.
-            </DialogDescription>
-          </DialogHeader>
-          {panelContent}
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
+    <>
+      {isDesktop ? (
         <Button
           type="button"
           variant="outline"
           className="h-8 border-white/20 bg-white/[0.04] px-3 text-xs text-white hover:bg-white/10"
+          onClick={() => setOpen(true)}
         >
           <Plus className="mr-1 h-3.5 w-3.5" />
           Add movies
         </Button>
-      </DrawerTrigger>
-      <DrawerContent className="max-h-[88svh] overflow-hidden px-4">
-        <DrawerHeader className="px-0 pb-2 pt-2 text-left">
-          <DrawerTitle className="text-white">Add movies</DrawerTitle>
-          <DrawerDescription className="text-gray-300">
-            Find a movie or TV show and add it to this list.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="min-h-0 overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          {panelContent}
-        </div>
-      </DrawerContent>
-    </Drawer>
+      ) : (
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-8 border-white/20 bg-white/[0.04] px-3 text-xs text-white hover:bg-white/10"
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" />
+              Add movies
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="with-popup-shell max-h-[88svh] overflow-hidden">
+            <div className="relative rounded-xl border border-white/10 bg-[#0b0b0c] p-6">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition hover:bg-white/10 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <span className="mb-3 inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
+                Add Movies
+              </span>
+
+              <h2 className="text-xl font-medium text-white">
+                Find a movie or show
+              </h2>
+              <p className="mt-1 text-sm text-white/40">
+                Search and add it to Favorites.
+              </p>
+
+              <div className="mt-5 h-px w-full bg-white/10" />
+
+              <div className="px-0 pb-3 pt-5">{panelContent}</div>
+
+              <div className="mt-4 flex items-center justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  className="bg-primaryM-500 text-black hover:bg-primaryM-600"
+                  disabled
+                >
+                  Search & add above
+                </Button>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {isDesktop ? (
+        <AnimatedModal
+          open={open}
+          onClose={() => setOpen(false)}
+          maxWidth="760px"
+          className="relative z-10 w-full overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-[0_24px_80px_-28px_rgba(0,0,0,0.95)]"
+        >
+          <span className="mb-3 mt-6 inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
+            Add Movies
+          </span>
+
+          <h2 className="text-xl font-medium text-white">Find a movie or show</h2>
+          <p className="mt-1 text-sm text-white/40">Search and add it to Favorites.</p>
+
+          <div className="mt-5 h-px w-full bg-white/10" />
+
+          <div className="px-0 pb-3 pt-5">{panelContent}</div>
+
+          <div className="mt-4 flex items-center justify-end gap-3 pb-6">
+            <Button type="button" variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button type="button" className="bg-primaryM-500 text-black hover:bg-primaryM-600" disabled>Search & add above</Button>
+          </div>
+        </AnimatedModal>
+      ) : null}
+    </>
   );
 }

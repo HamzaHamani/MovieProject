@@ -5,22 +5,10 @@ import { Search, UserPlus, Trash2, UserRoundCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+// Using a custom modal design for manage collaborators (replaces Dialog/Drawer)
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { AnimatedModal } from "@/components/ui/animated-modal";
+import InviteCollaboratorsModal from "@/components/bookmarks/inviteCollaborators";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   inviteCollaborator,
@@ -53,6 +41,17 @@ export default function ListCollaboratorsManager({
   const [isLoading, setIsLoading] = useState(false);
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  useEffect(() => {
+    if (!isManageOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isManageOpen]);
 
   useEffect(() => {
     loadCollaborators();
@@ -205,7 +204,7 @@ export default function ListCollaboratorsManager({
   );
 
   const manageContent = (
-    <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+    <>
       <div className="mb-3 flex items-center justify-between gap-2">
         <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
           Collaborators
@@ -224,37 +223,39 @@ export default function ListCollaboratorsManager({
           {collaborators.map((collab) => (
             <div
               key={collab.id}
-              className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-2"
+              className="flex cursor-pointer items-center gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-3"
             >
-              <Avatar className="h-10 w-10 shrink-0">
+              <Avatar className="h-9 w-9 shrink-0">
                 <AvatarImage src={collab.userImage ?? undefined} />
                 <AvatarFallback className="bg-white/10 text-xs text-white">
                   {collab.userName?.slice(0, 2)?.toUpperCase() ?? "U"}
                 </AvatarFallback>
               </Avatar>
-              <div className="min-w-0 text-left">
-                <p className="block w-full truncate pr-2 text-sm font-medium text-white">
+
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-white">
                   {collab.userName ?? collab.userUsername ?? "User"}
                 </p>
-                <p className="text-xs text-gray-400">@{collab.userUsername}</p>
+                <p className="mt-1 text-xs text-gray-400">
+                  @{collab.userUsername}
+                </p>
               </div>
-              <div className="flex items-center gap-2 justify-self-end">
+
+              <div className="ml-auto flex items-center gap-2">
                 <span
-                  className={`text-xs font-medium ${
-                    collab.status === "accepted"
-                      ? "text-green-400"
-                      : "text-yellow-400"
-                  }`}
+                  className={`text-xs font-medium ${collab.status === "accepted" ? "text-green-400" : "text-yellow-400"}`}
                 >
                   {collab.status === "accepted" ? "Accepted" : "Pending"}
                 </span>
+
                 <Button
                   size="sm"
                   variant="ghost"
                   disabled={removingUserId === collab.userId}
-                  onClick={() =>
-                    collab.userId && handleRemoveCollaborator(collab.userId)
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    collab.userId && handleRemoveCollaborator(collab.userId);
+                  }}
                   className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-400"
                   title="Remove collaborator"
                 >
@@ -265,92 +266,113 @@ export default function ListCollaboratorsManager({
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
-        <DialogTrigger asChild>
-          <Button
-            type="button"
-            className="h-8 gap-2 border border-white/20 bg-white/[0.04] px-3 text-xs text-white hover:bg-white/10"
-            disabled={!isOwner}
-            title={isOwner ? "Invite collaborators" : "Only owner can invite"}
-          >
-            <UserPlus className="h-3.5 w-3.5" />
-            Invite Collaborators
-          </Button>
-        </DialogTrigger>
-
-        <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-hidden p-5">
-          <DialogHeader className="pb-1">
-            <DialogTitle className="text-white">
-              Invite Collaborators
-            </DialogTitle>
-            <DialogDescription className="text-gray-300">
-              Invite friends to collaborate on this list. They can add or remove
-              movies, but cannot delete the list or change its details.
-            </DialogDescription>
-          </DialogHeader>
-          {inviteContent}
-        </DialogContent>
-      </Dialog>
+      {isOwner ? (
+        <InviteCollaboratorsModal
+          bookmarkId={bookmarkId}
+          onInvited={loadCollaborators}
+        />
+      ) : (
+        <Button
+          type="button"
+          className="h-8 gap-2 border border-white/20 bg-white/[0.04] px-3 text-xs text-white hover:bg-white/10"
+          disabled
+          title="Only owner can invite"
+        >
+          <UserPlus className="h-3.5 w-3.5" />
+          Invite Collaborators
+        </Button>
+      )}
 
       {isOwner ? (
-        isDesktop ? (
-          <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
-            <DialogTrigger asChild>
+        <>
+          {isDesktop ? (
+            <>
               <Button
                 type="button"
                 variant="outline"
+                onClick={() => setIsManageOpen(true)}
                 className="h-8 w-8 border-white/20 bg-white/[0.04] p-0 text-white hover:bg-white/10"
                 title="Manage collaborators"
               >
                 <UserRoundCog className="h-4 w-4" />
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-h-[88svh] w-[min(760px,94vw)] overflow-hidden p-5">
-              <DialogHeader className="pb-1">
-                <DialogTitle className="text-white">
-                  Manage Collaborators
-                </DialogTitle>
-                <DialogDescription className="text-gray-300">
-                  View all collaborators and remove selected users from this
-                  list.
-                </DialogDescription>
-              </DialogHeader>
-              {manageContent}
-            </DialogContent>
-          </Dialog>
-        ) : (
-          <Drawer open={isManageOpen} onOpenChange={setIsManageOpen}>
-            <DrawerTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-8 w-8 border-white/20 bg-white/[0.04] p-0 text-white hover:bg-white/10"
-                title="Manage collaborators"
+
+              <AnimatedModal
+                open={isManageOpen}
+                onClose={() => setIsManageOpen(false)}
+                maxWidth="760px"
+                className="relative z-10 w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0ed1] shadow-[0_24px_80px_-28px_rgba(0,0,0,0.95)]"
               >
-                <UserRoundCog className="h-4 w-4" />
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="max-h-[88svh] overflow-hidden px-4">
-              <DrawerHeader className="px-0 pb-2 pt-2 text-left">
-                <DrawerTitle className="text-white">
+                <span className="mb-3 mt-6 inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
                   Manage Collaborators
-                </DrawerTitle>
-                <DrawerDescription className="text-gray-300">
-                  View all collaborators and remove selected users from this
-                  list.
-                </DrawerDescription>
-              </DrawerHeader>
-              <div className="min-h-0 overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-                {manageContent}
-              </div>
-            </DrawerContent>
-          </Drawer>
-        )
+                </span>
+
+                <h2 className="text-xl font-medium text-white">Manage Collaborators</h2>
+                <p className="mt-1 text-sm text-white/40">View all collaborators and remove selected users from this list.</p>
+
+                <div className="mt-5 h-px w-full bg-white/10" />
+
+                <div className="mt-4">{manageContent}</div>
+              </AnimatedModal>
+            </>
+          ) : (
+            <Drawer open={isManageOpen} onOpenChange={setIsManageOpen}>
+              <DrawerTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-8 w-8 border-white/20 bg-white/[0.04] p-0 text-white hover:bg-white/10"
+                  title="Manage collaborators"
+                >
+                  <UserRoundCog className="h-4 w-4" />
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[88svh] overflow-hidden bg-[#0a0a0ed1] border border-white/20 shadow-[0_24px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl">
+                <div className="relative rounded-xl border border-white/10 bg-[#0a0a0ed1] p-6">
+                  <button
+                    type="button"
+                    onClick={() => setIsManageOpen(false)}
+                    aria-label="Close"
+                    className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+
+                  <span className="mb-3 inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
+                    Manage Collaborators
+                  </span>
+
+                  <h2 className="text-xl font-medium text-white">
+                    Manage Collaborators
+                  </h2>
+                  <p className="mt-1 text-sm text-white/40">
+                    View all collaborators and remove selected users from this
+                    list.
+                  </p>
+
+                  <div className="mt-5 h-px w-full bg-white/10" />
+
+                  <div className="mt-4">{manageContent}</div>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          )}
+        </>
       ) : null}
     </div>
   );

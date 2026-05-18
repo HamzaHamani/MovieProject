@@ -4,6 +4,7 @@ import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 
 const Drawer = ({
   shouldScaleBackground = true,
@@ -29,7 +30,7 @@ const DrawerOverlay = React.forwardRef<
   <DrawerPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/85 backdrop-blur-[3px]",
+      "fixed inset-0 z-50 bg-black/90 backdrop-blur-[10px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
     {...props}
@@ -50,7 +51,7 @@ const DrawerContent = React.forwardRef<
       <DrawerPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col overflow-hidden rounded-t-2xl text-textMain",
+          "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col overflow-hidden rounded-t-2xl text-textMain duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
           enableShell
             ? "popup-gradient-shell border border-white/10 shadow-[0_-24px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl"
             : "border-0 bg-transparent shadow-none backdrop-blur-none",
@@ -58,6 +59,10 @@ const DrawerContent = React.forwardRef<
         )}
         {...props}
       >
+        <VisuallyHidden>
+          <DrawerPrimitive.Title>Drawer</DrawerPrimitive.Title>
+          <DrawerPrimitive.Description>Drawer content</DrawerPrimitive.Description>
+        </VisuallyHidden>
         <div className="mx-auto mt-3 h-1.5 w-[120px] rounded-full bg-white/25" />
         {children}
       </DrawerPrimitive.Content>
