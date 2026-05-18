@@ -467,14 +467,30 @@ export default async function Saved() {
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {(collaboratorsByList.get(list.id) ?? [])
                     .slice(0, 6)
-                    .map((collab) => (
-                      <span
-                        key={`${list.id}-${collab.userId}`}
-                        className="rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 text-[11px] text-gray-300"
-                      >
-                        @{collab.username ?? collab.name ?? "user"}
-                      </span>
-                    ))}
+                    .map((collab) => {
+                      const label = collab.username ?? collab.name ?? "user";
+                      return (
+                        <span
+                          key={`${list.id}-${collab.userId}`}
+                          className="inline-flex items-center gap-1 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-2 py-1 text-[11px] text-emerald-200"
+                        >
+                          <span className="rounded-full bg-emerald-400/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200">
+                            Collaborator
+                          </span>
+                          {collab.username ? (
+                            <Link
+                              href={`/profile/${collab.username}`}
+                              className="rounded-full px-0.5 text-emerald-100 underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-emerald-400/40 focus:ring-offset-2 focus:ring-offset-backgroundM"
+                              title={`Open ${collab.username}'s profile`}
+                            >
+                              @{label}
+                            </Link>
+                          ) : (
+                            <span>@{label}</span>
+                          )}
+                        </span>
+                      );
+                    })}
                 </div>
               ) : null}
 
