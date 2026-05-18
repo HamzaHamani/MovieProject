@@ -1,412 +1,94 @@
 "use client";
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import type { ChartConfig } from "@/components/ui/chart";
 
-import { cn } from "@/lib/utils";
-import LazyBlurImage from "@/components/ui/lazyBlurImage";
-import { useEffect, useMemo, useState } from "react";
+const chartConfig = {
+  count: {
+    label: "Titles",
+    color: "#c9a227",
+  },
+} satisfies ChartConfig;
 
-interface FilmCommitGraphProps {
-  loggedMovies: Array<{
-    createdAt: Date | string | null;
-    id: string;
-    showId?: string;
-    title?: string;
-    posterPath?: string | null;
-    href?: string;
-    mediaTypeLabel?: "Movie" | "TV Show";
-  }>;
-}
+export function RatingRadarChart({
+  items,
+  totalRated,
+}: {
+  items: Array<{ rating: number; count: number }>;
+  totalRated: number;
+}) {
+  const chartData = [
+    { star: "1 ★", count: items.find((i) => i.rating === 1)?.count ?? 0 },
+    { star: "2 ★", count: items.find((i) => i.rating === 2)?.count ?? 0 },
+    { star: "3 ★", count: items.find((i) => i.rating === 3)?.count ?? 0 },
+    { star: "4 ★", count: items.find((i) => i.rating === 4)?.count ?? 0 },
+    { star: "5 ★", count: items.find((i) => i.rating === 5)?.count ?? 0 },
+  ];
 
-type HoveredDay = {
-  dateKey: string;
-  label: string;
-  x: number;
-  y: number;
-  posters: Array<{
-    id: string;
-    title: string;
-    posterPath: string | null;
-    href: string;
-    mediaTypeLabel: "Movie" | "TV Show";
-  }>;
-};
-
-const getColor = (count: number): string => {
-  if (count === 0) return "bg-white/10";
-  if (count === 1) return "bg-primaryM-500/30";
-  if (count === 2) return "bg-primaryM-400/50";
-  if (count === 3) return "bg-primaryM-400/70";
-  return "bg-primaryM-400";
-};
-
-function getTooltipText(count: number, date: string): string {
-  if (count === 0) return `No titles logged on ${date}`;
-  return `${count} title${count === 1 ? "" : "s"} logged on ${date}`;
-}
-
-export default function FilmCommitGraph({
-  loggedMovies,
-}: FilmCommitGraphProps) {
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [hoveredDay, setHoveredDay] = useState<HoveredDay | null>(null);
-  const [panelVisible, setPanelVisible] = useState(false);
-  const [panelMounted, setPanelMounted] = useState(false);
-
-  // Get all unique years from loggedMovies
-  const availableYears = useMemo(() => {
-    const years = new Set<number>();
-    loggedMovies.forEach((movie) => {
-      if (!movie.createdAt) return;
-      const date = new Date(movie.createdAt);
-      years.add(date.getFullYear());
-    });
-    return Array.from(years).sort((a, b) => b - a);
-  }, [loggedMovies]);
-
-  // Count movies logged by date
-  const movieCountByDate = useMemo(() => {
-    const map = new Map<string, number>();
-    const filteredMovies = selectedYear
-      ? loggedMovies.filter((movie) => {
-          if (!movie.createdAt) return false;
-          const date = new Date(movie.createdAt);
-          return date.getFullYear() === selectedYear;
-        })
-      : loggedMovies;
-
-    filteredMovies.forEach((movie) => {
-      if (!movie.createdAt) return;
-      const date = new Date(movie.createdAt);
-      const dateStr = date.toISOString().split("T")[0];
-      map.set(dateStr, (map.get(dateStr) ?? 0) + 1);
-    });
-    return map;
-  }, [loggedMovies, selectedYear]);
-
-  const moviesByDate = useMemo(() => {
-    const map = new Map<
-      string,
-      Array<{
-        id: string;
-        title: string;
-        posterPath: string | null;
-        href: string;
-        mediaTypeLabel: "Movie" | "TV Show";
-      }>
-    >();
-
-    const filteredMovies = selectedYear
-      ? loggedMovies.filter((movie) => {
-          if (!movie.createdAt) return false;
-          const date = new Date(movie.createdAt);
-          return date.getFullYear() === selectedYear;
-        })
-      : loggedMovies;
-
-    filteredMovies.forEach((movie) => {
-      if (!movie.createdAt) return;
-      const date = new Date(movie.createdAt);
-      const dateStr = date.toISOString().split("T")[0];
-      const current = map.get(dateStr) ?? [];
-
-      current.push({
-        id: movie.id,
-        title: movie.title ?? "Title unavailable",
-        posterPath: movie.posterPath ?? null,
-        href: movie.href ?? "#",
-        mediaTypeLabel: movie.mediaTypeLabel ?? "Movie",
-      });
-
-      map.set(dateStr, current);
-    });
-
-    return map;
-  }, [loggedMovies, selectedYear]);
-
-  // Generate 52 weeks of data (looking back from today)
-  const today = new Date();
-  const weeksData: Array<{ counts: number[]; dates: Date[] }> = [];
-
-  // Find the most recent Sunday before today
-  const currentDate = new Date(today);
-  const dayOfWeek = currentDate.getDay();
-  const recentSunday = new Date(currentDate);
-  recentSunday.setDate(currentDate.getDate() - dayOfWeek);
-
-  // Generate 52 weeks
-  for (let week = 51; week >= 0; week--) {
-    const weekData: number[] = [];
-    const weekDates: Date[] = [];
-    const weekStart = new Date(recentSunday);
-    weekStart.setDate(recentSunday.getDate() - week * 7);
-
-    for (let day = 0; day < 7; day++) {
-      const currentDay = new Date(weekStart);
-      currentDay.setDate(weekStart.getDate() + day);
-      const dateStr = currentDay.toISOString().split("T")[0];
-      weekData.push(movieCountByDate.get(dateStr) ?? 0);
-      weekDates.push(currentDay);
-    }
-
-    weeksData.push({ counts: weekData, dates: weekDates });
-  }
-
-  const monthLabelByWeek = new Map<number, string>();
-  weeksData.forEach((weekData, index) => {
-    const firstDate = weekData.dates[0];
-    if (!firstDate) return;
-
-    if (index === 0) {
-      monthLabelByWeek.set(
-        index,
-        firstDate.toLocaleDateString("en-US", { month: "short" }),
-      );
-      return;
-    }
-
-    const previousFirstDate = weeksData[index - 1]?.dates[0];
-    if (!previousFirstDate) return;
-
-    if (firstDate.getMonth() !== previousFirstDate.getMonth()) {
-      monthLabelByWeek.set(
-        index,
-        firstDate.toLocaleDateString("en-US", { month: "short" }),
-      );
-    }
-  });
-
-  const dayLabels = ["", "Mon", "", "Wed", "", "Fri", ""];
-
-  const hoveredCount = hoveredDay?.posters.length ?? 0;
-
-  useEffect(() => {
-    if (hoveredDay) {
-      setPanelMounted(true);
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => setPanelVisible(true)),
-      );
-      return;
-    }
-
-    setPanelVisible(false);
-    const timer = window.setTimeout(() => setPanelMounted(false), 180);
-    return () => window.clearTimeout(timer);
-  }, [hoveredDay]);
+  const hasData = chartData.some((d) => d.count > 0);
 
   return (
-    <section className="w-full">
-      <div className="relative rounded-lg border border-white/10 bg-white/[0.03] p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white">Viewing Activity</h3>
-          {availableYears.length > 1 && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedYear(null)}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                  selectedYear === null
-                    ? "border-primaryM-500 bg-primaryM-500 text-black"
-                    : "border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
-                }`}
-              >
-                All Years
-              </button>
-              {availableYears.map((year) => (
-                <button
-                  key={year}
-                  type="button"
-                  onClick={() => setSelectedYear(year)}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                    selectedYear === year
-                      ? "border-primaryM-500 bg-primaryM-500 text-black"
-                      : "border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
-                  }`}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="overflow-x-auto">
-          <div className="min-w-fit">
-            <div className="mb-2 ml-8 flex gap-1 text-[10px] text-gray-500">
-              {weeksData.map((_, weekIndex) => (
-                <div
-                  key={`month-${weekIndex}`}
-                  className="h-3 w-3 overflow-visible whitespace-nowrap md:w-4"
-                >
-                  {monthLabelByWeek.get(weekIndex) ?? ""}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
-              <div className="flex flex-col gap-1 pt-0.5 text-[10px] text-gray-500">
-                {dayLabels.map((label, idx) => (
-                  <div
-                    key={`label-${idx}`}
-                    className="h-3 leading-3 md:h-4 md:leading-4"
-                  >
-                    {label}
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-1">
-                {weeksData.map((week, weekIndex) => (
-                  <div
-                    key={`week-${weekIndex}`}
-                    className="flex flex-col gap-1"
-                  >
-                    {week.counts.map((count, dayIndex) => {
-                      const currentDay = week.dates[dayIndex];
-                      const dateStr = currentDay.toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      });
-
-                      return (
-                        <div
-                          key={`day-${weekIndex}-${dayIndex}`}
-                          className={cn(
-                            "group/tooltip relative h-3 w-3 cursor-pointer rounded-sm transition-transform duration-200 hover:scale-110 md:h-4 md:w-4",
-                            getColor(count),
-                          )}
-                          onMouseEnter={(event) => {
-                            const current =
-                              event.currentTarget.getBoundingClientRect();
-                            const container = event.currentTarget
-                              .closest("section")
-                              ?.getBoundingClientRect();
-                            const posters =
-                              moviesByDate.get(
-                                currentDay.toISOString().split("T")[0],
-                              ) ?? [];
-
-                            setHoveredDay({
-                              dateKey: currentDay.toISOString().split("T")[0],
-                              label: dateStr,
-                              x:
-                                current.left -
-                                (container?.left ?? 0) +
-                                current.width / 2,
-                              y: current.bottom - (container?.top ?? 0) + 12,
-                              posters,
-                            });
-                          }}
-                          onMouseMove={(event) => {
-                            const current =
-                              event.currentTarget.getBoundingClientRect();
-                            const container = event.currentTarget
-                              .closest("section")
-                              ?.getBoundingClientRect();
-
-                            setHoveredDay((previous) =>
-                              previous?.dateKey ===
-                              currentDay.toISOString().split("T")[0]
-                                ? {
-                                    ...previous,
-                                    x:
-                                      current.left -
-                                      (container?.left ?? 0) +
-                                      current.width / 2,
-                                    y:
-                                      current.bottom -
-                                      (container?.top ?? 0) +
-                                      12,
-                                  }
-                                : previous,
-                            );
-                          }}
-                          onMouseLeave={() => setHoveredDay(null)}
-                          aria-label={getTooltipText(count, dateStr)}
-                        ></div>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {panelMounted && hoveredDay ? (
-          <div
-            className={cn(
-              "duration-180 pointer-events-none absolute z-30 w-[240px] -translate-x-1/2 transition-all ease-out",
-              panelVisible
-                ? "scale-100 opacity-100"
-                : "translate-y-2 scale-[0.98] opacity-0",
-            )}
-            style={{
-              left: hoveredDay.x,
-              top: hoveredDay.y,
-            }}
-          >
-            <div className="rounded-2xl border border-white/10 bg-[#111114] p-3 shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">
-                  {hoveredDay.label}
-                </p>
-                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-white/60">
-                  {hoveredCount} logged
-                </span>
-              </div>
-
-              {hoveredDay.posters.length > 0 ? (
-                <div className="grid grid-cols-4 gap-2">
-                  {hoveredDay.posters.slice(0, 8).map((movie) => (
-                    <a
-                      key={movie.id}
-                      href={movie.href}
-                      className="group/movie block overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]"
-                    >
-                      <div className="relative aspect-[2/3]">
-                        {movie.posterPath ? (
-                          <LazyBlurImage
-                            src={`https://image.tmdb.org/t/p/w342/${movie.posterPath}`}
-                            alt={movie.title}
-                            className="h-full w-full object-cover transition-transform duration-200 group-hover/movie:scale-105"
-                            placeholderClassName="bg-zinc-700/50"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-white/[0.05] px-1 text-center text-[10px] text-gray-400">
-                            No poster
-                          </div>
-                        )}
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-1.5">
-                          <p className="line-clamp-2 text-[9px] font-medium text-white">
-                            {movie.title}
-                          </p>
-                        </div>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-gray-400">
-                  No films logged that day.
-                </p>
-              )}
-            </div>
-          </div>
-        ) : null}
-
-        {/* Legend */}
-        <div className="mt-4 flex items-center justify-end gap-2 text-xs text-gray-400">
-          <span>Less</span>
-          <div className="flex gap-1">
-            <div className="h-2.5 w-2.5 rounded-sm bg-white/10" />
-            <div className="h-2.5 w-2.5 rounded-sm bg-primaryM-500/30" />
-            <div className="h-2.5 w-2.5 rounded-sm bg-primaryM-400/50" />
-            <div className="h-2.5 w-2.5 rounded-sm bg-primaryM-400/70" />
-            <div className="h-2.5 w-2.5 rounded-sm bg-primaryM-400" />
-          </div>
-          <span>More</span>
+    <div className="relative flex h-full min-h-[590px] flex-col rounded-lg border border-white/10 bg-white/[0.02] p-4">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.28em] text-gray-400">
+            Rating Radar
+          </p>
+          <h4 className="mt-1 text-lg font-semibold text-white">
+            1 to 5 star spread
+          </h4>
+          <p className="mt-1 text-sm text-gray-400">
+            How many titles were rated at each star level.
+          </p>
         </div>
       </div>
-    </section>
+
+      {/* Chart */}
+      <div className="mt-4 flex flex-1 items-center justify-center">
+        {!hasData ? (
+          <div className="flex flex-col items-center gap-2 text-center">
+            <span className="text-4xl opacity-20">◎</span>
+            <p className="text-sm text-white/30">No ratings yet</p>
+          </div>
+        ) : (
+          <ChartContainer
+            config={chartConfig}
+            className="mx-auto aspect-square w-full max-w-[310px]"
+            style={{ minHeight: 280 }}
+          >
+            <RadarChart data={chartData}>
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <PolarAngleAxis
+                dataKey="star"
+                tick={{ fill: "rgba(255,255,255,0.55)", fontSize: 11 }}
+              />
+              <PolarGrid stroke="rgba(255,255,255,0.15)" />
+              <Radar
+                dataKey="count"
+                fill="#c9a227"
+                fillOpacity={0.6}
+                stroke="#c9a227"
+                strokeWidth={1.5}
+              />
+            </RadarChart>
+          </ChartContainer>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="mt-4 flex flex-col items-center gap-1 text-sm">
+        <div className="text-gray-400">
+          {totalRated > 0 ? `${totalRated} titles rated` : "No ratings yet"}
+        </div>
+      </div>
+    </div>
   );
 }

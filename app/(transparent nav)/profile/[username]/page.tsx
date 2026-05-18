@@ -27,7 +27,7 @@ import UserStatisticsSection from "../../../../components/profile/userStatistics
 import { ReplyForm } from "@/components/profile/replyForm";
 import { Separator } from "@/components/ui/separator";
 import MentionText from "@/components/general/mentionText";
-import FilmCommitGraph from "@/components/animata/graphs/film-commit-graph";
+import FilmCommitGraph from "../../../../components/profile/userStatisticsSection";
 import {
   addReviewReply,
   getBookmarks,
@@ -638,6 +638,8 @@ export default async function Page({
     idsToResolve.map(async (id) => [id, await resolveMediaById(id)] as const),
   );
   const mediaMap = new Map<string, ResolvedMedia | null>(resolvedPairs);
+  const mediaMapObj: Record<string, ResolvedMedia | null> =
+    Object.fromEntries(resolvedPairs);
 
   // Separate logged movies and TV shows
   const loggedMoviesWatched = loggedMovies
@@ -678,6 +680,7 @@ export default async function Page({
         id: item.id,
         createdAt: item.createdAt,
         showId: item.showId,
+        rating: item.rating ?? null,
         title: media?.title ?? "Title unavailable",
         posterPath: media?.posterPath ?? null,
         href: media?.href ?? `/profile/${usernameParam}/log/${item.id}`,
@@ -952,9 +955,12 @@ export default async function Page({
           </section>
           {/* ─── END PROFILE HEADER ─── */}
 
-          <FilmCommitGraph loggedMovies={activityGraphItems} />
+          <FilmCommitGraph
+            loggedMovies={activityGraphItems}
+            mediaMap={mediaMapObj}
+          />
 
-          <UserStatisticsSection username={username ?? usernameParam} />
+          {/* <UserStatisticsSection username={username ?? usernameParam} /> */}
 
           <Separator className="bg-white/10" />
 
