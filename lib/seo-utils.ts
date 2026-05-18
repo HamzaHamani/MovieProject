@@ -13,6 +13,7 @@ interface PageMetadataProps {
   ogType?: "website" | "article" | "profile";
   publishedTime?: string;
   authors?: string[];
+  robots?: Metadata["robots"];
 }
 
 interface MovieMetadataProps {
@@ -48,6 +49,7 @@ export function generatePageMetadata({
   ogType = "website",
   publishedTime,
   authors,
+  robots,
 }: PageMetadataProps): Metadata {
   const fullTitle = `${title} | ${SITE_NAME}`;
   const url = canonical || SITE_URL;
@@ -83,6 +85,7 @@ export function generatePageMetadata({
       canonical: url,
     },
     ...(authors && { authors: authors.map((name) => ({ name })) }),
+    ...(robots && { robots }),
   };
 }
 

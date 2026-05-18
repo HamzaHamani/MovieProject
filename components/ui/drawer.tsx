@@ -37,7 +37,7 @@ const DrawerOverlay = React.forwardRef<
   />
 ));
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
-
+//TODO CHECK MODELS IN LIST PAGE
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
@@ -65,7 +65,7 @@ const DrawerContent = React.forwardRef<
             Drawer content
           </DrawerPrimitive.Description>
         </VisuallyHidden>
-        <div className="mx-auto mt-3 h-1.5 w-[120px] rounded-full bg-white/25" />
+        <div className="mx-auto h-1.5 w-[120px] rounded-full bg-white/25" />
         {children}
       </DrawerPrimitive.Content>
     </DrawerPortal>

@@ -2,29 +2,15 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, X } from "lucide-react";
 
 import {
   showErrorNotification,
   showSuccessNotification,
 } from "@/components/notificationSystem";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { AnimatedModal } from "@/components/ui/animated-modal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -139,122 +125,108 @@ export default function CreateListQuick() {
   };
 
   const formContent = (
-    <form
-      onSubmit={(event) => void handleSubmit(event)}
-      className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3"
-    >
-      <div className="space-y-3">
-        <div>
-          <p className="mb-1 text-xs uppercase tracking-[0.2em] text-gray-400">
-            List name
-          </p>
-          <Input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Favorites from 2026"
-            className="h-10 border-white/15 bg-white/5 text-sm text-white"
-            maxLength={60}
-          />
-        </div>
+    <form onSubmit={(event) => void handleSubmit(event)} className="space-y-3">
+      <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
+        Create List
+      </p>
+      <Input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Favorites from 2026"
+        className="border-white/15 bg-white/5 text-white"
+        required
+        maxLength={60}
+      />
+      <Input
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="A short description for this list"
+        className="border-white/15 bg-white/5 text-white"
+        maxLength={180}
+      />
 
-        <div>
-          <p className="mb-1 text-xs uppercase tracking-[0.2em] text-gray-400">
-            Description
-          </p>
-          <Textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="A short description for this list"
-            className="min-h-[140px] resize-y border-white/15 bg-white/5 text-sm text-white"
-            maxLength={180}
-          />
-        </div>
-
-        <label className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200">
-          <span>
-            <span className="block text-xs uppercase tracking-[0.2em] text-gray-400">
-              Privacy
-            </span>
-            <span className="text-sm text-white">Make this list public</span>
+      <label className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200">
+        <span>
+          <span className="block text-xs uppercase tracking-[0.2em] text-gray-400">
+            Privacy
           </span>
-          <input
-            type="checkbox"
-            checked={isPublic}
-            onChange={(event) => setIsPublic(event.target.checked)}
-            className="h-4 w-4 accent-primaryM-500"
-          />
-        </label>
+          <span className="text-sm text-white">Make this list public</span>
+        </span>
+        <input
+          type="checkbox"
+          checked={isPublic}
+          onChange={(e) => setIsPublic(e.target.checked)}
+          className="h-4 w-4 accent-primaryM-500"
+        />
+      </label>
 
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <span className="inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
-              Invite collaborators
-            </span>
-          </div>
+      <div>
+        <div className="mb-2">
+          <span className="inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
+            Invite collaborators
+          </span>
+        </div>
 
-          <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
-            {friends.length === 0 ? (
-              <div className="rounded-lg border-dashed border-white/15 bg-transparent p-6 text-center text-xs text-gray-300">
-                No friends available to invite yet.
-              </div>
-            ) : (
-              <div className="max-h-36 space-y-2 overflow-y-auto rounded-md p-1">
-                {friends.map((friend) => {
-                  const selected = selectedCollaborators.includes(friend.id);
-                  return (
-                    <label
-                      key={friend.id}
-                      className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 hover:bg-white/[0.04]"
-                    >
-                      <span className="text-sm text-gray-200">
-                        {friend.name ?? friend.username ?? "User"}
-                        {friend.username ? (
-                          <span className="ml-1 text-xs text-gray-400">
-                            @{friend.username}
-                          </span>
-                        ) : null}
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={(event) => {
-                          if (event.target.checked) {
-                            setSelectedCollaborators((prev) => [
-                              ...prev,
-                              friend.id,
-                            ]);
-                          } else {
-                            setSelectedCollaborators((prev) =>
-                              prev.filter((id) => id !== friend.id),
-                            );
-                          }
-                        }}
-                      />
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+        <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+          {friends.length === 0 ? (
+            <div className="rounded-lg border-dashed border-white/15 bg-transparent p-6 text-center text-xs text-gray-300">
+              No friends available to invite yet.
+            </div>
+          ) : (
+            <div className="max-h-36 space-y-2 overflow-y-auto rounded-md p-1">
+              {friends.map((friend) => {
+                const selected = selectedCollaborators.includes(friend.id);
+                return (
+                  <label
+                    key={friend.id}
+                    className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 hover:bg-white/[0.04]"
+                  >
+                    <span className="text-sm text-gray-200">
+                      {friend.name ?? friend.username ?? "User"}
+                      {friend.username ? (
+                        <span className="ml-1 text-xs text-gray-400">
+                          @{friend.username}
+                        </span>
+                      ) : null}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={(event) => {
+                        if (event.target.checked)
+                          setSelectedCollaborators((prev) => [
+                            ...prev,
+                            friend.id,
+                          ]);
+                        else
+                          setSelectedCollaborators((prev) =>
+                            prev.filter((id) => id !== friend.id),
+                          );
+                      }}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-2">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="bg-primaryM-500 text-black hover:bg-primaryM-600"
-        >
-          {isSubmitting ? "Creating..." : "Create list"}
-        </Button>
+      <div className="flex justify-end gap-3">
         <Button
           type="button"
           variant="outline"
-          disabled={isSubmitting}
           className="border-white/20 bg-white/5 text-white hover:bg-white/10"
           onClick={closeAndReset}
         >
           Cancel
+        </Button>
+        <Button
+          type="submit"
+          className="bg-primaryM-500 text-black hover:bg-primaryM-600"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Creating..." : "Create list"}
         </Button>
       </div>
     </form>
@@ -262,26 +234,36 @@ export default function CreateListQuick() {
 
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          <Button
-            type="button"
-            className="bg-primaryM-500 text-black hover:bg-primaryM-600"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
+      <>
+        <Button
+          type="button"
+          className="bg-primaryM-500 text-black hover:bg-primaryM-600"
+          onClick={() => handleOpenChange(true)}
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Create List
+        </Button>
+
+        <AnimatedModal
+          open={open}
+          onClose={() => handleOpenChange(false)}
+          maxWidth="760px"
+          className="relative z-10 w-full overflow-hidden rounded-2xl border border-white/10 bg-backgroundM px-7 shadow-[0_24px_80px_-28px_rgba(0,0,0,0.95)]"
+        >
+          <span className="mb-3 mt-6 inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
             Create List
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-h-[88svh] w-[min(700px,94vw)] overflow-y-auto p-5">
-          <DialogHeader className="pb-1">
-            <DialogTitle className="text-white">Create a new list</DialogTitle>
-            <DialogDescription className="text-gray-300">
-              Add a name and description, then start saving movies and TV shows.
-            </DialogDescription>
-          </DialogHeader>
-          {formContent}
-        </DialogContent>
-      </Dialog>
+          </span>
+
+          <h2 className="text-xl font-medium text-white">Create a new list</h2>
+          <p className="mt-1 text-sm text-white/40">
+            Add a name and description, then start saving movies and TV shows.
+          </p>
+
+          <div className="mt-5 h-px w-full bg-white/10" />
+
+          <div className="px-0 pb-3 pt-5">{formContent}</div>
+        </AnimatedModal>
+      </>
     );
   }
 
@@ -296,15 +278,29 @@ export default function CreateListQuick() {
           Create List
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[88svh] overflow-hidden px-4">
-        <DrawerHeader className="px-0 pb-2 pt-2 text-left">
-          <DrawerTitle className="text-white">Create a new list</DrawerTitle>
-          <DrawerDescription className="text-gray-300">
+      <DrawerContent className="with-popup-shell max-h-[88svh] overflow-hidden border-0 bg-transparent from-transparent">
+        <div className="relative rounded-xl border border-white/10 bg-backgroundM p-6">
+          <button
+            type="button"
+            onClick={() => handleOpenChange(false)}
+            aria-label="Close"
+            className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition hover:bg-white/10 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+
+          <span className="mb-3 inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
+            Create List
+          </span>
+
+          <h2 className="text-xl font-medium text-white">Create a new list</h2>
+          <p className="mt-1 text-sm text-white/40">
             Add a name and description, then start saving movies and TV shows.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="min-h-0 overflow-y-auto overscroll-contain pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-          {formContent}
+          </p>
+
+          <div className="mt-5 h-px w-full bg-white/10" />
+
+          <div className="px-0 pb-3 pt-5">{formContent}</div>
         </div>
       </DrawerContent>
     </Drawer>

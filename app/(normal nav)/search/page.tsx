@@ -9,6 +9,17 @@ export const metadata: Metadata = generatePageMetadata({
   description:
     "Search for movies, TV shows, cast members, and users on Cinesphere.",
   canonical: `${SITE_URL}/search`,
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 });
 type Props = {};
 

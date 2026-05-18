@@ -22,6 +22,17 @@ export async function generateMetadata(): Promise<Metadata> {
         description:
           "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.",
         canonical: `${SITE_URL}/explore`,
+        robots: {
+          index: false,
+          follow: true,
+          googleBot: {
+            index: false,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+          },
+        },
         ogImage: DEFAULT_OG_IMAGE,
       });
     }
@@ -50,6 +61,17 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Explore",
       description,
       canonical: `${SITE_URL}/explore`,
+      robots: {
+        index: false,
+        follow: true,
+        googleBot: {
+          index: false,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
       ogImage,
       ogType: "website",
     });
@@ -59,6 +81,17 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.",
       canonical: `${SITE_URL}/explore`,
+      robots: {
+        index: false,
+        follow: true,
+        googleBot: {
+          index: false,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
       ogImage: DEFAULT_OG_IMAGE,
     });
   }

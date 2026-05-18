@@ -219,8 +219,8 @@ export default function ListAddMovies({
               Add movies
             </Button>
           </DrawerTrigger>
-          <DrawerContent className="with-popup-shell max-h-[88svh] overflow-hidden">
-            <div className="relative rounded-xl border border-white/10 bg-[#0b0b0c] p-6">
+          <DrawerContent className="with-popup-shell max-h-[88svh] overflow-hidden border-0 bg-transparent from-transparent">
+            <div className="relative rounded-xl border border-white/10 bg-backgroundM p-6">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -272,7 +272,7 @@ export default function ListAddMovies({
           open={open}
           onClose={() => setOpen(false)}
           maxWidth="760px"
-          className="relative z-10 w-full overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-[0_24px_80px_-28px_rgba(0,0,0,0.95)]"
+          className="relative z-10 w-full overflow-hidden rounded-2xl border border-white/10 bg-backgroundM px-7 shadow-[0_24px_80px_-28px_rgba(0,0,0,0.95)]"
         >
           <span className="mb-3 mt-6 inline-block rounded-full bg-[#c9a227] px-3 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-black">
             Add Movies

@@ -6,6 +6,7 @@ import { Metadata } from "next";
 import ListLikeButton from "@/components/list/listLikeButton";
 import ListAddMovies from "@/components/bookmarks/listAddMovies";
 import ListCollaboratorsManager from "@/components/profile/listCollaboratorsManager";
+import EditListDetails from "@/components/bookmarks/editListDetails";
 import LazyBlurImage from "@/components/ui/lazyBlurImage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -331,11 +332,26 @@ export default async function Page({
               )}
             </div>
             {!isSystemList ? (
-              <ListLikeButton
-                listId={list.id}
-                initialLiked={likeStats.viewerLiked}
-                initialLikesCount={likeStats.likesCount}
-              />
+              <div className="flex items-center gap-2">
+                <div className="order-1 md:order-2">
+                  {isOwner ? (
+                    <EditListDetails
+                      bookmarkId={list.id}
+                      initialName={list.bookmarkName}
+                      initialDescription={list.description}
+                      initialIsPublic={list.isPublic}
+                    />
+                  ) : null}
+                </div>
+
+                <div className="order-2 md:order-1">
+                  <ListLikeButton
+                    listId={list.id}
+                    initialLiked={likeStats.viewerLiked}
+                    initialLikesCount={likeStats.likesCount}
+                  />
+                </div>
+              </div>
             ) : (
               <p className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-gray-300">
                 System list
@@ -344,48 +360,19 @@ export default async function Page({
           </div>
 
           {isOwner && !isSystemList ? (
-            <form
-              action={updateListAction}
-              className="mt-5 grid gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-4"
-            >
-              <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
-                Edit List
-              </p>
+            <div className="mt-5 flex items-center gap-2">
               <Input
                 name="bookmarkName"
                 defaultValue={list.bookmarkName}
-                className="border-white/15 bg-white/5 text-white"
-                required
+                className="hidden"
               />
-              <Input
-                name="description"
-                defaultValue={list.description}
-                className="border-white/15 bg-white/5 text-white"
-                required
+              <EditListDetails
+                bookmarkId={list.id}
+                initialName={list.bookmarkName}
+                initialDescription={list.description}
+                initialIsPublic={list.isPublic}
               />
-              <label className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-gray-200">
-                <span>
-                  <span className="block text-xs uppercase tracking-[0.2em] text-gray-400">
-                    Privacy
-                  </span>
-                  <span className="text-sm text-white">
-                    Make this list public
-                  </span>
-                </span>
-                <input
-                  type="checkbox"
-                  name="isPublic"
-                  defaultChecked={list.isPublic ?? true}
-                  className="h-4 w-4 accent-primaryM-500"
-                />
-              </label>
-              <Button
-                type="submit"
-                className="w-fit bg-primaryM-500 text-black hover:bg-primaryM-600"
-              >
-                Save changes
-              </Button>
-            </form>
+            </div>
           ) : !isOwner ? (
             <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-gray-300">
               You can view and like this list.

@@ -54,6 +54,17 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Save, organize, and manage your favorite movies and TV shows in custom lists.",
       canonical: `${SITE_URL}/bookmarks`,
+      robots: {
+        index: false,
+        follow: true,
+        googleBot: {
+          index: false,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
       ogImage,
       ogType: "website",
     });
@@ -64,6 +75,17 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Save, organize, and manage your favorite movies and TV shows in custom lists.",
       canonical: `${SITE_URL}/bookmarks`,
+      robots: {
+        index: false,
+        follow: true,
+        googleBot: {
+          index: false,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
       ogType: "website",
     });
   }
