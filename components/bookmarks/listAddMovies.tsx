@@ -278,16 +278,33 @@ export default function ListAddMovies({
             Add Movies
           </span>
 
-          <h2 className="text-xl font-medium text-white">Find a movie or show</h2>
-          <p className="mt-1 text-sm text-white/40">Search and add it to Favorites.</p>
+          <h2 className="text-xl font-medium text-white">
+            Find a movie or show
+          </h2>
+          <p className="mt-1 text-sm text-white/40">
+            Search and add it to Favorites.
+          </p>
 
           <div className="mt-5 h-px w-full bg-white/10" />
 
           <div className="px-0 pb-3 pt-5">{panelContent}</div>
 
           <div className="mt-4 flex items-center justify-end gap-3 pb-6">
-            <Button type="button" variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="button" className="bg-primaryM-500 text-black hover:bg-primaryM-600" disabled>Search & add above</Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-primaryM-500 text-black hover:bg-primaryM-600"
+              disabled
+            >
+              Search & add above
+            </Button>
           </div>
         </AnimatedModal>
       ) : null}

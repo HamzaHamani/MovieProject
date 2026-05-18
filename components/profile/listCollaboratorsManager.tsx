@@ -312,8 +312,13 @@ export default function ListCollaboratorsManager({
                   Manage Collaborators
                 </span>
 
-                <h2 className="text-xl font-medium text-white">Manage Collaborators</h2>
-                <p className="mt-1 text-sm text-white/40">View all collaborators and remove selected users from this list.</p>
+                <h2 className="text-xl font-medium text-white">
+                  Manage Collaborators
+                </h2>
+                <p className="mt-1 text-sm text-white/40">
+                  View all collaborators and remove selected users from this
+                  list.
+                </p>
 
                 <div className="mt-5 h-px w-full bg-white/10" />
 
@@ -332,7 +337,7 @@ export default function ListCollaboratorsManager({
                   <UserRoundCog className="h-4 w-4" />
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="max-h-[88svh] overflow-hidden bg-[#0a0a0ed1] border border-white/20 shadow-[0_24px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl">
+              <DrawerContent className="max-h-[88svh] overflow-hidden border border-white/20 bg-[#0a0a0ed1] shadow-[0_24px_80px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl">
                 <div className="relative rounded-xl border border-white/10 bg-[#0a0a0ed1] p-6">
                   <button
                     type="button"

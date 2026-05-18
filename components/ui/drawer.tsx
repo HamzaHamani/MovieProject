@@ -61,7 +61,9 @@ const DrawerContent = React.forwardRef<
       >
         <VisuallyHidden>
           <DrawerPrimitive.Title>Drawer</DrawerPrimitive.Title>
-          <DrawerPrimitive.Description>Drawer content</DrawerPrimitive.Description>
+          <DrawerPrimitive.Description>
+            Drawer content
+          </DrawerPrimitive.Description>
         </VisuallyHidden>
         <div className="mx-auto mt-3 h-1.5 w-[120px] rounded-full bg-white/25" />
         {children}
