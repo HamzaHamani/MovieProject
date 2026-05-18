@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useLayoutEffect } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -76,24 +76,26 @@ export default function PlayerShell({
   const [lightsOff, setLightsOff] = useState<boolean>(false);
   const [theaterMode, setTheaterMode] = useState<boolean>(false);
   const isSmall = useMediaQuery("(max-width:640px)");
-  const [hideMobileModal, setHideMobileModal] = useState<boolean>(() => {
-    try {
-      return (
-        typeof window !== "undefined" &&
-        sessionStorage.getItem("player_mobile_warning_dismissed") === "1"
-      );
-    } catch {
-      return false;
-    }
-  });
+  const [hideMobileModal, setHideMobileModal] = useState<boolean>(false);
   const [modalExiting, setModalExiting] = useState(false);
-  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(() => {
+  const [showDisclaimer, setShowDisclaimer] = useState<boolean>(true);
+
+  // Read persisted dismissal flags on client only to avoid SSR hydration mismatches
+  // useLayoutEffect runs before paint to prevent a brief flash of the modal
+  useLayoutEffect(() => {
     try {
-      return sessionStorage.getItem("player_disclaimer_dismissed") !== "1";
-    } catch {
-      return true;
-    }
-  });
+      if (typeof window !== "undefined") {
+        const mobileDismissed =
+          sessionStorage.getItem("player_mobile_warning_dismissed") === "1";
+        if (mobileDismissed) setHideMobileModal(true);
+
+        const disclaimerDismissed =
+          sessionStorage.getItem("player_disclaimer_dismissed") === "1";
+        if (disclaimerDismissed) setShowDisclaimer(false);
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const posterUrl = posterPath
     ? `https://image.tmdb.org/t/p/w500${posterPath}`

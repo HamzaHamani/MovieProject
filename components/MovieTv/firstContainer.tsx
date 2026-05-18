@@ -1,10 +1,9 @@
 import { convertRuntime } from "@/lib/utils";
 import { TspecifiedMovie } from "@/types/api";
-import { StarIcon } from "lucide-react";
+import { Play, StarIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
-import { Button } from "../ui/button";
 import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
 import {
   getLoggedMovieTv,
@@ -153,11 +152,12 @@ export default async function FirstContainer({ response, typeM }: Props) {
                 itemPosterPath={movieRes.poster_path}
               />
               <ShareButton typeSearch="Movie" />
-              <Button asChild variant="default" size="default">
-                <Link href={`/player/movie/${movieRes.id}`} className="">
-                  Watch it
-                </Link>
-              </Button>
+              <Link
+                href={`/player/movie/${movieRes.id}`}
+                className="rounded-full border border-primaryM-500 bg-primaryM-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-primaryM-600"
+              >
+                Watch it
+              </Link>
             </div>
 
             {/* ── Watched by ── */}
@@ -262,11 +262,12 @@ export default async function FirstContainer({ response, typeM }: Props) {
                 itemPosterPath={tvRes.poster_path}
               />
               <ShareButton typeSearch="Movie" />
-              <Button asChild variant="default" size="default">
-                <Link href={`/player/tv/${tvRes.id}?s=1&ep=1`} className="">
-                  Watch it
-                </Link>
-              </Button>
+              <Link
+                href={`/player/tv/${tvRes.id}?s=1&ep=1`}
+                className="rounded-lg border border-primaryM-500 bg-primaryM-500 px-4 py-2 text-sm text-black transition hover:bg-primaryM-600"
+              >
+                <Play />
+              </Link>
             </div>
 
             <WatchedByRow watchedBy={watchedBy} />

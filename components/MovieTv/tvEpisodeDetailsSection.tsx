@@ -93,13 +93,14 @@ export default function TvEpisodeDetailsSection({
           </p>
 
           <div className="mb-4">
-            <Button asChild>
+            <Button
+              asChild
+              className="rounded-md bg-primaryM-500 px-4 py-2 text-sm text-black hover:bg-primaryM-600"
+            >
               <Link
                 href={`/player/tv/${tvId}?s=${seasonNumber}&ep=${episode.episode_number}`}
               >
-                <span className="rounded-md bg-primaryM-500 px-4 py-2 text-sm font-semibold text-black">
-                  Watch this episode
-                </span>
+                <span className="">Watch this episode</span>
               </Link>
             </Button>
           </div>
