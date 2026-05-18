@@ -107,7 +107,7 @@ export default function GenreSpotlightSection({ groups, userId }: Props) {
 
     if (item.backdrop_path) {
       const backdrop = new Image();
-      backdrop.src = `https://image.tmdb.org/t/p/original/${item.backdrop_path}`;
+      backdrop.src = `https://image.tmdb.org/t/p/w1280/${item.backdrop_path}`;
     }
 
     if (item.poster_path) {
@@ -171,7 +171,7 @@ export default function GenreSpotlightSection({ groups, userId }: Props) {
         className="absolute inset-0 -z-10"
         style={{
           backgroundImage: movie.backdrop_path
-            ? `url(https://image.tmdb.org/t/p/original/${movie.backdrop_path})`
+            ? `url(https://image.tmdb.org/t/p/w1280/${movie.backdrop_path})`
             : "none",
           backgroundSize: "cover",
           backgroundPosition: "center",

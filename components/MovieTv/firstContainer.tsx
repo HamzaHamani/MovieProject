@@ -4,6 +4,7 @@ import { StarIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
+import { Button } from "../ui/button";
 import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
 import {
   getLoggedMovieTv,
@@ -152,6 +153,11 @@ export default async function FirstContainer({ response, typeM }: Props) {
                 itemPosterPath={movieRes.poster_path}
               />
               <ShareButton typeSearch="Movie" />
+              <Button asChild variant="default" size="default">
+                <Link href={`/player/movie/${movieRes.id}`} className="">
+                  Watch it
+                </Link>
+              </Button>
             </div>
 
             {/* ── Watched by ── */}
@@ -256,6 +262,11 @@ export default async function FirstContainer({ response, typeM }: Props) {
                 itemPosterPath={tvRes.poster_path}
               />
               <ShareButton typeSearch="Movie" />
+              <Button asChild variant="default" size="default">
+                <Link href={`/player/tv/${tvRes.id}?s=1&ep=1`} className="">
+                  Watch it
+                </Link>
+              </Button>
             </div>
 
             <WatchedByRow watchedBy={watchedBy} />
