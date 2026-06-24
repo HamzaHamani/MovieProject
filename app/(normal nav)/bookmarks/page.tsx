@@ -52,7 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
     return generatePageMetadata({
       title: "Bookmarks",
       description:
-        "Save, organize, and manage your favorite movies and TV shows in custom lists.",
+        "Watch, save, organize, and manage your favorite movies and TV shows in custom lists.",
       canonical: `${SITE_URL}/bookmarks`,
       robots: {
         index: false,
@@ -73,7 +73,7 @@ export async function generateMetadata(): Promise<Metadata> {
     return generatePageMetadata({
       title: "Bookmarks",
       description:
-        "Save, organize, and manage your favorite movies and TV shows in custom lists.",
+        "Watch, save, organize, and manage your favorite movies and TV shows in custom lists.",
       canonical: `${SITE_URL}/bookmarks`,
       robots: {
         index: false,

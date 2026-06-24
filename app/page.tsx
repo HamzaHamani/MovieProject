@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata({
     title: SITE_NAME,
     description:
-      "Discover trending movies and TV shows, log what you watch, and share reviews with cinephiles.",
+      "Watch trending movies and TV shows on Cinesphere, then log what you watched and share reviews with cinephiles.",
     canonical: SITE_URL,
     ogImage: logo,
     ogType: "website",

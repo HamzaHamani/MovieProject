@@ -1027,7 +1027,6 @@ export async function getBookmarks(userId: string): Promise<bookSchemaType[]> {
     .from(bookmarks)
     .where(eq(bookmarks.userId, userId));
   // const validatedBoks = boks.map((bookmark) => bookmarksSchema.parse(bookmark));
-  //TODO CHECK WHY VALIDATING IS NOT WORKING
 
   return boks as bookSchemaType[];
 }

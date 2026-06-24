@@ -37,37 +37,37 @@ const typeMetadata: Record<
   featured: {
     title: "Featured",
     description:
-      "Browse our hand-picked selection of featured movies and TV shows on Cinesphere.",
+      "Watch our hand-picked selection of featured movies and TV shows on Cinesphere.",
   },
   "just-release": {
     title: "Just Released",
     description:
-      "Discover the latest movies and TV shows that just hit theaters and streaming platforms.",
+      "Watch the latest movies and TV shows that just hit theaters and streaming platforms.",
   },
   "top-rated": {
     title: "Top Rated Movies",
     description:
-      "Explore the highest-rated movies on Cinesphere. Find critically acclaimed films loved by cinephiles.",
+      "Watch the highest-rated movies on Cinesphere. Find critically acclaimed films loved by cinephiles.",
   },
   "popular-tv": {
     title: "Popular TV Shows",
     description:
-      "Discover the most popular TV shows trending on Cinesphere. Find your next binge-watch.",
+      "Watch the most popular TV shows trending on Cinesphere. Find your next binge-watch.",
   },
   "on-air-today": {
     title: "On Air Today",
     description:
-      "See which TV shows are airing today. Stay updated with current TV schedules on Cinesphere.",
+      "Watch which TV shows are airing today. Stay updated with current TV schedules on Cinesphere.",
   },
   "on-the-air": {
     title: "Currently Airing",
     description:
-      "Browse TV shows that are currently airing. Discover new series and follow ongoing favorites.",
+      "Watch TV shows that are currently airing. Discover new series and follow ongoing favorites.",
   },
   genre: {
     title: "Browse by Genre",
     description:
-      "Explore movies and TV shows by genre. Find exactly what you're in the mood for on Cinesphere.",
+      "Watch movies and TV shows by genre. Find exactly what you're in the mood for on Cinesphere.",
   },
 };
 

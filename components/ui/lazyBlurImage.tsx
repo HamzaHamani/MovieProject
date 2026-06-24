@@ -27,6 +27,8 @@ export default function LazyBlurImage({
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const imageRef = useRef<HTMLImageElement | null>(null);
+  console.log(imageRef);
+  // TODO CHECK IT LATER, ERROR ACCOURS WHEN I OPEN THE PAGE FIRST TIME, BUT WHEN I REFRESH THE PAGE IT WORKS FINE, MAYBE IT'S BECAUSE OF THE CACHE OR SOMETHING ELSE
 
   useEffect(() => {
     setIsLoaded(false);

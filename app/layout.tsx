@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} | Discover Movies, TV Shows & Connect with Cinephiles`,
+    default: `${SITE_NAME} | Watch Movies & TV Shows First`,
     template: "%s | " + SITE_NAME,
   },
   description: SITE_DESCRIPTION,
@@ -53,21 +53,21 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: SITE_URL,
-    title: `${SITE_NAME} | Movie & TV Discovery Platform`,
+    title: `${SITE_NAME} | Watch Movies & TV Shows`,
     description: SITE_DESCRIPTION,
     images: [
       {
         url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: `${SITE_NAME} - Discover movies and TV shows`,
+        alt: `${SITE_NAME} - Watch movies and TV shows on Cinesphere`,
       },
     ],
     siteName: SITE_NAME,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} | Discover Movies & TV Shows`,
+    title: `${SITE_NAME} | Watch Movies & TV Shows`,
     description: SITE_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE],
   },

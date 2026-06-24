@@ -37,8 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : undefined;
 
   const shortDescription = show.overview?.trim()
-    ? `${show.overview.slice(0, 150)}${show.overview.length > 150 ? "..." : ""}`
-    : `Discover details about ${show.name} on ${SITE_NAME}`;
+    ? `Watch ${show.name} on ${SITE_NAME}. ${show.overview.slice(0, 150)}${show.overview.length > 150 ? "..." : ""}`
+    : `Watch ${show.name} on ${SITE_NAME} and discover details about it.`;
 
   return generatePageMetadata({
     title: show.name || "TV Show",

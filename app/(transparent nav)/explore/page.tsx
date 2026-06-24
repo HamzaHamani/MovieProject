@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
       return generatePageMetadata({
         title: "Explore",
         description:
-          "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.",
+          "Watch movies and TV shows on Cinesphere. Discover popular and top-rated content before you log anything.",
         canonical: `${SITE_URL}/explore`,
         robots: {
           index: false,
@@ -55,7 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
       : DEFAULT_OG_IMAGE;
 
     const description =
-      "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.";
+      "Watch movies and TV shows on Cinesphere. Discover popular and top-rated content before you log anything.";
 
     return generatePageMetadata({
       title: "Explore",
@@ -79,7 +79,7 @@ export async function generateMetadata(): Promise<Metadata> {
     return generatePageMetadata({
       title: "Explore",
       description:
-        "Explore new world to movies and tv shows. Discover popular and top-rated content on Cinesphere.",
+        "Watch movies and TV shows on Cinesphere. Discover popular and top-rated content before you log anything.",
       canonical: `${SITE_URL}/explore`,
       robots: {
         index: false,

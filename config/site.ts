@@ -8,7 +8,7 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.cinesphere.app";
 export const SITE_NAME = "Cinesphere";
 export const SITE_DESCRIPTION =
-  "Discover movies, TV shows, and connect with cinephiles. Log films, create lists, and share reviews on Cinesphere.";
+  "Watch movies and TV shows on Cinesphere, then log what you watched, create lists, and share reviews with cinephiles.";
 export const SOCIAL_LINKS = {
   github: "https://github.com",
   twitter: "https://twitter.com",

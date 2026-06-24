@@ -74,8 +74,8 @@ export default function LandingPageClient() {
             <HeroWordTicker />
           </h1>
           <p className="mx-auto max-w-[44ch] text-lg font-light text-gray-300 xl:text-base lg:text-sm md:text-xs sm:text-xs">
-            Discover movies and TV shows, build your watchlist, and connect with
-            fellow fans through reviews and collections.
+            Watch movies and TV shows first, build your watchlist second, and
+            connect with fellow fans through reviews and collections.
           </p>
         </motion.div>
 
@@ -101,7 +101,7 @@ export default function LandingPageClient() {
                 />
               )}
               <Play className="relative h-5 w-5 transition xl:h-4 xl:w-4 lg:h-4 lg:w-4 md:h-4 md:w-4 sm:h-3.5 sm:w-3.5" />
-              Start Exploring
+              Start Watching
               <ArrowRight className="relative h-5 w-5 transition xl:h-4 xl:w-4 lg:h-4 lg:w-4 md:h-4 md:w-4 sm:h-3.5 sm:w-3.5" />
             </button>
           </Link>
@@ -132,7 +132,8 @@ export default function LandingPageClient() {
           variants={itemVariants}
           className="mt-8 text-sm text-gray-400 xl:mt-7 xl:text-xs lg:mt-6 lg:text-[11px] md:mt-5 md:text-[10px] sm:mt-4 sm:text-[10px]"
         >
-          Join thousands of cinephiles sharing their passion for great cinema.
+          Watch first, then log and share your favorites with thousands of
+          cinephiles.
           <span className="mt-2 block text-xs text-gray-500 xl:mt-1.5 xl:text-[10px] lg:text-[9px] md:text-[8px] sm:text-[8px]">
             No credit card required • Free forever
           </span>

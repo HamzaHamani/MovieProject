@@ -1,0 +1,12 @@
+The Socket.IO server can share the same underlying HTTP server with Next.js. You just have to create a server.js file at the root of your project:
+-- step2 The server.js file becomes the entrypoint of your application:
+ // ---- {
+  "scripts": {
+-   "dev": "next dev",
++   "dev": "node server.js",
+    "build": "next build",
+-   "start": "next start",
++   "start": "NODE_ENV=production node server.js",
+    "lint": "next lint"
+  }
+}--//

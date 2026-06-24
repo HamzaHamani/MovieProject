@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata({
     title: "Upcoming Movies & TV Shows",
     description:
-      "Discover what's coming soon to theaters and streaming platforms. Stay updated with the latest upcoming movies and TV shows on Cinesphere.",
+      "Plan what to watch next with upcoming movies and TV shows on Cinesphere. Stay updated with what is coming soon to theaters and streaming platforms.",
     canonical: `${SITE_URL}/upcoming`,
     ogImage: DEFAULT_OG_IMAGE,
     ogType: "website",
