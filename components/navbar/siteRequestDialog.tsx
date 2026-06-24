@@ -100,7 +100,8 @@ export default function SiteRequestDialog() {
         <DialogHeader>
           <DialogTitle>Send a request</DialogTitle>
           <DialogDescription>
-            Ask for a feature, share feedback, or contact the creator of the site.
+            Ask for a feature, share feedback, or contact the creator of the
+            site.
           </DialogDescription>
         </DialogHeader>
 
