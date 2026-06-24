@@ -10,6 +10,7 @@ import TopLoaderClient from "@/components/ui/TopLoaderClient";
 import InternalTopProgress from "@/components/ui/InternalTopProgress";
 import {
   DEFAULT_OG_IMAGE,
+  SITE_KEYWORDS,
   SITE_URL,
   SITE_NAME,
   SITE_DESCRIPTION,
@@ -26,15 +27,7 @@ export const metadata: Metadata = {
     template: "%s | " + SITE_NAME,
   },
   description: SITE_DESCRIPTION,
-  keywords: [
-    "movies",
-    "tv shows",
-    "reviews",
-    "watchlist",
-    "cinema",
-    "films",
-    "streaming",
-  ],
+  keywords: SITE_KEYWORDS,
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,
   publisher: SITE_NAME,

@@ -7,6 +7,7 @@ import { getUser } from "@/lib/actions";
 import { UserDropDown } from "./userDropDown";
 import NotificationBell from "./notificationBell";
 import TransparentNavbarShell from "./transparentNavbarShell";
+import SiteRequestDialog from "./siteRequestDialog";
 
 type Props = {
   type: string;
@@ -43,6 +44,7 @@ export default async function Navbar({ type }: Props) {
         right={
           user ? (
             <div className="flex items-center gap-3">
+              <SiteRequestDialog />
               <NotificationBell />
               <UserDropDown user={user} />
             </div>
@@ -65,6 +67,7 @@ export default async function Navbar({ type }: Props) {
       </div>
       {user ? (
         <div className="flex items-center gap-3">
+          <SiteRequestDialog />
           <NotificationBell />
           <UserDropDown user={user} />
         </div>
