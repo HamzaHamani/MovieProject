@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { getUser, markNotificationAsRead } from "@/lib/actions";
+
+const requestSchema = z.object({
+  notificationId: z.string().trim().min(1),
+});
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -8,15 +13,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = (await request.json()) as { notificationId?: string };
-    const notificationId = String(body?.notificationId ?? "").trim();
+    const body = await request.json();
+    const parsed = requestSchema.safeParse(body);
 
-    if (!notificationId) {
+    if (!parsed.success) {
       return NextResponse.json(
         { error: "notificationId is required" },
         { status: 400 },
       );
     }
+
+    const notificationId = parsed.data.notificationId;
 
     const result = await markNotificationAsRead(notificationId);
 

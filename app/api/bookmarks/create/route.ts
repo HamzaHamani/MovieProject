@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { CreateBookmark, getUser } from "@/lib/actions";
+
+const requestSchema = z.object({
+  bookmarkName: z.string().trim().min(2).max(120),
+  description: z.string().trim().min(10).max(400),
+  isPublic: z.boolean().optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,29 +16,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const body = (await request.json()) as {
-      bookmarkName?: string;
-      description?: string;
-      isPublic?: boolean;
-    };
+    const body = await request.json();
+    const parsed = requestSchema.safeParse(body);
 
-    const bookmarkName = String(body?.bookmarkName ?? "").trim();
-    const description = String(body?.description ?? "").trim();
-    const isPublic = body?.isPublic !== false;
-
-    if (bookmarkName.length < 2) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "List name must be at least 2 characters" },
+        { error: "Invalid list payload" },
         { status: 400 },
       );
     }
 
-    if (description.length < 10) {
-      return NextResponse.json(
-        { error: "Description must be at least 10 characters" },
-        { status: 400 },
-      );
-    }
+    const bookmarkName = parsed.data.bookmarkName;
+    const description = parsed.data.description;
+    const isPublic = parsed.data.isPublic !== false;
 
     const created = await CreateBookmark({
       bookmarkName,

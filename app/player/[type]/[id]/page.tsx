@@ -63,7 +63,7 @@ export default async function Page({ params, searchParams }: Props) {
 // Prevent indexing of player pages
 export const metadata = {
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
 };

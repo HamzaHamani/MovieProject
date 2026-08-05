@@ -1,33 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { addMovieToProfileSection } from "@/lib/actions";
 import type { StoredMediaType } from "@/lib/utils";
 
 type SectionType = "favorites" | "likes" | "watchlist";
 
+const requestSchema = z.object({
+  section: z.enum(["favorites", "likes", "watchlist"]),
+  movieId: z.union([z.string().trim().min(1), z.number()]),
+  mediaType: z.enum(["movie", "tv"]).optional(),
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as {
-      section?: SectionType;
-      movieId?: string | number;
-      mediaType?: StoredMediaType;
-    };
+    const body = await request.json();
+    const parsed = requestSchema.safeParse(body);
 
-    if (!body?.section || !body?.movieId) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "section and movieId are required" },
+        { error: "Invalid payload: section and movieId are required" },
         { status: 400 },
       );
     }
 
-    if (!["favorites", "likes", "watchlist"].includes(body.section)) {
-      return NextResponse.json({ error: "Invalid section" }, { status: 400 });
-    }
+    const { section, movieId, mediaType } = parsed.data;
 
     const result = await addMovieToProfileSection({
-      section: body.section,
-      movieId: body.movieId,
-      mediaType: body.mediaType,
+      section: section as SectionType,
+      movieId,
+      mediaType: mediaType as StoredMediaType | undefined,
     });
 
     return NextResponse.json(result);

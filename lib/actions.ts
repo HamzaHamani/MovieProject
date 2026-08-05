@@ -10,10 +10,10 @@ import {
   listLikes,
   userFollows,
   activities,
+  siteRequests,
   users,
   notifications,
   listCollaborators,
-  siteRequests,
 } from "@/db/schema";
 import { db } from "@/db";
 import { and, desc, eq, inArray, ne, sum, avg, count, sql } from "drizzle-orm";
@@ -294,34 +294,6 @@ export const ensureBookmarkPrivacyColumn = (() => {
   };
 })();
 
-export const ensureSiteRequestsTable = (() => {
-  let pending: Promise<void> | null = null;
-
-  return async () => {
-    if (!pending) {
-      pending = (async () => {
-        try {
-          await db.execute(sql`
-            CREATE TABLE IF NOT EXISTS "site_requests" (
-              "id" text PRIMARY KEY NOT NULL,
-              "userId" text NOT NULL REFERENCES "user"("id") ON DELETE cascade,
-              "title" text NOT NULL,
-              "message" text NOT NULL,
-              "status" text NOT NULL DEFAULT 'open',
-              "createdAt" timestamp DEFAULT now(),
-              "updatedAt" timestamp DEFAULT now()
-            )
-          `);
-        } catch (error) {
-          if (!isSchemaDriftError(error)) throw error;
-        }
-      })();
-    }
-
-    await pending;
-  };
-})();
-
 async function cleanupSystemListCollaborations() {
   await ensureBookmarkPrivacyColumn();
 
@@ -414,11 +386,6 @@ const profileUpdateSchema = z.object({
   image: z.string().url().optional().nullable(),
   backdropPath: z.string().trim().max(255).optional().nullable(),
   showNsfw: z.boolean().optional(),
-});
-
-const siteRequestSchema = z.object({
-  title: z.string().trim().min(3).max(120),
-  message: z.string().trim().min(10).max(2000),
 });
 
 function isAllowedProfileImageUrl(url: string) {
@@ -3077,6 +3044,58 @@ export async function createNotification(data: {
     return { success: true };
   } catch {
     return { success: false };
+  }
+}
+
+export async function createSiteRequest(input: {
+  title: string;
+  message: string;
+}) {
+  const user = await getUser();
+
+  if (!user?.id) {
+    return { ok: false as const, error: "You must be signed in" };
+  }
+
+  const title = input.title.trim();
+  const message = input.message.trim();
+
+  if (!title) {
+    return { ok: false as const, error: "Title is required" };
+  }
+
+  if (!message) {
+    return { ok: false as const, error: "Message is required" };
+  }
+
+  if (title.length > 120) {
+    return {
+      ok: false as const,
+      error: "Title is too long (max 120 characters)",
+    };
+  }
+
+  if (message.length > 5000) {
+    return {
+      ok: false as const,
+      error: "Message is too long (max 5000 characters)",
+    };
+  }
+
+  try {
+    await db.insert(siteRequests).values({
+      userId: user.id,
+      title,
+      message,
+      status: "open",
+    });
+
+    return { ok: true as const };
+  } catch {
+    return {
+      ok: false as const,
+      error: "Could not submit your request right now",
+    };
   }
 }
 

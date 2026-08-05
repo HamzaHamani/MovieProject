@@ -3,7 +3,12 @@
  */
 
 import { Metadata } from "next";
-import { DEFAULT_OG_IMAGE, SITE_URL, SITE_NAME } from "@/config/site";
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_URL,
+  SITE_NAME,
+  SEO_KEYWORDS,
+} from "@/config/site";
 
 interface PageMetadataProps {
   title: string;
@@ -14,6 +19,7 @@ interface PageMetadataProps {
   publishedTime?: string;
   authors?: string[];
   robots?: Metadata["robots"];
+  keywords?: string[];
 }
 
 interface MovieMetadataProps {
@@ -50,9 +56,13 @@ export function generatePageMetadata({
   publishedTime,
   authors,
   robots,
+  keywords,
 }: PageMetadataProps): Metadata {
   const fullTitle = `${title} | ${SITE_NAME}`;
   const url = canonical || SITE_URL;
+  const mergedKeywords = Array.from(
+    new Set([...SEO_KEYWORDS, ...(keywords ?? [])]),
+  );
 
   return {
     title: fullTitle,
@@ -84,6 +94,7 @@ export function generatePageMetadata({
     alternates: {
       canonical: url,
     },
+    keywords: mergedKeywords,
     ...(authors && { authors: authors.map((name) => ({ name })) }),
     ...(robots && { robots }),
   };
@@ -108,6 +119,13 @@ export function generateMovieMetadata({
     description,
     ogImage,
     ogType: "website",
+    keywords: [
+      title,
+      `${title} watch`,
+      `${title} review`,
+      `${title} where to watch`,
+      ...(genres ?? []),
+    ],
   });
 }
 
@@ -132,6 +150,7 @@ export function generateReviewMetadata({
     ogImage,
     ogType: "article",
     authors: authorName ? [authorName] : undefined,
+    keywords: [movieTitle, `${movieTitle} review`, "user movie review"],
   });
 }
 
@@ -149,6 +168,7 @@ export function generateProfileMetadata({
     description,
     ogImage,
     ogType: "profile",
+    keywords: [username, `${username} movie profile`, "movie profile"],
   });
 }
 

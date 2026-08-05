@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { db } from "@/db";
 import { bookmarks } from "@/db/schema";
 import { AddMovie, ensureBookmarkPrivacyColumn, getUser } from "@/lib/actions";
 import type { StoredMediaType } from "@/lib/utils";
 import { and, eq } from "drizzle-orm";
+
+const requestSchema = z.object({
+  bookmarkId: z.string().trim().min(1),
+  movieId: z.union([z.string().trim().min(1), z.number()]),
+  mediaType: z.enum(["movie", "tv"]).optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,24 +22,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const body = (await request.json()) as {
-      bookmarkId?: string;
-      movieId?: string | number;
-      mediaType?: StoredMediaType;
-    };
+    const body = await request.json();
+    const parsed = requestSchema.safeParse(body);
 
-    if (!body?.bookmarkId || !body?.movieId) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "bookmarkId and movieId are required" },
+        { error: "Invalid payload: bookmarkId and movieId are required" },
         { status: 400 },
       );
     }
+
+    const { bookmarkId, movieId, mediaType } = parsed.data;
 
     const ownedList = await db
       .select({ id: bookmarks.id })
       .from(bookmarks)
       .where(
-        and(eq(bookmarks.id, body.bookmarkId), eq(bookmarks.userId, user.id)),
+        and(eq(bookmarks.id, bookmarkId), eq(bookmarks.userId, user.id)),
       )
       .limit(1);
 
@@ -44,9 +50,9 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await AddMovie({
-      bookmarkId: body.bookmarkId,
-      movieId: String(body.movieId),
-      mediaType: body.mediaType,
+      bookmarkId,
+      movieId: String(movieId),
+      mediaType: mediaType as StoredMediaType | undefined,
       review: "",
     });
 

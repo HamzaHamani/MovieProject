@@ -10,10 +10,10 @@ import TopLoaderClient from "@/components/ui/TopLoaderClient";
 import InternalTopProgress from "@/components/ui/InternalTopProgress";
 import {
   DEFAULT_OG_IMAGE,
-  SITE_KEYWORDS,
   SITE_URL,
   SITE_NAME,
   SITE_DESCRIPTION,
+  SEO_KEYWORDS,
 } from "@/config/site";
 
 export const viewport: Viewport = {
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s | " + SITE_NAME,
   },
   description: SITE_DESCRIPTION,
-  keywords: SITE_KEYWORDS,
+  keywords: [...SEO_KEYWORDS],
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
@@ -145,6 +145,7 @@ export default function RootLayout({
               url: SITE_URL,
               name: SITE_NAME,
               description: SITE_DESCRIPTION,
+              keywords: SEO_KEYWORDS,
               publisher: {
                 "@id": `${SITE_URL}/#organization`,
               },

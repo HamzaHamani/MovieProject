@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { getUser } from "@/lib/actions";
 import { db } from "@/db";
 import { bookmarksMovies, bookmarks } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 
 type SectionType = "favorites" | "likes" | "watchlist";
+
+const requestSchema = z.object({
+  section: z.enum(["favorites", "likes", "watchlist"]),
+  movieId: z.union([z.string().trim().min(1), z.number()]),
+});
 
 const favoriteKeywords = ["favorite", "favourite", "fav"];
 const likedKeywords = ["liked", "like", "love", "loved"];
@@ -22,21 +28,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const body = (await request.json()) as {
-      section?: SectionType;
-      movieId?: string | number;
-    };
+    const body = await request.json();
+    const parsed = requestSchema.safeParse(body);
 
-    if (!body?.section || !body?.movieId) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "section and movieId are required" },
+        { error: "Invalid payload: section and movieId are required" },
         { status: 400 },
       );
     }
 
-    if (!["favorites", "likes", "watchlist"].includes(body.section)) {
-      return NextResponse.json({ error: "Invalid section" }, { status: 400 });
-    }
+    const { section, movieId } = parsed.data;
 
     // Get all bookmarks for the user
     const allBookmarks = await db.query.bookmarks.findMany({
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
         matchesKeywords(list.bookmarkName, likedKeywords),
       watchlist: (list: (typeof allBookmarks)[number]) =>
         matchesKeywords(list.bookmarkName, watchlistKeywords),
-    }[body.section];
+    }[section as SectionType];
 
     const sectionBookmarks = allBookmarks.filter(matcher);
 
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
       .where(
         and(
           inArray(bookmarksMovies.bookmarkId, bookmarkIds),
-          eq(bookmarksMovies.movieId, String(body.movieId)),
+          eq(bookmarksMovies.movieId, String(movieId)),
         ),
       );
 

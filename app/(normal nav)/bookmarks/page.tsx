@@ -55,10 +55,10 @@ export async function generateMetadata(): Promise<Metadata> {
         "Watch, save, organize, and manage your favorite movies and TV shows in custom lists.",
       canonical: `${SITE_URL}/bookmarks`,
       robots: {
-        index: false,
+        index: true,
         follow: true,
         googleBot: {
-          index: false,
+          index: true,
           follow: true,
           "max-video-preview": -1,
           "max-image-preview": "large",
@@ -76,10 +76,10 @@ export async function generateMetadata(): Promise<Metadata> {
         "Watch, save, organize, and manage your favorite movies and TV shows in custom lists.",
       canonical: `${SITE_URL}/bookmarks`,
       robots: {
-        index: false,
+        index: true,
         follow: true,
         googleBot: {
-          index: false,
+          index: true,
           follow: true,
           "max-video-preview": -1,
           "max-image-preview": "large",

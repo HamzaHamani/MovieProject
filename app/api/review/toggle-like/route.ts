@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { toggleReviewLike } from "@/lib/actions";
 
+const requestSchema = z.object({
+  reviewId: z.string().trim().min(1),
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as { reviewId?: string };
-    const reviewId = String(body?.reviewId ?? "").trim();
+    const body = await request.json();
+    const parsed = requestSchema.safeParse(body);
 
-    if (!reviewId) {
+    if (!parsed.success) {
       return NextResponse.json(
         { error: "reviewId is required" },
         { status: 400 },
       );
     }
+
+    const reviewId = parsed.data.reviewId;
 
     const result = await toggleReviewLike(reviewId);
     return NextResponse.json(result);

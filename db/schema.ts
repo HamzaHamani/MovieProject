@@ -243,20 +243,6 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
 });
 
-export const siteRequests = pgTable("site_requests", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  userId: text("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  message: text("message").notNull(),
-  status: text("status").notNull().default("open"),
-  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
-  updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
-});
-
 export const activities = pgTable("activities", {
   id: text("id")
     .primaryKey()
@@ -270,6 +256,20 @@ export const activities = pgTable("activities", {
   message: text("message"),
   data: text("data"), // optional JSON string with extra metadata
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
+});
+
+export const siteRequests = pgTable("site_requests", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("open"),
+  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow(),
 });
 
 // List Collaborators table
@@ -317,6 +317,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   addedCollaborations: many(listCollaborators, {
     relationName: "listCollaboratorAddedBy",
   }),
+  siteRequests: many(siteRequests),
 }));
 
 // Define relationships for bookmarks
@@ -419,3 +420,10 @@ export const listCollaboratorsRelations = relations(
     }),
   }),
 );
+
+export const siteRequestsRelations = relations(siteRequests, ({ one }) => ({
+  user: one(users, {
+    fields: [siteRequests.userId],
+    references: [users.id],
+  }),
+}));

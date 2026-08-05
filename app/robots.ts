@@ -35,8 +35,6 @@ export default function robots(): MetadataRoute.Robots {
           "/private/", // Block private content
           "/404", // Block error pages
           "/500",
-          "/player/", // Block player pages from crawl
-          "/auth/", // Block auth pages during crawl
         ],
       },
 
@@ -44,14 +42,14 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: ["/api/", "/admin/", "/_next/", "/private/", "/player/"],
+        disallow: ["/api/", "/admin/", "/_next/", "/private/"],
       },
 
       // Bing
       {
         userAgent: "Bingbot",
         allow: "/",
-        disallow: ["/api/", "/admin/", "/_next/", "/player/"],
+        disallow: ["/api/", "/admin/", "/_next/"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

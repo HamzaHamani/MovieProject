@@ -1,25 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { followUserByUsername, unfollowUserByUsername } from "@/lib/actions";
 
 type ActionType = "follow" | "unfollow";
 
+const requestSchema = z.object({
+  username: z.string().trim().min(1),
+  action: z.enum(["follow", "unfollow"]),
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as {
-      username?: string;
-      action?: ActionType;
-    };
+    const body = await request.json();
+    const parsed = requestSchema.safeParse(body);
 
-    const username = String(body?.username ?? "").trim();
-    const action = body?.action;
-
-    if (!username || (action !== "follow" && action !== "unfollow")) {
+    if (!parsed.success) {
       return NextResponse.json(
         { error: "username and valid action are required" },
         { status: 400 },
       );
     }
+
+    const username = parsed.data.username;
+    const action: ActionType = parsed.data.action;
 
     if (action === "follow") {
       const result = await followUserByUsername(username);

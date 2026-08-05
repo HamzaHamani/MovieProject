@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { MessageSquareText, Send } from "lucide-react";
-
+import { MessageCirclePlus } from "lucide-react";
 import {
   showErrorNotification,
   showSuccessNotification,
 } from "@/components/notificationSystem";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 export default function SiteRequestDialog() {
   const [open, setOpen] = useState(false);
@@ -30,55 +29,55 @@ export default function SiteRequestDialog() {
     setMessage("");
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleSubmit = async () => {
     const trimmedTitle = title.trim();
     const trimmedMessage = message.trim();
 
-    if (trimmedTitle.length < 3) {
-      showErrorNotification(
-        "Request title",
-        "Title must be at least 3 characters.",
-      );
+    if (!trimmedTitle) {
+      showErrorNotification("Request Error", "Title is required.");
       return;
     }
 
-    if (trimmedMessage.length < 10) {
-      showErrorNotification(
-        "Request message",
-        "Message must be at least 10 characters.",
-      );
+    if (!trimmedMessage) {
+      showErrorNotification("Request Error", "Message is required.");
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
       const response = await fetch("/api/site-requests", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           title: trimmedTitle,
           message: trimmedMessage,
         }),
       });
+      const result = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+      };
 
-      const payload = (await response.json()) as { error?: string };
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Could not submit request");
+      if (!response.ok || !result.ok) {
+        showErrorNotification(
+          "Request Error",
+          result.error ?? "Could not submit your request right now.",
+        );
+        return;
       }
 
       showSuccessNotification(
         "Request sent",
-        "Your message reached the creator inbox.",
+        "Thanks. Your request was submitted to the site creator.",
       );
-      setOpen(false);
       resetForm();
-    } catch (error) {
+      setOpen(false);
+    } catch {
       showErrorNotification(
-        "Request failed",
-        error instanceof Error ? error.message : "Could not submit request",
+        "Request Error",
+        "Could not submit your request right now.",
       );
     } finally {
       setIsSubmitting(false);
@@ -89,73 +88,70 @@ export default function SiteRequestDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          type="button"
-          className="inline-flex h-10 items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 text-sm font-semibold text-white hover:bg-white/10"
+          variant="ghost"
+          className="h-10 rounded-full border border-white/15 bg-white/5 px-3 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white"
         >
-          <MessageSquareText className="h-4 w-4" />
+          <MessageCirclePlus className="mr-1.5 h-4 w-4 text-primaryM-500" />
           Request
         </Button>
       </DialogTrigger>
-      <DialogContent className="with-popup-shell max-h-[88svh] w-[min(560px,92vw)] overflow-y-auto">
+
+      <DialogContent className="max-w-lg border border-white/15 bg-[#0d0d12f0]">
         <DialogHeader>
-          <DialogTitle>Send a request</DialogTitle>
-          <DialogDescription>
-            Ask for a feature, share feedback, or contact the creator of the
-            site.
+          <DialogTitle>Send a Request</DialogTitle>
+          <DialogDescription className="text-sm text-gray-400">
+            Ask for a feature, report missing content, or contact the creator.
+            Both fields are required.
           </DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-gray-400">
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs uppercase tracking-[0.16em] text-gray-400">
               Title
             </label>
             <Input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Add a subtitle to reviews"
-              className="border-white/15 bg-white/5 text-white placeholder:text-gray-500"
-              required
               maxLength={120}
+              placeholder="Example: Add movie XYZ"
+              className="border-white/15 bg-white/[0.03] text-white placeholder:text-gray-500"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-gray-400">
+          <div className="space-y-1.5">
+            <label className="text-xs uppercase tracking-[0.16em] text-gray-400">
               Message
             </label>
             <Textarea
               value={message}
               onChange={(event) => setMessage(event.target.value)}
-              placeholder="Tell us what you want to change or ask about."
-              className="min-h-[150px] border-white/15 bg-white/5 text-white placeholder:text-gray-500"
-              required
-              maxLength={2000}
+              maxLength={5000}
+              rows={6}
+              placeholder="Write what you want to add or any message for the creator..."
+              className="resize-none border-white/15 bg-white/[0.03] text-white placeholder:text-gray-500"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-2">
             <Button
-              type="button"
               variant="outline"
-              className="border-white/15 bg-white/5 text-white hover:bg-white/10"
-              onClick={() => {
-                setOpen(false);
-                resetForm();
-              }}
+              type="button"
+              onClick={() => setOpen(false)}
+              className="border-white/20 bg-transparent text-gray-200 hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
             <Button
-              type="submit"
-              className="bg-primaryM-500 text-black hover:bg-primaryM-600"
+              type="button"
+              onClick={() => void handleSubmit()}
               disabled={isSubmitting}
+              className="bg-primaryM-500 text-black hover:bg-primaryM-600"
             >
-              <Send className="mr-2 h-4 w-4" />
-              {isSubmitting ? "Sending..." : "Send request"}
+              {isSubmitting ? "Submitting..." : "Submit Request"}
             </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

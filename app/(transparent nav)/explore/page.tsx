@@ -23,10 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
           "Watch movies and TV shows on Cinesphere. Discover popular and top-rated content before you log anything.",
         canonical: `${SITE_URL}/explore`,
         robots: {
-          index: false,
+          index: true,
           follow: true,
           googleBot: {
-            index: false,
+            index: true,
             follow: true,
             "max-video-preview": -1,
             "max-image-preview": "large",
@@ -62,10 +62,10 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       canonical: `${SITE_URL}/explore`,
       robots: {
-        index: false,
+        index: true,
         follow: true,
         googleBot: {
-          index: false,
+          index: true,
           follow: true,
           "max-video-preview": -1,
           "max-image-preview": "large",
@@ -82,10 +82,10 @@ export async function generateMetadata(): Promise<Metadata> {
         "Watch movies and TV shows on Cinesphere. Discover popular and top-rated content before you log anything.",
       canonical: `${SITE_URL}/explore`,
       robots: {
-        index: false,
+        index: true,
         follow: true,
         googleBot: {
-          index: false,
+          index: true,
           follow: true,
           "max-video-preview": -1,
           "max-image-preview": "large",

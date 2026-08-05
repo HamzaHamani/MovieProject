@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import { updateMyProfile } from "@/lib/actions";
 import { checkRateLimit } from "@/lib/securityRateLimit";
+
+const requestSchema = z.object({
+  username: z.string().trim().min(3).max(24),
+  bio: z.string().trim().max(240).nullable().optional(),
+  image: z.string().url().nullable().optional(),
+  backdropPath: z.string().trim().max(255).nullable().optional(),
+  show_nsfw: z.boolean().optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,21 +28,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = (await request.json()) as {
-      username?: string;
-      bio?: string | null;
-      image?: string | null;
-      backdropPath?: string | null;
-      show_nsfw?: boolean;
-    };
+    const body = await request.json();
+    const parsed = requestSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid profile payload" },
+        { status: 400 },
+      );
+    }
+
+    const payload = parsed.data;
 
     const result = await updateMyProfile({
-      username: body?.username,
-      bio: body?.bio ?? null,
-      image: body?.image ?? null,
-      backdropPath: body?.backdropPath ?? null,
+      username: payload.username,
+      bio: payload.bio ?? null,
+      image: payload.image ?? null,
+      backdropPath: payload.backdropPath ?? null,
       showNsfw:
-        typeof body?.show_nsfw === "boolean" ? body.show_nsfw : undefined,
+        typeof payload.show_nsfw === "boolean"
+          ? payload.show_nsfw
+          : undefined,
     });
 
     if (!result.ok) {
