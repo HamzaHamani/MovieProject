@@ -294,6 +294,31 @@ export const ensureBookmarkPrivacyColumn = (() => {
   };
 })();
 
+// Site requests can be submitted by logged-out visitors (userId is null in
+// that case). Some earlier migrations created "site_requests"."userId" as
+// NOT NULL, which silently breaks anonymous submissions with a DB error
+// that gets swallowed by the generic catch below. This self-heals the
+// column the same way ensureBookmarkPrivacyColumn does.
+export const ensureSiteRequestsUserIdNullable = (() => {
+  let pending: Promise<void> | null = null;
+
+  return async () => {
+    if (!pending) {
+      pending = (async () => {
+        try {
+          await db.execute(
+            sql`ALTER TABLE "site_requests" ALTER COLUMN "userId" DROP NOT NULL`,
+          );
+        } catch (error) {
+          if (!isSchemaDriftError(error)) throw error;
+        }
+      })();
+    }
+
+    await pending;
+  };
+})();
+
 async function cleanupSystemListCollaborations() {
   await ensureBookmarkPrivacyColumn();
 
@@ -3079,6 +3104,10 @@ export async function createSiteRequest(input: {
   }
 
   try {
+    // Self-heal legacy schemas where "userId" was created NOT NULL, which
+    // silently breaks anonymous (logged-out) submissions.
+    await ensureSiteRequestsUserIdNullable();
+
     await db.insert(siteRequests).values({
       userId: user?.id ?? null,
       title,
@@ -3087,7 +3116,8 @@ export async function createSiteRequest(input: {
     });
 
     return { ok: true as const };
-  } catch {
+  } catch (error) {
+    console.error("createSiteRequest failed:", error);
     return {
       ok: false as const,
       error: "Could not submit your request right now",

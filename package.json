@@ -27,6 +27,7 @@
     "@tanstack/react-query-devtools": "^5.91.3",
     "@uploadthing/react": "^7.3.3",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "axios": "^1.7.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
