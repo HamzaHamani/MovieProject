@@ -157,8 +157,8 @@ export default function SiteRequestDialog() {
             Send a request or contact the creator
           </h2>
           <p className="mt-1 text-sm text-white/40">
-            Ask for a feature, report missing content, or share feedback. If
-            you are signed in, your account is attached automatically.
+            Ask for a feature, report missing content, or share feedback. If you
+            are signed in, your account is attached automatically.
           </p>
 
           <div className="mt-5 h-px w-full bg-white/10" />
@@ -202,8 +202,8 @@ export default function SiteRequestDialog() {
             Send a request or contact the creator
           </h2>
           <p className="mt-1 text-sm text-white/40">
-            Ask for a feature, report missing content, or share feedback. If
-            you are signed in, your account is attached automatically.
+            Ask for a feature, report missing content, or share feedback. If you
+            are signed in, your account is attached automatically.
           </p>
 
           <div className="mt-5 h-px w-full bg-white/10" />

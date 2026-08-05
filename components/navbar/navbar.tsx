@@ -42,19 +42,19 @@ export default async function Navbar({ type }: Props) {
           </>
         }
         right={
-            <div className="flex items-center gap-3">
-              <SiteRequestDialog />
-              {user ? (
-                <>
-                  <NotificationBell />
-                  <UserDropDown user={user} />
-                </>
-              ) : (
-                <Button className="bg-transparent font-extrabold hover:bg-transparent active:bg-transparent md:hidden">
-                  <Link href="/sign-in">Get Started</Link>
-                </Button>
-              )}
-            </div>
+          <div className="flex items-center gap-3">
+            <SiteRequestDialog />
+            {user ? (
+              <>
+                <NotificationBell />
+                <UserDropDown user={user} />
+              </>
+            ) : (
+              <Button className="bg-transparent font-extrabold hover:bg-transparent active:bg-transparent md:hidden">
+                <Link href="/sign-in">Get Started</Link>
+              </Button>
+            )}
+          </div>
         }
         mobile={<Hamburger />}
       />
