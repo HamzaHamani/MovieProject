@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
+import Script from "next/script";
 import { GlobalContextProvider } from "@/context/globalContext";
 import ReactQueryProvider from "@/provider/reaxtQueryProvider";
 import { Toaster } from "sonner";
@@ -162,6 +163,14 @@ export default function RootLayout({
               },
             }),
           }}
+        />
+
+        {/* Google AdSense */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7472549542421138"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
       </head>
       <body
