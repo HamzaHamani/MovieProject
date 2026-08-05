@@ -37,9 +37,7 @@ export async function POST(request: NextRequest) {
     const ownedList = await db
       .select({ id: bookmarks.id })
       .from(bookmarks)
-      .where(
-        and(eq(bookmarks.id, bookmarkId), eq(bookmarks.userId, user.id)),
-      )
+      .where(and(eq(bookmarks.id, bookmarkId), eq(bookmarks.userId, user.id)))
       .limit(1);
 
     if (ownedList.length === 0) {

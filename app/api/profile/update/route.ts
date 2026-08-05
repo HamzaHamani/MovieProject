@@ -46,9 +46,7 @@ export async function POST(request: NextRequest) {
       image: payload.image ?? null,
       backdropPath: payload.backdropPath ?? null,
       showNsfw:
-        typeof payload.show_nsfw === "boolean"
-          ? payload.show_nsfw
-          : undefined,
+        typeof payload.show_nsfw === "boolean" ? payload.show_nsfw : undefined,
     });
 
     if (!result.ok) {

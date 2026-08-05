@@ -89,10 +89,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const [profileRows, listRows, loggedRows] = await Promise.all([
-      db
-        .select({ username: users.username })
-        .from(users)
-        .limit(500),
+      db.select({ username: users.username }).from(users).limit(500),
       db.select({ id: bookmarks.id }).from(bookmarks).limit(1000),
       db.select({ showId: loggedMovies.showId }).from(loggedMovies).limit(1500),
     ]);
