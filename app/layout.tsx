@@ -112,6 +112,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta
+          name="google-adsense-account"
+          content="ca-pub-7472549542421138"
+        ></meta>
         {/* Organization Schema */}
         <script
           type="application/ld+json"
@@ -166,12 +170,6 @@ export default function RootLayout({
         />
 
         {/* Google AdSense */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7472549542421138"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
       </head>
       <body
         className={`font-geist- relative bg-backgroundM font-normal text-textMain ${chillax.className} relative`}
