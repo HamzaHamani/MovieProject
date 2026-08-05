@@ -3053,10 +3053,6 @@ export async function createSiteRequest(input: {
 }) {
   const user = await getUser();
 
-  if (!user?.id) {
-    return { ok: false as const, error: "You must be signed in" };
-  }
-
   const title = input.title.trim();
   const message = input.message.trim();
 
@@ -3084,7 +3080,7 @@ export async function createSiteRequest(input: {
 
   try {
     await db.insert(siteRequests).values({
-      userId: user.id,
+      userId: user?.id ?? null,
       title,
       message,
       status: "open",

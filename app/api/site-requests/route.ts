@@ -40,13 +40,7 @@ export async function POST(request: NextRequest) {
     const result = await createSiteRequest(parsed.data);
 
     if (!result.ok) {
-      const status =
-        result.error?.toLowerCase().includes("signed in") ||
-        result.error?.toLowerCase().includes("auth")
-          ? 401
-          : 400;
-
-      return NextResponse.json(result, { status });
+      return NextResponse.json(result, { status: 400 });
     }
 
     return NextResponse.json({ ok: true });

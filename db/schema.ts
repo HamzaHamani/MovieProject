@@ -262,9 +262,9 @@ export const siteRequests = pgTable("site_requests", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  userId: text("userId").references(() => users.id, {
+    onDelete: "set null",
+  }),
   title: text("title").notNull(),
   message: text("message").notNull(),
   status: text("status").notNull().default("open"),

@@ -42,17 +42,19 @@ export default async function Navbar({ type }: Props) {
           </>
         }
         right={
-          user ? (
             <div className="flex items-center gap-3">
-              <NotificationBell />
               <SiteRequestDialog />
-              <UserDropDown user={user} />
+              {user ? (
+                <>
+                  <NotificationBell />
+                  <UserDropDown user={user} />
+                </>
+              ) : (
+                <Button className="bg-transparent font-extrabold hover:bg-transparent active:bg-transparent md:hidden">
+                  <Link href="/sign-in">Get Started</Link>
+                </Button>
+              )}
             </div>
-          ) : (
-            <Button className="bg-transparent font-extrabold hover:bg-transparent active:bg-transparent md:hidden">
-              <Link href="/sign-in">Get Started</Link>
-            </Button>
-          )
         }
         mobile={<Hamburger />}
       />
@@ -65,17 +67,19 @@ export default async function Navbar({ type }: Props) {
         <Logo />
         <NavbarList links={links} />
       </div>
-      {user ? (
-        <div className="flex items-center gap-3">
-          <NotificationBell />
-          <SiteRequestDialog />
-          <UserDropDown user={user} />
-        </div>
-      ) : (
-        <Button className="bg-transparent font-extrabold hover:bg-transparent active:bg-transparent md:hidden">
-          <Link href="/sign-in">Get Started</Link>
-        </Button>
-      )}
+      <div className="flex items-center gap-3">
+        <SiteRequestDialog />
+        {user ? (
+          <>
+            <NotificationBell />
+            <UserDropDown user={user} />
+          </>
+        ) : (
+          <Button className="bg-transparent font-extrabold hover:bg-transparent active:bg-transparent md:hidden">
+            <Link href="/sign-in">Get Started</Link>
+          </Button>
+        )}
+      </div>
 
       <Hamburger />
     </nav>
