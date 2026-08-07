@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { MessageSquareText, Send, X } from "lucide-react";
 import {
   showErrorNotification,
@@ -18,6 +18,8 @@ export default function SiteRequestDialog() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const resetForm = () => {
@@ -30,8 +32,43 @@ export default function SiteRequestDialog() {
     resetForm();
   };
 
+  const checkAuth = async () => {
+    setCheckingAuth(true);
+    try {
+      const response = await fetch("/api/auth/session", {
+        cache: "no-store",
+      });
+      const data = response.ok ? await response.json() : null;
+      setIsLoggedIn(Boolean(data?.user));
+    } catch {
+      setIsLoggedIn(false);
+    } finally {
+      setCheckingAuth(false);
+    }
+  };
+
+  // Check once on mount so the trigger/dialog reflects auth state promptly.
+  useEffect(() => {
+    void checkAuth();
+  }, []);
+
+  // Re-check whenever the dialog is opened, in case the session changed
+  // since the last check (e.g. user just signed in in another tab).
+  const handleOpen = () => {
+    setOpen(true);
+    void checkAuth();
+  };
+
   const handleSubmit = async (event?: FormEvent) => {
     event?.preventDefault();
+
+    if (!isLoggedIn) {
+      showErrorNotification(
+        "Request Error",
+        "You must be logged in to send a request.",
+      );
+      return;
+    }
 
     const trimmedTitle = title.trim();
     const trimmedMessage = message.trim();
@@ -64,6 +101,9 @@ export default function SiteRequestDialog() {
       };
 
       if (!response.ok || !result.ok) {
+        if (response.status === 401) {
+          setIsLoggedIn(false);
+        }
         showErrorNotification(
           "Request Error",
           result.error ?? "Could not submit your request right now.",
@@ -87,11 +127,20 @@ export default function SiteRequestDialog() {
     }
   };
 
+  const canSubmit = isLoggedIn === true && !isSubmitting && !checkingAuth;
+
   const formContent = (
     <form onSubmit={(event) => void handleSubmit(event)} className="space-y-3">
       <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
         Send Request
       </p>
+
+      {isLoggedIn === false && (
+        <p className="text-sm font-medium text-red-500">
+          You must be logged in to send a request.
+        </p>
+      )}
+
       <Input
         value={title}
         onChange={(event) => setTitle(event.target.value)}
@@ -99,6 +148,7 @@ export default function SiteRequestDialog() {
         className="border-white/15 bg-white/5 text-white placeholder:text-gray-500"
         required
         maxLength={120}
+        disabled={isLoggedIn === false}
       />
       <Textarea
         value={message}
@@ -107,6 +157,7 @@ export default function SiteRequestDialog() {
         className="min-h-[160px] border-white/15 bg-white/5 text-white placeholder:text-gray-500"
         required
         maxLength={5000}
+        disabled={isLoggedIn === false}
       />
 
       <div className="flex justify-end gap-3">
@@ -120,8 +171,8 @@ export default function SiteRequestDialog() {
         </Button>
         <Button
           type="submit"
-          className="bg-primaryM-500 text-black hover:bg-primaryM-600"
-          disabled={isSubmitting}
+          className="bg-primaryM-500 text-black hover:bg-primaryM-600 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!canSubmit}
         >
           <Send className="mr-2 h-4 w-4" />
           {isSubmitting ? "Submitting..." : "Send request"}
@@ -137,7 +188,7 @@ export default function SiteRequestDialog() {
           type="button"
           variant="ghost"
           className="h-10 rounded-full border border-white/15 bg-white/5 px-3 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white"
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
         >
           <MessageSquareText className="mr-1.5 h-4 w-4 text-primaryM-500" />
           Request
@@ -170,13 +221,16 @@ export default function SiteRequestDialog() {
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer
+      open={open}
+      onOpenChange={(next) => (next ? handleOpen() : setOpen(next))}
+    >
       <DrawerTrigger asChild>
         <Button
           type="button"
           variant="ghost"
           className="h-10 rounded-full border border-white/15 bg-white/5 px-3 text-sm font-medium text-gray-200 hover:bg-white/10 hover:text-white"
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
         >
           <MessageSquareText className="mr-1.5 h-4 w-4 text-primaryM-500" />
           Request

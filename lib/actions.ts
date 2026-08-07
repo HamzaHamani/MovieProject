@@ -37,6 +37,7 @@ import {
   decodeStoredMediaId,
 } from "@/lib/utils";
 import { tmdbFetch, TMDBApiError } from "@/lib/tmdb-api";
+import { headers } from "next/headers";
 
 //------------------------------------------------------------------------#uilities for handlingath
 cache;
@@ -51,6 +52,123 @@ export const getUser = cache(async () => {
     return null;
   }
 });
+
+//------------------------------------------------------------------------#
+// RATE LIMITING
+//
+// Simple in-memory sliding-window-ish (fixed window) limiter keyed by
+// "action:identity", where identity is the signed-in user's id, or the
+// caller's IP address for logged-out visitors. This is process-local
+// memory, so on multi-instance / serverless deployments each instance
+// tracks its own counters. That's an acceptable tradeoff here since the
+// goal is to blunt casual spam/abuse, not to provide hard guarantees; if
+// you need cross-instance limits, swap this out for a shared store
+// (e.g. Redis / Upstash) behind the same enforceRateLimit() call sites.
+//------------------------------------------------------------------------#
+
+type RateLimitBucket = { count: number; resetAt: number };
+
+const RATE_LIMIT_BUCKETS = new Map<string, RateLimitBucket>();
+
+// Periodically sweep expired buckets so the map doesn't grow unbounded.
+const RATE_LIMIT_SWEEP_INTERVAL = setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, bucket] of RATE_LIMIT_BUCKETS.entries()) {
+      if (bucket.resetAt <= now) {
+        RATE_LIMIT_BUCKETS.delete(key);
+      }
+    }
+  },
+  5 * 60 * 1000,
+);
+// Don't let this timer keep the process alive on its own.
+(RATE_LIMIT_SWEEP_INTERVAL as unknown as { unref?: () => void }).unref?.();
+
+function checkRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number,
+): { allowed: boolean; retryAfterMs: number } {
+  const now = Date.now();
+  const bucket = RATE_LIMIT_BUCKETS.get(key);
+
+  if (!bucket || bucket.resetAt <= now) {
+    RATE_LIMIT_BUCKETS.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, retryAfterMs: 0 };
+  }
+
+  if (bucket.count >= limit) {
+    return { allowed: false, retryAfterMs: bucket.resetAt - now };
+  }
+
+  bucket.count += 1;
+  return { allowed: true, retryAfterMs: 0 };
+}
+
+async function getRateLimitIdentity(): Promise<string> {
+  const user = await getUser();
+  if (user?.id) return `user:${user.id}`;
+
+  try {
+    const hdrs = await headers();
+    const forwardedFor = hdrs.get("x-forwarded-for");
+    const ip =
+      forwardedFor?.split(",")[0]?.trim() || hdrs.get("x-real-ip") || "unknown";
+    return `ip:${ip}`;
+  } catch {
+    return "ip:unknown";
+  }
+}
+
+function formatRetryAfter(retryAfterMs: number) {
+  const seconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
+  if (seconds < 60) return `${seconds} second${seconds === 1 ? "" : "s"}`;
+  const minutes = Math.ceil(seconds / 60);
+  return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+}
+
+/**
+ * Enforces a per-action rate limit for the current caller (by user id when
+ * signed in, otherwise by IP). Throws an Error with a user-friendly message
+ * when the limit has been exceeded. Call this at the top of any mutating
+ * server action, before doing any work.
+ */
+async function enforceRateLimit(
+  action: string,
+  { limit, windowMs }: { limit: number; windowMs: number },
+) {
+  const identity = await getRateLimitIdentity();
+  const key = `${action}:${identity}`;
+  const result = checkRateLimit(key, limit, windowMs);
+
+  if (!result.allowed) {
+    throw new Error(
+      `Too many requests. Please try again in ${formatRetryAfter(result.retryAfterMs)}.`,
+    );
+  }
+}
+
+/**
+ * Same as enforceRateLimit, but returns a { ok:false, error } result instead
+ * of throwing, for actions that use that return-value error convention
+ * rather than throwing.
+ */
+async function tryEnforceRateLimit(
+  action: string,
+  options: { limit: number; windowMs: number },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await enforceRateLimit(action, options);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Too many requests.",
+    };
+  }
+}
+
 export async function getUserUsername() {
   const user = await getUser();
   return user?.username ?? null; // ← username not name
@@ -83,6 +201,14 @@ export async function createActivity(activity: {
 export async function logProfileMenuOpened() {
   const user = await getUser();
   if (!user?.id) return;
+
+  // Lightweight, but still cheap to spam from a hot key/script — keep it
+  // generous so normal usage never trips it.
+  const rate = await tryEnforceRateLimit("logProfileMenuOpened", {
+    limit: 120,
+    windowMs: 60 * 1000,
+  });
+  if (!rate.ok) return;
 
   await createActivity({
     userId: user.id,
@@ -461,6 +587,14 @@ export async function completeUsernameSetup(
     throw new Error("User not authenticated");
   }
 
+  const rate = await tryEnforceRateLimit("completeUsernameSetup", {
+    limit: 5,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!rate.ok) {
+    return { ok: false as const, error: rate.error };
+  }
+
   const username = normalizeUsername(usernameInput);
   const validity = await isUsernameAvailable(username, user.id);
 
@@ -504,6 +638,14 @@ export async function updateMyProfile(input: {
 
   if (!user?.id) {
     throw new Error("User not authenticated");
+  }
+
+  const rate = await tryEnforceRateLimit("updateMyProfile", {
+    limit: 10,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!rate.ok) {
+    return { ok: false as const, error: rate.error };
   }
 
   const parsed = profileUpdateSchema.safeParse({
@@ -599,6 +741,11 @@ export async function followUserByUsername(targetUsernameInput: string) {
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
 
+  await enforceRateLimit("followUserByUsername", {
+    limit: 30,
+    windowMs: 60 * 1000,
+  });
+
   const targetUsername = normalizeUsername(targetUsernameInput);
   const target = await db
     .select({ id: users.id })
@@ -647,6 +794,11 @@ export async function followUserByUsername(targetUsernameInput: string) {
 export async function unfollowUserByUsername(targetUsernameInput: string) {
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
+
+  await enforceRateLimit("unfollowUserByUsername", {
+    limit: 30,
+    windowMs: 60 * 1000,
+  });
 
   const targetUsername = normalizeUsername(targetUsernameInput);
   const target = await db
@@ -770,6 +922,11 @@ export async function toggleReviewLike(reviewId: string) {
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
 
+  await enforceRateLimit("toggleReviewLike", {
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
+
   const existing = await db
     .select({ id: reviewLikes.id })
     .from(reviewLikes)
@@ -818,6 +975,14 @@ export async function toggleReviewLike(reviewId: string) {
 export async function addReviewReply(reviewId: string, content: string) {
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
+
+  const rate = await tryEnforceRateLimit("addReviewReply", {
+    limit: 20,
+    windowMs: 5 * 60 * 1000,
+  });
+  if (!rate.ok) {
+    return { ok: false as const, error: rate.error };
+  }
 
   const normalizedContent = content.trim();
   if (normalizedContent.length < 1 || normalizedContent.length > 500) {
@@ -928,6 +1093,11 @@ export async function updateBookmarkDetails(data: {
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
 
+  await enforceRateLimit("updateBookmarkDetails", {
+    limit: 20,
+    windowMs: 10 * 60 * 1000,
+  });
+
   const bookmark = await getBookmarkById(data.bookmarkId);
   if (!bookmark) throw new Error("List not found");
   if (bookmark.userId !== user.id) throw new Error("Not allowed");
@@ -961,6 +1131,11 @@ export async function removeMovieFromBookmark(data: {
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
 
+  await enforceRateLimit("removeMovieFromBookmark", {
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
+
   const bookmark = await getBookmarkById(data.bookmarkId);
   if (!bookmark) throw new Error("List not found");
 
@@ -973,6 +1148,11 @@ export async function removeMovieFromBookmark(data: {
 export async function toggleListLike(bookmarkId: string) {
   const user = await getUser();
   if (!user?.id) throw new Error("User not authenticated");
+
+  await enforceRateLimit("toggleListLike", {
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
 
   const bookmark = await getBookmarkById(bookmarkId);
   if (!bookmark) throw new Error("List not found");
@@ -1499,6 +1679,11 @@ export async function AddMovie(data: {
   movieId: string | number;
   mediaType?: StoredMediaType;
 }) {
+  await enforceRateLimit("AddMovie", {
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
+
   if (!data.review) data.review = "";
 
   const storedMovieId = encodeStoredMediaId(data.movieId, data.mediaType);
@@ -1552,6 +1737,11 @@ export async function RemoveMovie(data: {
   movieId: string | number;
   mediaType?: StoredMediaType;
 }) {
+  await enforceRateLimit("RemoveMovie", {
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
+
   const existingMovie = await getMoviesBook(data.bookmarkId);
   const candidates = getStoredMovieIdCandidates(data.movieId, data.mediaType);
   const match = existingMovie.find((movie) =>
@@ -1587,6 +1777,11 @@ export async function addMovieToProfileSection(data: {
   if (!user?.id) {
     throw new Error("User not authenticated");
   }
+
+  await enforceRateLimit("addMovieToProfileSection", {
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
 
   const bookmarksForUser = await getBookmarks(user.id);
 
@@ -1652,6 +1847,11 @@ export async function CreateBookmark(data: {
   isPublic?: boolean;
 }) {
   await ensureBookmarkPrivacyColumn();
+
+  await enforceRateLimit("CreateBookmark", {
+    limit: 10,
+    windowMs: 10 * 60 * 1000,
+  });
 
   const insert = await db
     .insert(bookmarks)
@@ -2821,6 +3021,11 @@ export async function sendLoggedMovieTv({
 
   if (!user?.id) throw new Error("User not authenticated");
 
+  await enforceRateLimit("sendLoggedMovieTv", {
+    limit: 30,
+    windowMs: 5 * 60 * 1000,
+  });
+
   const normalizedShowId = String(showId);
   const normalizedRating = Math.max(0, Math.min(5, rating));
 
@@ -2947,6 +3152,11 @@ export async function deleteLoggedMovieTv(logId: string) {
 
   if (!user?.id) throw new Error("User not authenticated");
 
+  await enforceRateLimit("deleteLoggedMovieTv", {
+    limit: 30,
+    windowMs: 5 * 60 * 1000,
+  });
+
   // Security check: ensure the log belongs to the current user
   const logEntry = await db
     .select({ userId: loggedMovies.userId, showId: loggedMovies.showId })
@@ -3019,6 +3229,12 @@ export async function markNotificationAsRead(notificationId: string) {
   const user = await getUser();
   if (!user?.id) return { success: false };
 
+  const rate = await tryEnforceRateLimit("markNotificationAsRead", {
+    limit: 120,
+    windowMs: 60 * 1000,
+  });
+  if (!rate.ok) return { success: false, error: rate.error };
+
   try {
     await db
       .update(notifications)
@@ -3038,6 +3254,12 @@ export async function markNotificationAsRead(notificationId: string) {
 export async function markAllNotificationsAsRead() {
   const user = await getUser();
   if (!user?.id) return { success: false };
+
+  const rate = await tryEnforceRateLimit("markAllNotificationsAsRead", {
+    limit: 10,
+    windowMs: 60 * 1000,
+  });
+  if (!rate.ok) return { success: false, error: rate.error };
 
   try {
     await db
@@ -3078,6 +3300,22 @@ export async function createSiteRequest(input: {
 }) {
   const user = await getUser();
 
+  // Site requests now require an authenticated account.
+  if (!user?.id) {
+    return {
+      ok: false as const,
+      error: "You must be logged in to send a request.",
+    };
+  }
+
+  const rate = await tryEnforceRateLimit("createSiteRequest", {
+    limit: 3,
+    windowMs: 5 * 60 * 1000,
+  });
+  if (!rate.ok) {
+    return { ok: false as const, error: rate.error };
+  }
+
   const title = input.title.trim();
   const message = input.message.trim();
 
@@ -3109,7 +3347,7 @@ export async function createSiteRequest(input: {
     await ensureSiteRequestsUserIdNullable();
 
     await db.insert(siteRequests).values({
-      userId: user?.id ?? null,
+      userId: user.id,
       title,
       message,
       status: "open",
@@ -3237,6 +3475,12 @@ export async function inviteCollaborator(
   const user = await getUser();
   if (!user?.id) return { success: false, error: "Not authenticated" };
 
+  const rate = await tryEnforceRateLimit("inviteCollaborator", {
+    limit: 20,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!rate.ok) return { success: false, error: rate.error };
+
   try {
     await cleanupSystemListCollaborations();
 
@@ -3335,6 +3579,12 @@ export async function acceptCollaborationInvite(bookmarkId: string) {
   const user = await getUser();
   if (!user?.id) return { success: false, error: "Not authenticated" };
 
+  const rate = await tryEnforceRateLimit("acceptCollaborationInvite", {
+    limit: 30,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!rate.ok) return { success: false, error: rate.error };
+
   try {
     const collaborator = await db
       .select({ id: listCollaborators.id, status: listCollaborators.status })
@@ -3404,6 +3654,12 @@ export async function acceptCollaborationInvite(bookmarkId: string) {
 export async function declineCollaborationInvite(bookmarkId: string) {
   const user = await getUser();
   if (!user?.id) return { success: false, error: "Not authenticated" };
+
+  const rate = await tryEnforceRateLimit("declineCollaborationInvite", {
+    limit: 30,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!rate.ok) return { success: false, error: rate.error };
 
   try {
     await db
@@ -3502,6 +3758,12 @@ export async function removeCollaborator(
 ) {
   const user = await getUser();
   if (!user?.id) return { success: false, error: "Not authenticated" };
+
+  const rate = await tryEnforceRateLimit("removeCollaborator", {
+    limit: 30,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!rate.ok) return { success: false, error: rate.error };
 
   try {
     // Only owner can remove collaborators
