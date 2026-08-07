@@ -80,6 +80,8 @@ export default function PlayerShell({
   const [modalExiting, setModalExiting] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState<boolean>(true);
 
+  const MAX_EMBED = 7;
+
   // Read persisted dismissal flags on client only to avoid SSR hydration mismatches
   // useLayoutEffect runs before paint to prevent a brief flash of the modal
   useLayoutEffect(() => {
@@ -122,16 +124,11 @@ export default function PlayerShell({
 
   function buildEmbedUrl(idx: number) {
     if (idx === 1) {
-      if (imdbId) {
-        if (typeM === "tv") {
-          return `https://multiembed.mov/?video_id=${encodeURIComponent(imdbId)}${season ? `&s=${season}&e=${episode ?? 1}` : ""}`;
-        }
-        return `https://multiembed.mov/?video_id=${encodeURIComponent(imdbId)}`;
+      // vixsrc.to
+      if (typeM === "movie") {
+        return `https://vixsrc.to/movie/${tmdbId}`;
       }
-      if (typeM === "tv") {
-        return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1${season ? `&s=${season}&e=${episode ?? 1}` : ""}`;
-      }
-      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
+      return `https://vixsrc.to/tv/${tmdbId}/${season ?? 1}/${episode ?? 1}`;
     }
 
     if (idx === 2) {
@@ -151,12 +148,35 @@ export default function PlayerShell({
     }
 
     if (idx === 3) {
+      if (imdbId) {
+        if (typeM === "tv") {
+          return `https://multiembed.mov/?video_id=${encodeURIComponent(imdbId)}${season ? `&s=${season}&e=${episode ?? 1}` : ""}`;
+        }
+        return `https://multiembed.mov/?video_id=${encodeURIComponent(imdbId)}`;
+      }
+      if (typeM === "tv") {
+        return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1${season ? `&s=${season}&e=${episode ?? 1}` : ""}`;
+      }
+      return `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`;
+    }
+
+    if (idx === 4) {
+      // vidrock.ru
+      if (typeM === "movie") {
+        return imdbId
+          ? `https://vidrock.ru/movie/${encodeURIComponent(imdbId)}`
+          : `https://vidrock.ru/movie/${tmdbId}`;
+      }
+      return `https://vidrock.ru/tv/${tmdbId}/${season ?? 1}/${episode ?? 1}`;
+    }
+
+    if (idx === 5) {
       return typeM === "tv"
         ? `https://player.embed-api.stream/?id=${tmdbId}${season ? `&s=${season}&e=${episode ?? 1}` : ""}`
         : `https://player.embed-api.stream/?id=${tmdbId}`;
     }
 
-    if (idx === 4) {
+    if (idx === 6) {
       // 2embed.online
       if (typeM === "movie") {
         return imdbId
@@ -168,7 +188,7 @@ export default function PlayerShell({
         : `https://www.2embed.online/embed/tv/${tmdbId}/${season ?? 1}/${episode ?? 1}`;
     }
 
-    if (idx === 5) {
+    if (idx === 7) {
       // 2embed.cc patterns
       if (typeM === "movie") {
         return imdbId
@@ -208,7 +228,7 @@ export default function PlayerShell({
       }
     }
 
-    if (idx === 1) {
+    if (idx === 3) {
       // try tmdb vs imdb variants
       if (imdbId)
         alternates.push(
@@ -216,7 +236,14 @@ export default function PlayerShell({
         );
     }
 
-    if (idx === 3) {
+    if (idx === 4) {
+      // vidrock: try the other id type as an alternate
+      if (typeM === "movie") {
+        if (imdbId) alternates.push(`https://vidrock.ru/movie/${tmdbId}`);
+      }
+    }
+
+    if (idx === 5) {
       // small alternative format
       alternates.push(
         `https://player.embed-api.stream/?id=${tmdbId}${season ? `&s=${season}&e=${episode ?? 1}` : ""}`,
@@ -260,8 +287,8 @@ export default function PlayerShell({
     }
 
     // otherwise fall back to next embed
-    if (embedIndex < 5) {
-      setEmbedIndex((current) => Math.min(current + 1, 5));
+    if (embedIndex < MAX_EMBED) {
+      setEmbedIndex((current) => Math.min(current + 1, MAX_EMBED));
       return;
     }
 
@@ -449,41 +476,22 @@ export default function PlayerShell({
                   <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-black/80 text-center">
                     <p className="text-sm text-red-400">{error}</p>
                     <div className="flex flex-wrap justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setEmbedIndex(1)}
-                        className="rounded-full border border-primaryM-500 bg-primaryM-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-primaryM-600"
-                      >
-                        Try Embed 1
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEmbedIndex(2)}
-                        className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:border-primaryM-500/50 hover:bg-white/[0.08]"
-                      >
-                        Try Embed 2
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEmbedIndex(3)}
-                        className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:border-primaryM-500/50 hover:bg-white/[0.08]"
-                      >
-                        Try Embed 3
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEmbedIndex(4)}
-                        className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:border-primaryM-500/50 hover:bg-white/[0.08]"
-                      >
-                        Try Embed 4
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEmbedIndex(5)}
-                        className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:border-primaryM-500/50 hover:bg-white/[0.08]"
-                      >
-                        Try Embed 5
-                      </button>
+                      {Array.from({ length: MAX_EMBED }, (_, i) => i + 1).map(
+                        (n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => setEmbedIndex(n)}
+                            className={
+                              n === 1
+                                ? "rounded-full border border-primaryM-500 bg-primaryM-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-primaryM-600"
+                                : "rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:border-primaryM-500/50 hover:bg-white/[0.08]"
+                            }
+                          >
+                            Try Embed {n}
+                          </button>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
@@ -569,6 +577,18 @@ export default function PlayerShell({
                             className="hover:bg-primaryM-500 hover:text-black"
                           >
                             Embed 5
+                          </SelectItem>
+                          <SelectItem
+                            value="6"
+                            className="hover:bg-primaryM-500 hover:text-black"
+                          >
+                            Embed 6
+                          </SelectItem>
+                          <SelectItem
+                            value="7"
+                            className="hover:bg-primaryM-500 hover:text-black"
+                          >
+                            Embed 7
                           </SelectItem>
                         </SelectContent>
                       </Select>
