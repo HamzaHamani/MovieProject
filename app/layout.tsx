@@ -18,6 +18,7 @@ import {
   SITE_DESCRIPTION,
   SEO_KEYWORDS,
 } from "@/config/site";
+import ClarityInit from "@/components/ClarityInit";
 
 export const viewport: Viewport = {
   themeColor: "#8b5cf6",
@@ -187,16 +188,7 @@ export default function RootLayout({
         </GlobalContextProvider>
         <Analytics />
         <SpeedInsights />
-        {/* Microsoft Clarity */}
-        <Script id="microsoft-clarity" strategy="afterInteractive">
-          {`
-            (function(c,l,a,r,i,t,y){
-              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-            })(window, document, "clarity", "script", "xz7uea5o10");
-          `}
-        </Script>
+        <ClarityInit />
       </body>
     </html>
   );
