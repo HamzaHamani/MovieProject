@@ -1,10 +1,11 @@
 import { convertRuntime } from "@/lib/utils";
 import { TspecifiedMovie } from "@/types/api";
-import { Play, StarIcon } from "lucide-react";
+import { StarIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { TspecifiedTv } from "@/types/apiTv";
 import ShareButton from "./buttons/shareButton";
 import { DrawerDialogButtonList } from "./buttons/draweDialogButtonList";
+import WatchButton from "./buttons/watchButton";
 import {
   getLoggedMovieTv,
   getUser,
@@ -79,6 +80,7 @@ function WatchedByRow({
 
 export default async function FirstContainer({ response, typeM }: Props) {
   const user = await getUser();
+  const isLoggedIn = !!user?.id;
 
   if (typeM === "movie") {
     const movieRes = response as TspecifiedMovie;
@@ -152,12 +154,11 @@ export default async function FirstContainer({ response, typeM }: Props) {
                 itemPosterPath={movieRes.poster_path}
               />
               <ShareButton typeSearch="Movie" />
-              <Link
+              <WatchButton
                 href={`/player/movie/${movieRes.id}`}
-                className="rounded-full border border-primaryM-500 bg-primaryM-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-primaryM-600"
-              >
-                Watch it
-              </Link>
+                isLoggedIn={isLoggedIn}
+                variant="movie"
+              />
             </div>
 
             {/* ── Watched by ── */}
@@ -262,12 +263,11 @@ export default async function FirstContainer({ response, typeM }: Props) {
                 itemPosterPath={tvRes.poster_path}
               />
               <ShareButton typeSearch="Movie" />
-              <Link
+              <WatchButton
                 href={`/player/tv/${tvRes.id}?s=1&ep=1`}
-                className="rounded-lg border border-primaryM-500 bg-primaryM-500 px-4 py-2 text-sm text-black transition hover:bg-primaryM-600"
-              >
-                <Play />
-              </Link>
+                isLoggedIn={isLoggedIn}
+                variant="tv"
+              />
             </div>
 
             <WatchedByRow watchedBy={watchedBy} />
