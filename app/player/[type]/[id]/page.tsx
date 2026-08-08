@@ -1,5 +1,5 @@
 import PlayerShell from "@/components/player/PlayerShell";
-import { getSpecifiedMovie, getSpecifiedTV } from "@/lib/actions";
+import { getSpecifiedMovie, getSpecifiedTV, getUser } from "@/lib/actions";
 import { notFound } from "next/navigation";
 
 type Props = {
@@ -13,6 +13,9 @@ export default async function Page({ params, searchParams }: Props) {
 
   if (type !== "movie" && type !== "tv") return notFound();
 
+  const user = await getUser();
+  const isLoggedIn = !!user?.id;
+
   try {
     if (type === "movie") {
       const movie = await getSpecifiedMovie(id);
@@ -25,6 +28,7 @@ export default async function Page({ params, searchParams }: Props) {
           title={movie.title}
           posterPath={movie.poster_path}
           backdropPath={movie.backdrop_path}
+          isLoggedIn={isLoggedIn}
         />
       );
     }
@@ -53,6 +57,7 @@ export default async function Page({ params, searchParams }: Props) {
         seasons={tv.seasons}
         initialSeason={Number.isInteger(season) ? season : undefined}
         initialEpisode={Number.isInteger(episode) ? episode : undefined}
+        isLoggedIn={isLoggedIn}
       />
     );
   } catch (e) {
