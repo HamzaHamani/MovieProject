@@ -3,6 +3,8 @@
 import React, { useMemo, useState, useEffect, useLayoutEffect } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, LogIn } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -27,6 +29,7 @@ type Props = {
   seasons?: Season[] | null;
   initialSeason?: number | null;
   initialEpisode?: number | null;
+  isLoggedIn?: boolean;
 };
 
 export default function PlayerShell({
@@ -39,6 +42,7 @@ export default function PlayerShell({
   seasons,
   initialSeason = null,
   initialEpisode = null,
+  isLoggedIn = false,
 }: Props) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -98,6 +102,16 @@ export default function PlayerShell({
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Lock scroll while the login-required gate is shown
+  useEffect(() => {
+    if (!isLoggedIn) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isLoggedIn]);
 
   const posterUrl = posterPath
     ? `https://image.tmdb.org/t/p/w500${posterPath}`
@@ -320,6 +334,53 @@ export default function PlayerShell({
       }}
     >
       <div className="absolute inset-0 bg-black/60" />
+
+      {/* Login-required gate — blocks access entirely, no close/cancel, only two exits */}
+      {!isLoggedIn && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+          <div className="w-full max-w-[420px] rounded-2xl border border-white/10 bg-[#1a1a1a] p-6 shadow-2xl">
+            <div className="flex flex-col items-center gap-6 rounded-xl border border-white/10 bg-black/20 px-6 py-8 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/5">
+                <LogIn className="h-7 w-7 text-amber-400" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-lg font-medium text-white">
+                  Login required
+                </h3>
+                <p className="text-sm text-white/45">
+                  You need to be signed in to watch this content.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-2.5">
+              <Link
+                href="/explore"
+                className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] py-3 text-center text-sm font-medium text-white/70 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                Go to Explore
+              </Link>
+              <Link
+                href="/sign-in"
+                className="flex flex-[2] items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-black transition hover:opacity-90"
+                style={{ background: "#c9a227" }}
+              >
+                <LogIn className="h-4 w-4" />
+                Go to sign in
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Back to explore */}
+      <Link
+        href="/explore"
+        className="fixed left-4 top-4 z-[65] flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-md transition hover:border-primaryM-500/50 hover:bg-white/[0.12]"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        <span className="sr-only sm:not-sr-only">Back to Explore</span>
+      </Link>
 
       {/* Top banner: general player disclaimer */}
       {showDisclaimer && (
